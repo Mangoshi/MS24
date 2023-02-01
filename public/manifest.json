@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "MangoSynth24",
+  "name": "MangoSynth24 - A Web Audio API Synthesizer",
   "icons": [
     {
       "src": "favicon.ico",

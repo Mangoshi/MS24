@@ -36,8 +36,8 @@ const Synth = () => {
 	return (
 		<div style={containerStyling}>
 			<div style={frameStyling2}>
-					<OscillatorGroup x={20} y={100} name={"OSC1"}/>
-					{/*<OscillatorGroup x={700} y={100} name={"OSC2"}/>*/}
+					<OscillatorGroup x={20} y={100} name={"OSC-A"} enabled={1}/>
+					{/*<OscillatorGroup x={800} y={100} name={"OSC-B"} enabled={0}/>*/}
 			</div>
 		</div>
 	);

@@ -3,7 +3,6 @@ import * as Tone from 'tone'
 import OscillatorGroup from '../components/OscillatorGroup'
 
 import frame_svg from './assets/Frame.svg'
-import {useRef} from "react";
 
 //create a synth and connect it to the main output (your speakers)
 const synth = new Tone.Synth().toDestination();
@@ -28,17 +27,17 @@ const frameStyling1 = {
 }
 
 const frameStyling2 = {
-	width: '100%',
-	height: '100%',
+	width: '1280px',
+	aspectRatio: '16/9',
 	backgroundColor: 'grey'
 }
 
 const Synth = () => {
-	const parentRef = useRef(null);
 	return (
 		<div style={containerStyling}>
-			<div ref={parentRef} style={frameStyling2}>
-					<OscillatorGroup parentRef={parentRef} x={100} y={200} heightPercent={5} widthPercent={5}/>
+			<div style={frameStyling2}>
+					<OscillatorGroup x={20} y={100} name={"OSC1"}/>
+					{/*<OscillatorGroup x={700} y={100} name={"OSC2"}/>*/}
 			</div>
 		</div>
 	);

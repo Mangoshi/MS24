@@ -1,11 +1,11 @@
-.App {
-  text-align: center;
-}
-
 h1 {
   font-family: 'Inika', serif;
 }
 
 h2 {
   font-family: 'Inconsolata', monospace;
+}
+
+.App {
+  height: 100vh;
 }

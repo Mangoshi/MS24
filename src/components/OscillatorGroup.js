@@ -1,3 +1,4 @@
+import './OscillatorGroup.css'
 
 const OscillatorGroup = ({x, y, name}) => {
 
@@ -19,8 +20,8 @@ const OscillatorGroup = ({x, y, name}) => {
 
 	const oscGroupLabelStyle = {
 		paddingBottom: '5px',
-		fontSize: '18px',
-		alignSelf: 'center'
+		fontSize: '20px',
+		alignSelf: 'center',
 	}
 
 	const oscGroupValueStyle = {
@@ -66,14 +67,16 @@ const OscillatorGroup = ({x, y, name}) => {
 					<webaudio-knob
 						id={name+"_octave_control"}
 						diameter="100"
-						min="0"
-						max="100"
+						min="-6"
+						max="6"
+						value="0"
 						colors="#FF6188;#2C292D;#D9D9D9"
 						style={knobStyle}
 					></webaudio-knob>
 					<webaudio-param
 						link={name+"_octave_control"}
 						style={oscGroupValueStyle}
+						fontSize="14"
 					></webaudio-param>
 				</div>
 				<div className="semitone_control_group" style={controlSubGroupStyle}>
@@ -81,14 +84,16 @@ const OscillatorGroup = ({x, y, name}) => {
 					<webaudio-knob
 						id={name+"_semitone_control"}
 						diameter="100"
-						min="0"
-						max="100"
+						min="-12"
+						max="12"
+						value="0"
 						colors="#A9DC76;#2C292D;#D9D9D9"
 						style={knobStyle}
 					></webaudio-knob>
 					<webaudio-param
 						link={name+"_semitone_control"}
 						style={oscGroupValueStyle}
+						fontSize="14"
 					></webaudio-param>
 				</div>
 				<div className="quantize_control_group" style={controlSubGroupStyle}>
@@ -104,6 +109,7 @@ const OscillatorGroup = ({x, y, name}) => {
 					<webaudio-param
 						link={name+"_quantize_control"}
 						style={oscGroupValueStyle}
+						fontSize="14"
 					></webaudio-param>
 				</div>
 				<div className="shape_control_group" style={controlSubGroupStyle}>
@@ -112,6 +118,10 @@ const OscillatorGroup = ({x, y, name}) => {
 						id={name+"_shape_control"}
 						width="30"
 						height="100"
+						min="0"
+						max="4"
+						value="4"
+						conv="['noise','tri','sqr','saw','sin'][x]"
 						colors="#78DCE8;#2C292D;#D9D9D9"
 						direction="vert"
 						style={sliderStyle}
@@ -119,6 +129,8 @@ const OscillatorGroup = ({x, y, name}) => {
 					<webaudio-param
 						link={name+"_shape_control"}
 						style={oscGroupValueStyle}
+						fontSize="14"
+						width="50"
 					></webaudio-param>
 				</div>
 			</div>
@@ -131,7 +143,8 @@ const OscillatorGroup = ({x, y, name}) => {
 							id={name+"_attack_control"}
 							diameter="50"
 							min="0"
-							max="100"
+							max="1000"
+							value="0.5"
 							colors="#AB9DF2;#2C292D;#D9D9D9"
 							style={knobStyle}
 						></webaudio-knob>
@@ -146,7 +159,8 @@ const OscillatorGroup = ({x, y, name}) => {
 							id={name+"_decay_control"}
 							diameter="50"
 							min="0"
-							max="100"
+							max="10000"
+							value="500"
 							colors="#AB9DF2;#2C292D;#D9D9D9"
 							style={knobStyle}
 						></webaudio-knob>
@@ -161,7 +175,8 @@ const OscillatorGroup = ({x, y, name}) => {
 							id={name+"_sustain_control"}
 							diameter="50"
 							min="0"
-							max="100"
+							max="20"
+							value="0"
 							colors="#AB9DF2;#2C292D;#D9D9D9"
 							style={knobStyle}
 						></webaudio-knob>
@@ -176,7 +191,8 @@ const OscillatorGroup = ({x, y, name}) => {
 							id={name+"_release_control"}
 							diameter="50"
 							min="0"
-							max="100"
+							max="10000"
+							value="1000"
 							colors="#AB9DF2;#2C292D;#D9D9D9"
 							style={knobStyle}
 						></webaudio-knob>

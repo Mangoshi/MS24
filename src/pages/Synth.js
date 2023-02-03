@@ -4,6 +4,8 @@ import OscillatorGroup from '../components/OscillatorGroup'
 
 import frame_svg from './assets/Frame.svg'
 
+import React from "react";
+
 //create a synth and connect it to the main output (your speakers)
 const synth = new Tone.Synth().toDestination();
 
@@ -32,12 +34,50 @@ const frameStyling2 = {
 	backgroundColor: 'grey'
 }
 
+class TestClass extends React.Component {
+	render(x,y) {
+		let oscillatorGroupContainerStyle = {
+			position: 'absolute',
+			left: x,
+			top: y,
+			display: 'flex',
+			flexDirection: 'row',
+			backgroundColor: 'red',
+			width: '1200px'
+		}
+		return (
+			<div style={oscillatorGroupContainerStyle}>
+				test
+			</div>
+		);
+	}
+}
+
+function TestClass2({x, y, bg}) {
+	let oscillatorGroupContainerStyle = {
+		position: 'absolute',
+		left: x,
+		top: y,
+		display: 'flex',
+		flexDirection: 'row',
+		backgroundColor: bg,
+		width: '1200px'
+	}
+	return (
+		<div style={oscillatorGroupContainerStyle}>
+			test
+		</div>
+	);
+}
+
 const Synth = () => {
 	return (
 		<div style={containerStyling}>
 			<div style={frameStyling2}>
-					<OscillatorGroup x={20} y={100} name={"OSC-A"} enabled={1}/>
-					{/*<OscillatorGroup x={800} y={100} name={"OSC-B"} enabled={0}/>*/}
+				<TestClass x={0} y={0} />
+				<TestClass2 x={0} y={20} bg='lime' />
+				<OscillatorGroup x={20} y={100} name={"OSC-A"} enabled={1}/>
+				{/*<OscillatorGroup x={800} y={100} name={"OSC-B"} enabled={0}/>*/}
 			</div>
 		</div>
 	);

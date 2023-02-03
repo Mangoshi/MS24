@@ -235,17 +235,33 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 		mainToggle.addEventListener('change', function(e) {
 			console.log("ID:",e.target.id, "Val:", e.target.value);
 		});
-		let knobs = document.getElementsByTagName('webaudio-knob');
-		for (let i = 0; i < knobs.length; i++) {
-			const knob = knobs[i];
-			knob.addEventListener('change', function(e) {
-				console.log("ID:",e.target.id, "Val:", e.target.value);
-			});
-		}
+		// let knobs = document.getElementsByTagName('webaudio-knob');
+		// for (let i = 0; i < knobs.length; i++) {
+		// 	const knob = knobs[i];
+		// 	knob.addEventListener('change', function(e) {
+		// 		console.log("ID:",e.target.id, "Val:", e.target.value);
+		// 	});
+		// }
 		// let slider = document.getElementById(name+"_shape_control");
 		// slider.addEventListener('change', function(e) {
 		// 	console.log("ID:",e.target.id, "Val:", e.target.value);
 		// });
+		let octaveModifier = 3;
+		let octaveControl = document.getElementById(name+"_octave_control");
+		octaveControl.addEventListener('change', function(e) {
+			console.log("ID:",e.target.id, "Val:", e.target.value);
+			octaveModifier = 3 + e.target.value;
+			console.log("Octave Modifier:", octaveModifier);
+		});
+
+		let semitoneModifier = 0;
+		let semitoneControl = document.getElementById(name+"_semitone_control");
+		semitoneControl.addEventListener('change', function(e) {
+			console.log("ID:",e.target.id, "Val:", e.target.value);
+			semitoneModifier = 0 + e.target.value;
+			console.log("Semitone Modifier:", semitoneModifier);
+		})
+
 		const keyboard = document.getElementById('keyboard');
 		keyboard.addEventListener('mouseover', function() {
 			keyboard.cv.focus();
@@ -256,30 +272,51 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 		let heldNote
 		let heldNotes = [];
 		keyboard.addEventListener('change', function(e) {
+			let keyboardOctave = Math.floor(e.note[1]/12);
+
+			function getNoteFromNumber(number) {
+				const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+				// return notes[number % 12];
+				return notes[(12 + (number % 12)) % 12];
+			}
+			// TODO: Make negative semitone modifier reduce octave by one
+			for (let i = -11; i < 12; i++) {
+				console.log(i + " -> " + getNoteFromNumber(i));
+			}
+			let heldKey = e.note[1];
+			let convertedNote = getNoteFromNumber(heldKey+semitoneModifier)
+			let noteAndOctave = convertedNote+(keyboardOctave+octaveModifier)
 			if (e.note[0]) {
-				// console.log("Note-On:" + e.note[1]);
+				console.log("Modulo test: ", -1%12)
+				console.log("Converted Note: ", convertedNote)
+				console.log("Note and Octave: ", noteAndOctave)
+				console.log("Note-On:" + e.note[1]);
+				// console.log("e.note[0]: ", e.note[0])
+				// console.log("e.note[1]: ", e.note[1])
 				// console.log("Modulo12:" + e.note[1]%12);
 				// console.log("DividedBy12:" + Math.floor(e.note[1]/12));
-				let octave = Math.floor(e.note[1]/12);
-				function getNoteFromNumber(number) {
-					const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-					return notes[number % 12];
-				}
-				let heldNote = (getNoteFromNumber(e.note[1])+(octave+3)).toString()
-				console.log("Held note: ", heldNote)
-				heldNotes.push(heldNote);
+				console.log("Held note: ", heldKey)
+				heldNotes.push(noteAndOctave);
 				console.log("Held notes: ", heldNotes)
-				synth.triggerAttack(heldNote, now)
-				console.log(synth.context)
+				synth.triggerAttack(noteAndOctave, now)
+				// console.log(synth.context)
 				// oscillator.frequency.value = (e.note[1]+1)*100
 				// oscillator.start()
 			}
 			else {
+				// console.log("e.note[0]: ", e.note[0])
+				// console.log("e.note[1]: ", e.note[1])
 				console.log("Held notes: ", heldNotes)
-				console.log("Note-Off:"+e.note[1]);
-				synth.triggerRelease(heldNotes, "16n")
-				console.log(synth.context)
+				console.log("Held note: ", heldKey)
+				synth.triggerRelease(noteAndOctave, "16n")
+				const index = heldNotes.indexOf(noteAndOctave);
+				console.log("Index: ", index)
+				if (index > -1) {
+					heldNotes.splice(index, 1);
+				}
+				// console.log(synth.context)
 				// oscillator.stop()
+				console.log("Note-Off:"+e.note[1]);
 			}
 		});
 		const shapeSlider = document.getElementById(name+"_shape_control");
@@ -344,8 +381,8 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 							<webaudio-knob
 								id={name+"_octave_control"}
 								diameter={bigKnobParams.diameter}
-								min="-6"
-								max="6"
+								min="-3"
+								max="3"
 								value="0"
 								colors="#FF6188;#2C292D;#D9D9D9"
 							></webaudio-knob>

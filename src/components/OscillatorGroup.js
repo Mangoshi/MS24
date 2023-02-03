@@ -1,4 +1,5 @@
 import './OscillatorGroup.css'
+import Sketch from 'react-p5'
 
 const OscillatorGroup = ({x, y, name, enabled}) => {
 
@@ -62,13 +63,6 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 		backgroundColor: 'darkgrey'
 	}
 
-	const visualiserStyle = {
-		width: '100%',
-		height: '150px',
-		backgroundColor: 'lightgrey',
-		borderRadius: '20px',
-		marginTop: '10px'
-	}
 
 	const bigKnobParams = {
 		diameter: 100,
@@ -106,6 +100,26 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 		slider.addEventListener('change', function(e) {
 			console.log("ID:",e.target.id, "Val:", e.target.value);
 		});
+	}
+
+	const visualiserStyle = {
+		width: '100%',
+		height: '150px',
+		backgroundColor: 'lightgrey',
+		borderRadius: '20px',
+		marginTop: '10px',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center'
+	}
+
+	const setup = (p5, canvasParentRef) => {
+		p5.createCanvas(278, 120).parent(canvasParentRef)
+	}
+	const draw = p5 => {
+		p5.background('lightgrey')
+		// p5.textSize(16)
+		// p5.text('I AM CANVAS', 85, 69)
 	}
 
 	return (
@@ -255,7 +269,7 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 					</div>
 				</div>
 				<div className={name+"_visualiser"} style={visualiserStyle}>
-
+					<Sketch setup={setup} draw={draw} />
 				</div>
 			</div>
 		</div>

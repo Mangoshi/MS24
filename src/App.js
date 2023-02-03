@@ -1,5 +1,4 @@
 import './App.css';
-
 import Synth from "./pages/Synth";
 
 function App() {

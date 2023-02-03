@@ -134,16 +134,7 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 
 	// let slider = document.getElementById(name+"_shape_control");
 	//
-	// let slider_string_val
-	// console.log(slider.value)
-	// switch (slider.value) {
-	// 	case 0: slider_string_val = "sine"; break;
-	// 	case 1: slider_string_val = "sawtooth"; break;
-	// 	case 2: slider_string_val = "square"; break;
-	// 	case 3: slider_string_val = "triangle"; break;
-	// 	case 4: slider_string_val = "sine"; break;
-	// 	default: slider_string_val = "sine"; break;
-	// }
+
 	//
 	// console.log(slider_string_val)
 	//
@@ -166,18 +157,19 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 		type: "sine"
 	}).toDestination();
 
-	const synth = new Tone.Synth({
+	const synth = new Tone.PolySynth().toDestination();
+	synth.set({
 		oscillator: {
 			volume: -20,
 			type: "sine"
 		},
 		envelope: {
-			attack: 0.1,
-			decay: 0.001,
-			sustain: 1,
-			release: 20
+			attack: 1,
+			decay: 0.2,
+			sustain: 1.0,
+			release: 2
 		}
-	}).toDestination();
+	})
 
 	function makeSynth() {
 		let synth2 = new Tone.MonoSynth();
@@ -235,6 +227,8 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 	const triggerSynth = () => synth.triggerAttackRelease("A3", 1)
 	const triggerSynth2 = () => synth2.triggerAttackRelease("A2", 1)
 
+	const now = Tone.now()
+
 	window.addEventListener('load', function(){
 		console.log("Window Loaded");
 		let mainToggle = document.getElementById(name+"_toggle")
@@ -248,24 +242,72 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 				console.log("ID:",e.target.id, "Val:", e.target.value);
 			});
 		}
-		let slider = document.getElementById(name+"_shape_control");
-		slider.addEventListener('change', function(e) {
-			console.log("ID:",e.target.id, "Val:", e.target.value);
-		});
+		// let slider = document.getElementById(name+"_shape_control");
+		// slider.addEventListener('change', function(e) {
+		// 	console.log("ID:",e.target.id, "Val:", e.target.value);
+		// });
 		const keyboard = document.getElementById('keyboard');
+		keyboard.addEventListener('mouseover', function() {
+			keyboard.cv.focus();
+		});
+		// keyboard.addEventListener('mouseout', function() {
+		// 	keyboard.cv.blur();
+		// })
+		let heldNote
+		let heldNotes = [];
 		keyboard.addEventListener('change', function(e) {
 			if (e.note[0]) {
-				console.log("Note-On:" + e.note[1]);
-				// synth.triggerAttackRelease('B3', 1)
-				oscillator.frequency.value = (e.note[1]+1)*100
-				oscillator.start()
+				// console.log("Note-On:" + e.note[1]);
+				// console.log("Modulo12:" + e.note[1]%12);
+				// console.log("DividedBy12:" + Math.floor(e.note[1]/12));
+				let octave = Math.floor(e.note[1]/12);
+				function getNoteFromNumber(number) {
+					const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+					return notes[number % 12];
+				}
+				let heldNote = (getNoteFromNumber(e.note[1])+(octave+3)).toString()
+				console.log("Held note: ", heldNote)
+				heldNotes.push(heldNote);
+				console.log("Held notes: ", heldNotes)
+				synth.triggerAttack(heldNote, now)
+				console.log(synth.context)
+				// oscillator.frequency.value = (e.note[1]+1)*100
+				// oscillator.start()
 			}
 			else {
+				console.log("Held notes: ", heldNotes)
 				console.log("Note-Off:"+e.note[1]);
-				oscillator.stop()
+				synth.triggerRelease(heldNotes, "16n")
+				console.log(synth.context)
+				// oscillator.stop()
 			}
 		});
+		const shapeSlider = document.getElementById(name+"_shape_control");
+		shapeSlider.addEventListener('change', function(e) {
+			console.log("ID:",e.target.id, "Val:", e.target.value);
+			let slider_val = e.target.value
+			let slider_string_val
+			let shape_volume
+			console.log("Slider val: ", slider_val)
+			switch (slider_val) {
+				case 0: slider_string_val = "triangle"; shape_volume = -17; break;
+				case 1: slider_string_val = "triangle"; shape_volume = -17; break;
+				case 2: slider_string_val = "square"; shape_volume = -25; break;
+				case 3: slider_string_val = "sawtooth"; shape_volume = -22; break;
+				case 4: slider_string_val = "sine"; shape_volume = -20; break;
+				default: slider_string_val = "sine"; shape_volume = -20; break;
+			}
+			console.log("Slider string val: ", slider_string_val)
+			oscillator.type = slider_string_val
+			synth.set({
+				oscillator:{
+					volume: shape_volume,
+					type: slider_string_val
+				}
+			})
+		})
 	})
+
 
 
 	return (
@@ -436,7 +478,7 @@ const OscillatorGroup = ({x, y, name, enabled}) => {
 				</div>
 			</div>
 			<div style={{position: 'absolute', top: 450, left: 20}}>
-				<webaudio-keyboard id="keyboard" keys="49"></webaudio-keyboard>
+				<webaudio-keyboard id="keyboard" keys="49" ></webaudio-keyboard>
 			</div>
 		</div>
 	);

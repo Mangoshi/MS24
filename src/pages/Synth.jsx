@@ -37,7 +37,7 @@ let defaultSynthSettings = {
 			octave: 0,
 			semitone: 0,
 			quantize: 0,
-			shape: 'sin',
+			shape: 0,
 			attack: 1,
 			decay: 500,
 			sustain: 1,
@@ -46,7 +46,7 @@ let defaultSynthSettings = {
 		settings: {
 			oscillator: {
 				volume: -5,
-				type: "square"
+				type: "saw"
 			},
 			envelope: {
 				attack: 1,
@@ -89,10 +89,16 @@ oscillatorA_atom.debugLabel = 'atomOscA'
 // TODO: Convert Jotai logic above to Zustand logic
 const useSynthStore = create((set) => ({
 	synth: defaultSynthSettings,
-	setSynthData: (targetGroup, targetSubgroup, targetControl, payload) =>
+	setSynthControls: (targetGroup, targetSubgroup, targetControl, payload) =>
 	set(
 		produce((draft) => {
 			draft.synth[targetGroup][targetSubgroup][targetControl] = payload
+		})
+	),
+	setSynthSettings: (targetGroup, targetSubgroup, targetControl, payload) =>
+	set(
+		produce((draft) => {
+			draft.synth[targetGroup].settings[targetSubgroup][targetControl] = payload
 		})
 	),
 }))
@@ -183,6 +189,8 @@ function Synth() {
 	let [oscA] = useAtom(oscillatorA_atom)
 	let [tone] = useAtom(toneAtom)
 
+	let synthData = useSynthStore((state) => state.synth)
+
 	// --- CORE --- //
 	const setSynthLoadedTrue = () => setSynthLoaded(true)
 	const WindowLoadListener = () => {
@@ -209,15 +217,16 @@ function Synth() {
 		console.log("Tone Running Atom:", toneRunning)
 	}
 
-	const OscillatorControls = ({group, control, size, min, max, value, modifier, colors}) => {
+	const OscillatorControls = ({type, group, control, size, min, max, value, modifier, colors}) => {
 		// console.log("OscillatorControls:", group, control, size, min, max, value, colors)
 
 		let testString = "oscillatorA_atom"
 
 		const [oscA, setOscA] = useAtom(oscillatorA_atom)
 
-		const zustandState = useSynthStore((state) => state)
-		const updateZustandState = useSynthStore((state) => state.setSynthData)
+		const synthState = useSynthStore((state) => state)
+		const updateSynthControls = useSynthStore((state) => state.setSynthControls)
+		const updateSynthSettings = useSynthStore((state) => state.setSynthSettings)
 
 		let controlElement;
 		let controlOutput;
@@ -231,17 +240,44 @@ function Synth() {
 		if(controlElement){
 			controlElement.addEventListener('change', function (e) {
 				console.log("ID:", e.target.id, "Val:", e.target.value);
-				// CONTROL OUTPUT
+
+				// CONTROL PROCESSING
 				controlOutput = modifier + e.target.value;
-				// SETTING
+
+				// SET STATE
 				// const setOSC_A = useSynthStore((state) => state.setOSC_A(octaveModifier));
 				function setControl(control, value){
 					setOscA({...oscA, controls: {...oscA.controls, [control]: value}})
 				}
 				setControl(control, e.target.value)
-				updateZustandState(group, "controls", control, e.target.value)
-				updateZustandState(group, "settings", "oscillator", e.target.value)
+				updateSynthControls(group, "controls", control, e.target.value)
+				// updateZustandState(group, "settings", "oscillator", e.target.value)
 				// setOscA({...oscA, controls: {...oscA.controls, octave: e.target.value}})
+
+				// SET SYNTH
+				if(control === "shape"){
+					let newType
+					let newVolume
+					if(e.target.value === 0){
+						newType = "sine"
+						newVolume = -12
+					} else if(e.target.value === 1){
+						newType = "square"
+						newVolume = -12
+					} else if(e.target.value === 2){
+						newType = "triangle"
+						newVolume = -12
+					} else if(e.target.value === 3){
+						newType = "sawtooth"
+						newVolume = -12
+					} else {
+						newType = "sine"
+						newVolume = -12
+					}
+					updateSynthSettings(group, "oscillator", "type", newType)
+					updateSynthSettings(group, "oscillator", "volume", newVolume)
+					polySynth.set({...oscA, oscillator: {volume: newVolume, type: newType}})
+				}
 				// polySynth.set({...oscA, oscillator: {...oscA.oscillator, octave: controlOutput}})
 				// LOGGING
 				console.log("Octave modifier:", controlOutput);
@@ -254,20 +290,41 @@ function Synth() {
 		console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
 		return (
 			<div>
-				<div style={controlGroup}>
-					<webaudio-knob
-						id={id}
-						diameter={size}
-						min={min}
-						max={max}
-						value={dynamicGroupValue}
-						colors={colors}
-					></webaudio-knob>
-					<webaudio-param
-						link={id}
-						fontSize="14"
-					></webaudio-param>
-				</div>
+				{ type === "knob" &&
+					<div style={controlGroup}>
+						<webaudio-knob
+							id={id}
+							diameter={size}
+							min={min}
+							max={max}
+							value={dynamicGroupValue}
+							colors={colors}
+						></webaudio-knob>
+						<webaudio-param
+							link={id}
+							fontSize="14"
+						></webaudio-param>
+					</div>
+				}
+				{ type === "slider" &&
+					<div style={controlGroup}>
+						<webaudio-slider
+							id={id}
+							width={30}
+							height={size}
+							min={min}
+							max={max}
+							value={dynamicGroupValue}
+							conv="['sin', 'triangle', 'saw', 'square', 'noise'][x]"
+							colors={colors}
+							direction="vert"
+						></webaudio-slider>
+						<webaudio-param
+							link={id}
+							fontSize="14"
+						></webaudio-param>
+					</div>
+				}
 			</div>
 		)
 	}
@@ -277,8 +334,8 @@ function Synth() {
 	// TODO: Implement keyboard & held keys array for further testing
 
 	const startNote = 0
-	let octave = oscA.controls.octave
-	let semitone = oscA.controls.semitone
+	let octave = synthData.OSC_A.controls.octave
+	let semitone = synthData.OSC_A.controls.semitone
 	let keyboardOctave = Math.floor(startNote/12);
 	function getNoteFromNumber(number) {
 		const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -308,13 +365,21 @@ function Synth() {
 		)
 	}
 
-	const zustandState = useSynthStore((state) => state)
+	const oscA_state = useSynthStore((state) => state.synth.OSC_A)
+
+	const oscA_dataContainer_style = {
+		backgroundColor: 'black',
+		paddingLeft: '10px',
+		paddingRight: '10px',
+		margin: '2.5px'
+	}
 
 	// --- JSX --- //
 	return (
 		<div>
 			<WindowLoadListener/>
 			<DebugAtoms/>
+			<h3>App Data</h3>
 			{/*<pre>*/}
 				Synth Loaded: {JSON.stringify(synthLoaded, null, 2)}
 			{/*</pre>*/}
@@ -324,38 +389,80 @@ function Synth() {
 			<pre>
 				Keys Held: {JSON.stringify(keysHeld, null, 2)}
 			</pre>
+			<hr/>
 			{!toneRunning ?
 				<div>
 					<button onClick={startContext}>Start Tone!</button>
 				</div>
 				:
 				<div>
-					<pre>
-						{JSON.stringify(zustandState, null, 2)}
-					</pre>
-					<ChangeSynthJSON/>
+					<h3>OSC_A</h3>
+					<div style={{display: 'flex'}}>
+						<div style={oscA_dataContainer_style}>
+							<h4>controls</h4>
+							<pre>
+								{JSON.stringify(oscA_state.controls, null, 2)}
+							</pre>
+						</div>
+						<div style={oscA_dataContainer_style}>
+							<h4>oscillator</h4>
+							<pre>
+								{JSON.stringify(oscA_state.settings.oscillator, null, 2)}
+							</pre>
+						</div>
+						<div style={oscA_dataContainer_style}>
+							<h4>envelope</h4>
+							<pre>
+								{JSON.stringify(oscA_state.settings.envelope, null, 2)}
+							</pre>
+						</div>
+						<div style={oscA_dataContainer_style}>
+							<h4>filter</h4>
+							<pre>
+								{JSON.stringify(oscA_state.settings.filter, null, 2)}
+							</pre>
+						</div>
+						<div style={oscA_dataContainer_style}>
+							<h4>filterEnvelope</h4>
+							<pre>
+								{JSON.stringify(oscA_state.settings.filterEnvelope, null, 2)}
+							</pre>
+						</div>
+					</div>
+					{/*<ChangeSynthJSON/>*/}
 					<ToneTrigger/>
 					<hr/>
 					<div style={controlContainer}>
 						<OscillatorControls
+							type={"knob"}
 							group={"OSC_A"}
 							control={"octave"}
-							size={60}
+							size={100}
 							min={-3}
 							max={3}
 							modifier={3}
-							value={oscA.controls.octave}
+							value={oscA_state.controls.octave}
 							colors={"#FF6188;#2C292D;#D9D9D9"}
 						/>
 						<OscillatorControls
+							type={"knob"}
 							group={"OSC_A"}
 							control={"semitone"}
-							size={60}
+							size={100}
 							min={-3}
 							max={3}
-							modifier={0}
-							value={oscA.controls.semitone}
+							value={oscA_state.controls.semitone}
 							colors={"#A9DC76;#2C292D;#D9D9D9"}
+						/>
+						<OscillatorControls
+							type={"slider"}
+							group={"OSC_A"}
+							control={"shape"}
+							size={100}
+							min={0}
+							max={4}
+							value={oscA_state.controls.shape}
+							colors={"#78DCE8;#2C292D;#D9D9D9"}
 						/>
 					</div>
 				</div>

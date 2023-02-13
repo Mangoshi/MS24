@@ -1,28 +1,17 @@
-import {atom, useAtom, useSetAtom} from 'jotai'
-import { useAtomsDebugValue } from 'jotai-devtools'
 import * as Tone from 'tone'
-import {useState} from "react";
 import create from 'zustand'
-import { immer } from 'zustand/middleware/immer'
 import produce from "immer";
-
-// --- DEBUG --- //
-const DebugAtoms = () => {
-	useAtomsDebugValue()
-	return null
-}
+import {useEffect} from "react";
 
 // --- TONE JS --- //
-// -- Setup & Util -- //
-
-const now = Tone.now()
-// console.log(Tone.context.state)
 
 // -- JSON -- //
 let defaultAppData = {
-	loaded: false,
-	running: false,
+	domLoaded: false,
+	windowLoaded: false,
+	toneRunning: false,
 	keysHeld: [],
+	keysReleased: []
 }
 
 let defaultSynthSettings = {
@@ -46,132 +35,100 @@ let defaultSynthSettings = {
 		settings: {
 			oscillator: {
 				volume: -5,
-				type: "saw"
+				type: "sawtooth"
 			},
 			envelope: {
 				attack: 1,
-				decay: 0.2,
-				sustain: 1.0,
-				release: 2
+				decay: 1,
+				sustain: 1,
+				release: 1
 			},
 			filter: {
-				Q: 10,
-				type: "highpass",
-				rolloff: -24
+				Q: 5,
+				type: "lowpass",
+				rolloff: -12
 			},
 			filterEnvelope: {
-				attack: 0,
-				decay: 0.32,
-				sustain: 0.9,
-				release: 3,
-				baseFrequency: 150,
-				octaves: 4
-			}
+				attack: 0.1,
+				decay: 0.2,
+				sustain: 1,
+				release: 2,
+				baseFrequency: 150
+			},
+			maxPolyphony: 4,
 		}
 	}
 }
 
+// -- Setup & Util -- //
 // const polySynth = new Tone.PolySynth(Tone.MonoSynth).toDestination()
-const autoFilter = new Tone.AutoFilter("4n").toDestination().start();
-const polySynth = new Tone.PolySynth(Tone.MonoSynth).connect(autoFilter)
+const autoFilter = new Tone.AutoFilter("8n").toDestination().start();
+const polySynth = new Tone.PolySynth(Tone.MonoSynth, defaultSynthSettings.OSC_A.settings).connect(autoFilter)
+const now = Tone.now()
+// console.log(Tone.context.state)
 
-// --- STATE --- //
-// -- Synth General -- //
-const windowLoadedAtom = atom(defaultAppData.loaded)
-const toneAtom = atom(defaultAppData)
-const toneRunningAtom = atom(defaultAppData.running)
-const keysHeldAtom = atom(defaultAppData.keysHeld)
-// -- Synth Components -- //
-const oscillatorA_atom = atom(defaultSynthSettings.OSC_A)
-oscillatorA_atom.debugLabel = 'atomOscA'
-
-// --- ZUSTAND --- //
-// TODO: Convert Jotai logic above to Zustand logic
+// --- zSTATE --- //
+const useAppStore = create((set) => ({
+	app: defaultAppData,
+	setAppData: (targetControl, payload) =>
+		set(
+			produce((draft) => {
+				draft.app[targetControl] = payload
+			})
+		),
+	addKeysHeld: (payload) =>
+		set(
+			produce((draft) => {
+				draft.app.keysHeld.push(payload)
+			})
+		),
+	addKeysReleased: (payload) =>
+		set(
+			produce((draft) => {
+				draft.app.keysReleased.push(payload)
+			})
+		),
+	filterKeysHeld: (payload) =>
+		set(
+			produce((draft) => {
+				draft.app.keysHeld = draft.app.keysHeld.filter((key) => key !== payload)
+			})
+		),
+	clearKeysReleased: () =>
+		set(
+			produce((draft) => {
+				draft.app.keysReleased = []
+			})
+		),
+}))
 const useSynthStore = create((set) => ({
 	synth: defaultSynthSettings,
 	setSynthControls: (targetGroup, targetSubgroup, targetControl, payload) =>
-	set(
-		produce((draft) => {
-			draft.synth[targetGroup][targetSubgroup][targetControl] = payload
-		})
-	),
-	setSynthSettings: (targetGroup, targetSubgroup, targetControl, payload) =>
-	set(
-		produce((draft) => {
-			draft.synth[targetGroup].settings[targetSubgroup][targetControl] = payload
-		})
-	),
+		set(
+			produce((draft) => {
+				draft.synth[targetGroup][targetSubgroup][targetControl] = payload
+			})
+		),
+	setSynthSettings: (targetGroup, targetSubgroup, payload) =>
+		set(
+			produce((draft) => {
+				draft.synth[targetGroup].settings[targetSubgroup] = payload
+			})
+		),
+	setOscillatorSettings: (targetGroup, targetControl, payload) =>
+		set(
+			produce((draft) => {
+				draft.synth[targetGroup].settings.oscillator[targetControl] = payload
+			})
+		),
 }))
 
-// console.log(useSynthStore.getState())
-
-// const PlayTest = () => {
-// 	const [oscA, setOscA] = useAtom(oscillatorA_atom)
-// 	let settings = oscA.settings
-// 	console.log(settings)
-// 	// polySynth.set(settings)
-// 	const play = () => polySynth.triggerAttackRelease("C4", "8n");
-// 	return (
-// 		<button onClick={play}>Play Test!</button>
-// 	)
-// }
-
-// --- FUNCTIONAL COMPONENTS --- //
-const ChangeSynthJSON = () => {
-	const [oscA, setOscA] = useAtom(oscillatorA_atom)
-	let oscASetTest
-	if(oscA.enabled){
-		oscASetTest = () => setOscA({
-			...oscA,
-			name: 'OSC A: DISABLED',
-			enabled: 0,
-			controls: {
-				...oscA.controls,
-				octave: 2},
-			settings: {
-				...oscA.settings,
-				oscillator: {
-					...oscA.settings.oscillator,
-					type: 'sawtooth'
-				}
-			}
-		})
-		polySynth.set({...oscA.settings})
-	} else {
-		oscASetTest = () => setOscA({
-			...oscA,
-			name: 'OSC A: ENABLED',
-			enabled: 1,
-			controls: {
-				...oscA.controls,
-				octave: 3},
-			settings: {
-				...oscA.settings,
-				oscillator: {
-					...oscA.settings.oscillator,
-					type: 'square'
-				}
-			}
-		})
-		polySynth.set({...oscA.settings})
-
-	}
-	return (
-		<div>
-			<button onClick={oscASetTest}>Set JSON!</button>
-		</div>
-
-	)
-}
-
 // --- STYLING --- //
-
 const controlContainer = {
 	display: 'flex',
 	flexDirection: 'row',
 	justifyContent: 'center',
 }
-
 const controlGroup = {
 	display: 'flex',
 	flexDirection: 'column',
@@ -179,125 +136,99 @@ const controlGroup = {
 	alignItems: 'center',
 	paddingRight: '10px'
 }
+const oscA_dataContainer_style = {
+	backgroundColor: 'black',
+	paddingLeft: '10px',
+	paddingRight: '10px',
+	margin: '2.5px'
+}
 
 function Synth() {
-
-	// --- ATOMS --- //
-	let [toneRunning, setToneRunning] = useAtom(toneRunningAtom)
-	let [synthLoaded, setSynthLoaded] = useAtom(windowLoadedAtom)
-	let [keysHeld, setKeysHeld] = useAtom(keysHeldAtom)
-	let [oscA] = useAtom(oscillatorA_atom)
-	let [tone] = useAtom(toneAtom)
-
+	// --- zSTATE --- //
+	// -- Getters -- //
+	let appData = useAppStore((state) => state.app)
 	let synthData = useSynthStore((state) => state.synth)
-
-	// --- CORE --- //
-	const setSynthLoadedTrue = () => setSynthLoaded(true)
-	const WindowLoadListener = () => {
-		const [windowLoaded] = useAtom(windowLoadedAtom)
-		const setLoaded = () => {
-			setSynthLoadedTrue()
-			console.log("WL:", windowLoaded)
-		}
-		window.onload = function () {
-			setLoaded()
-		}
-	}
+	// -- Setters -- //
+	const setAppData = useAppStore((state) => state.setAppData)
+	const updateSynthControls = useSynthStore((state) => state.setSynthControls)
+	const updateSynthSettings = useSynthStore((state) => state.setSynthSettings)
 
 	// --- TONE CONTEXT --- //
-	const setToneRunningTrue = () => setToneRunning(true)
 	const startContext = () => {
-		console.log("Tone is: ", Tone.context.state)
-		document.body.addEventListener("click", () => {
-			Tone.context.resume().then(() => {
-				console.log("Tone is: ", Tone.context.state)
-				setToneRunningTrue()
-			})
-		})
-		console.log("Tone Running Atom:", toneRunning)
+		if (Tone.context.state !== "running") {
+			document.body.addEventListener("click", function resumeTone() {
+				Tone.context.resume().then(() => {
+					console.log("Tone is: ", Tone.context.state);
+					setAppData("toneRunning", true);
+				});
+				document.body.removeEventListener("click", resumeTone);
+			}, { once: true });
+		}
 	}
 
 	const OscillatorControls = ({type, group, control, size, min, max, value, modifier, colors}) => {
 		// console.log("OscillatorControls:", group, control, size, min, max, value, colors)
 
-		let testString = "oscillatorA_atom"
-
-		const [oscA, setOscA] = useAtom(oscillatorA_atom)
-
-		const synthState = useSynthStore((state) => state)
-		const updateSynthControls = useSynthStore((state) => state.setSynthControls)
-		const updateSynthSettings = useSynthStore((state) => state.setSynthSettings)
-
 		let controlElement;
 		let controlOutput;
 
-		let key = "oscA"
-
 		let id = group + "_" + control + "_control"
 		// console.log("ID:", id)
-		controlElement = document.getElementById(id);
 
-		if(controlElement){
+		let dynamicGroupValue
+		let dynamicGroup
+
+		useEffect(() => {
+			controlElement = document.getElementById(id);
 			controlElement.addEventListener('change', function (e) {
 				console.log("ID:", e.target.id, "Val:", e.target.value);
+				if(control === "shape") {
+					dynamicGroup = {[group]: {"settings": {"oscillator": {[control]: value}}}}
+					dynamicGroupValue = dynamicGroup[group].settings.oscillator[control]
+					console.log("Dynamic Group:", `${group}-${control}`, dynamicGroup)
+					console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
 
-				// CONTROL PROCESSING
-				controlOutput = modifier + e.target.value;
+					const newControlsLookup = {
+						0: {type: "sine", volume: -12},
+						1: {type: "square", volume: -12},
+						2: {type: "triangle", volume: -12},
+						3: {type: "sawtooth", volume: -12}
+					};
 
-				// SET STATE
-				// const setOSC_A = useSynthStore((state) => state.setOSC_A(octaveModifier));
-				function setControl(control, value){
-					setOscA({...oscA, controls: {...oscA.controls, [control]: value}})
+					const newControls = newControlsLookup[e.target.value] || newControlsLookup[0];
+					console.log("Updating Synth Settings:", group, "settings", newControls)
+					updateSynthControls(group, "controls", control, e.target.value)
+					updateSynthSettings(group, "oscillator", newControls)
+					polySynth.set({
+						oscillator: {
+							volume: newControls.volume,
+							type: newControls.type
+						}
+					})
+				} else {
+					dynamicGroup = {[group] : {"controls": {[control]: value}}}
+					dynamicGroupValue = dynamicGroup[group].controls[control]
+					console.log("Dynamic Group:", `${group}-${control}`, dynamicGroup)
+					console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
+
+					controlOutput = e.target.value + modifier;
+					console.log("Updating Synth Controls:", group, "controls", control, e.target.value)
+					updateSynthControls(group, "controls", control, e.target.value)
 				}
-				setControl(control, e.target.value)
-				updateSynthControls(group, "controls", control, e.target.value)
-				// updateZustandState(group, "settings", "oscillator", e.target.value)
-				// setOscA({...oscA, controls: {...oscA.controls, octave: e.target.value}})
+			})
+		}, [])
 
-				// SET SYNTH
-				if(control === "shape"){
-					let newType
-					let newVolume
-					if(e.target.value === 0){
-						newType = "sine"
-						newVolume = -12
-					} else if(e.target.value === 1){
-						newType = "square"
-						newVolume = -12
-					} else if(e.target.value === 2){
-						newType = "triangle"
-						newVolume = -12
-					} else if(e.target.value === 3){
-						newType = "sawtooth"
-						newVolume = -12
-					} else {
-						newType = "sine"
-						newVolume = -12
-					}
-					updateSynthSettings(group, "oscillator", "type", newType)
-					updateSynthSettings(group, "oscillator", "volume", newVolume)
-					polySynth.set({...oscA, oscillator: {volume: newVolume, type: newType}})
-				}
-				// polySynth.set({...oscA, oscillator: {...oscA.oscillator, octave: controlOutput}})
-				// LOGGING
-				console.log("Octave modifier:", controlOutput);
-			});
-			// console.log("Window Loaded!");
-		}
-		let dynamicGroup = {[group] : {"controls": {[control]: value}}}
-		console.log("Dynamic Group:", `${group}-${control}`, dynamicGroup)
-		let dynamicGroupValue = dynamicGroup[group].controls[control]
-		console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
 		return (
 			<div>
-				{ type === "knob" &&
+				{
+					type === "knob" &&
 					<div style={controlGroup}>
 						<webaudio-knob
 							id={id}
 							diameter={size}
 							min={min}
 							max={max}
-							value={dynamicGroupValue}
+							value={value}
 							colors={colors}
 						></webaudio-knob>
 						<webaudio-param
@@ -305,98 +236,173 @@ function Synth() {
 							fontSize="14"
 						></webaudio-param>
 					</div>
-				}
-				{ type === "slider" &&
-					<div style={controlGroup}>
-						<webaudio-slider
-							id={id}
-							width={30}
-							height={size}
-							min={min}
-							max={max}
-							value={dynamicGroupValue}
-							conv="['sin', 'triangle', 'saw', 'square', 'noise'][x]"
-							colors={colors}
-							direction="vert"
-						></webaudio-slider>
-						<webaudio-param
-							link={id}
-							fontSize="14"
-						></webaudio-param>
-					</div>
-				}
+				} {
+				type === "slider" &&
+				<div style={controlGroup}>
+					<webaudio-slider
+						id={id}
+						width={30}
+						height={size}
+						min={min}
+						max={max}
+						value={value}
+						conv="['sine', 'triangle', 'sawtooth', 'square', 'noise'][x]"
+						colors={colors}
+						direction="vert"
+					></webaudio-slider>
+					<webaudio-param
+						link={id}
+						fontSize="14"
+						width="50"
+					></webaudio-param>
+				</div>
+			}
 			</div>
 		)
 	}
 
 	// --- KEYBOARD & NOTE LOGIC --- //
 
-	// TODO: Implement keyboard & held keys array for further testing
+	const oscA_state = useSynthStore((state) => state.synth.OSC_A)
 
-	const startNote = 0
-	let octave = synthData.OSC_A.controls.octave
-	let semitone = synthData.OSC_A.controls.semitone
-	let keyboardOctave = Math.floor(startNote/12);
-	function getNoteFromNumber(number) {
-		const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-		// return notes[number % 12];
-		return notes[(12 + (number % 12)) % 12];
-	}
+	useEffect(() => {
+		document.addEventListener('DOMContentLoaded', () => {
+			console.log("DOM Loaded")
+			setAppData("domLoaded", true)
+		})
+		window.addEventListener('load', (event) => {
+			console.log("Window Loaded")
+			setAppData("windowLoaded", true)
+		})
+	}, [])
 
-	let convertedNote = getNoteFromNumber(startNote + semitone)
-	let noteAndOctave = convertedNote + (keyboardOctave + octave)
+	const Keyboard = () => {
+		let keysHeld = useAppStore((state) => state.app.keysHeld)
+		let keysReleased = useAppStore((state) => state.app.keysReleased)
+		let octave = useSynthStore((state) => state.synth.OSC_A.controls.octave)
+		let semitone = useSynthStore((state) => state.synth.OSC_A.controls.semitone)
+		console.log("keysHeld array: ", keysHeld)
+		console.log("keysReleased array: ", keysReleased)
+		console.log("Octave:", octave, "Semitone:", semitone)
 
+		const addKeysHeld = useAppStore((state) => state.addKeysHeld)
+		const addKeysReleased = useAppStore((state) => state.addKeysReleased)
+		const removeKeysHeld = useAppStore((state) => state.filterKeysHeld)
+		const clearKeysReleased = useAppStore((state) => state.clearKeysReleased)
 
-	// --- TONE SIGNALS --- //
-	const noteAttackSignal = () => {
-		console.log("Note and Octave:", noteAndOctave)
-		polySynth.triggerAttack(noteAndOctave, now);
-	}
-	const noteReleaseSignal = () => {
-		console.log("Note and Octave:", noteAndOctave)
-		polySynth.triggerRelease(noteAndOctave, "+0.1");
-	}
-	const ToneTrigger = () => {
+		// -- KEYBOARD LOGIC -- //
+		function getNoteFromNumber(number) {
+			const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+			// return notes[number % 12];
+			return notes[(12 + (number % 12)) % 12];
+		}
+
+		// -- TONE SIGNALS -- //
+		function noteAttackSignal(key){
+			console.log("Attack:", key)
+			polySynth.triggerAttack(key, now);
+		}
+		function noteReleaseSignal(key){
+			console.log("Release:", key)
+			polySynth.triggerRelease(key, "+0.1");
+		}
+		function noteAttackReleaseSignal(key){
+			console.log("Attack+Release:", key)
+			polySynth.triggerAttackRelease(key, "16n");
+		}
+
+		useEffect(() => {
+			console.log("keysHeld array: ", keysHeld)
+			console.log("keysReleased array: ", keysReleased)
+
+			console.log("Initializing Keyboard...")
+
+			let keyboard = document.getElementById("keyboard");
+
+			console.log("SUCCESS!")
+
+			keyboard.addEventListener("mouseover", function () {
+				keyboard.cv.focus();
+				console.log("mouse over keyboard!");
+			});
+
+			let heldKeys = []
+			keyboard.addEventListener("change", function (e) {
+				console.log("KEY CHANGE!", e.note)
+				const inputKey = e.note[1]
+				console.log("Input Key: ", inputKey)
+				let keyboardOctave = Math.floor(inputKey / 12);
+				console.log("Keyboard Octave: ", keyboardOctave)
+				console.log("Modifier Octave: ", octave)
+				let convertedNote = getNoteFromNumber(inputKey + semitone)
+				console.log("Converted Note: ", convertedNote)
+				let noteAndOctave = convertedNote + (keyboardOctave + octave)
+
+				if (e.note[0]) {
+					console.log("Held note: ", noteAndOctave)
+					console.log("Modulo test: ", -1 % 12)
+
+					// addKeysHeld(noteAndOctave)
+
+					heldKeys.push(noteAndOctave)
+
+					noteAttackSignal(noteAndOctave)
+					// noteAttackReleaseSignal(noteAndOctave)
+				} else {
+					console.log("Released note: ", noteAndOctave)
+
+					// addKeysReleased(noteAndOctave)
+					// removeKeysHeld(noteAndOctave)
+
+					heldKeys = heldKeys.filter((key) => key !== noteAndOctave)
+
+					noteReleaseSignal([noteAndOctave])
+
+					// Stop all notes if no keys are held (glitch safeguard) //
+					if(heldKeys.length === 0) {
+						polySynth.releaseAll()
+					}
+					// noteReleaseSignal(keysReleased)
+				}
+				// clearKeysReleased()
+				// console.log("keysHeld array: ", keysHeld)
+				// console.log("keysReleased array: ", keysReleased)
+			});
+		}, [])
+
 		return (
-			<div>
-				<button onClick={noteAttackSignal}>Play Test!</button>
-				<button onClick={noteReleaseSignal}>Stop Test!</button>
+			<div style={{display: 'flex', justifyContent: 'center', margin: '10px'}}>
+				<webaudio-keyboard id="keyboard" keys="49" ></webaudio-keyboard>
 			</div>
 		)
 	}
 
-	const oscA_state = useSynthStore((state) => state.synth.OSC_A)
-
-	const oscA_dataContainer_style = {
-		backgroundColor: 'black',
-		paddingLeft: '10px',
-		paddingRight: '10px',
-		margin: '2.5px'
+	function setOscillatorTest () {
+		console.log("Setting oscillator test...")
+		let newSettings = {
+			volume: 0,
+			type: "sine",
+		}
+		updateSynthSettings("OSC_A", "oscillator", newSettings);
 	}
 
 	// --- JSX --- //
 	return (
 		<div>
-			<WindowLoadListener/>
-			<DebugAtoms/>
+			<button onClick={setOscillatorTest}>Set Oscillator Test</button>
 			<h3>App Data</h3>
-			{/*<pre>*/}
-				Synth Loaded: {JSON.stringify(synthLoaded, null, 2)}
-			{/*</pre>*/}
 			<pre>
-				Tone Running: {JSON.stringify(toneRunning, null, 2)}
-			</pre>
-			<pre>
-				Keys Held: {JSON.stringify(keysHeld, null, 2)}
+				{JSON.stringify(appData, null, 2)}
 			</pre>
 			<hr/>
-			{!toneRunning ?
+			{!appData.toneRunning ?
 				<div>
 					<button onClick={startContext}>Start Tone!</button>
 				</div>
 				:
 				<div>
-					<h3>OSC_A</h3>
+					<Keyboard/>
+					<h3>Oscillator A</h3>
 					<div style={{display: 'flex'}}>
 						<div style={oscA_dataContainer_style}>
 							<h4>controls</h4>
@@ -430,7 +436,6 @@ function Synth() {
 						</div>
 					</div>
 					{/*<ChangeSynthJSON/>*/}
-					<ToneTrigger/>
 					<hr/>
 					<div style={controlContainer}>
 						<OscillatorControls

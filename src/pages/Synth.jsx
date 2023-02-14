@@ -1,15 +1,12 @@
 import * as Tone from 'tone'
-import create from 'zustand'
+import { create } from 'zustand'
 import produce from "immer";
 import {useEffect} from "react";
 
 // --- TONE JS --- //
 
 // -- JSON -- //
-let defaultAppData = {
-	domLoaded: false,
-	windowLoaded: false,
-	toneRunning: false,
+let controlsData = {
 	keysHeld: [],
 	keysReleased: []
 }
@@ -23,7 +20,7 @@ let defaultSynthSettings = {
 			y: 140
 		},
 		controls: {
-			octave: 0,
+			octave: 1,
 			semitone: 0,
 			quantize: 0,
 			shape: 0,
@@ -34,7 +31,7 @@ let defaultSynthSettings = {
 		},
 		settings: {
 			oscillator: {
-				volume: -5,
+				volume: -15,
 				type: "sawtooth"
 			},
 			envelope: {
@@ -68,38 +65,43 @@ const now = Tone.now()
 // console.log(Tone.context.state)
 
 // --- zSTATE --- //
-const useAppStore = create((set) => ({
-	app: defaultAppData,
-	setAppData: (targetControl, payload) =>
+const useControlsStore = create((set) => ({
+	control: controlsData,
+	setControlsData: (targetControl, payload) =>
 		set(
 			produce((draft) => {
-				draft.app[targetControl] = payload
+				draft.control[targetControl] = payload
 			})
 		),
 	addKeysHeld: (payload) =>
 		set(
 			produce((draft) => {
-				draft.app.keysHeld.push(payload)
+				draft.control.keysHeld.push(payload)
+				// polySynth.triggerAttack(payload, now);
 			})
 		),
 	addKeysReleased: (payload) =>
 		set(
 			produce((draft) => {
-				draft.app.keysReleased.push(payload)
+				draft.control.keysReleased.push(payload)
+				// polySynth.triggerRelease(payload, "+0.1");
 			})
 		),
 	filterKeysHeld: (payload) =>
 		set(
 			produce((draft) => {
-				draft.app.keysHeld = draft.app.keysHeld.filter((key) => key !== payload)
+				draft.control.keysHeld = draft.control.keysHeld.filter((key) => key !== payload)
 			})
 		),
 	clearKeysReleased: () =>
 		set(
 			produce((draft) => {
-				draft.app.keysReleased = []
+				draft.control.keysReleased = []
+				// if(draft.control.keysHeld.length <= 1) {
+				// 	polySynth.releaseAll()
+				// }
 			})
-		),
+		)
 }))
 const useSynthStore = create((set) => ({
 	synth: defaultSynthSettings,
@@ -143,28 +145,18 @@ const oscA_dataContainer_style = {
 	margin: '2.5px'
 }
 
-function Synth() {
+
+
+function Synth({appData}) {
 	// --- zSTATE --- //
 	// -- Getters -- //
-	let appData = useAppStore((state) => state.app)
+	// let appData = useAppStore((state) => state.app)
 	let synthData = useSynthStore((state) => state.synth)
+	let controlsData = useControlsStore((state) => state.control)
 	// -- Setters -- //
-	const setAppData = useAppStore((state) => state.setAppData)
+	// const setAppData = useAppStore((state) => state.setAppData)
 	const updateSynthControls = useSynthStore((state) => state.setSynthControls)
 	const updateSynthSettings = useSynthStore((state) => state.setSynthSettings)
-
-	// --- TONE CONTEXT --- //
-	const startContext = () => {
-		if (Tone.context.state !== "running") {
-			document.body.addEventListener("click", function resumeTone() {
-				Tone.context.resume().then(() => {
-					console.log("Tone is: ", Tone.context.state);
-					setAppData("toneRunning", true);
-				});
-				document.body.removeEventListener("click", resumeTone);
-			}, { once: true });
-		}
-	}
 
 	const OscillatorControls = ({type, group, control, size, min, max, value, modifier, colors}) => {
 		// console.log("OscillatorControls:", group, control, size, min, max, value, colors)
@@ -265,30 +257,34 @@ function Synth() {
 
 	const oscA_state = useSynthStore((state) => state.synth.OSC_A)
 
-	useEffect(() => {
-		document.addEventListener('DOMContentLoaded', () => {
-			console.log("DOM Loaded")
-			setAppData("domLoaded", true)
-		})
-		window.addEventListener('load', (event) => {
-			console.log("Window Loaded")
-			setAppData("windowLoaded", true)
-		})
-	}, [])
+	// -- TONE SIGNALS -- //
+	function noteAttackSignal(key){
+		console.log("Attack:", key)
+		polySynth.triggerAttack(key, now);
+	}
+	function noteReleaseSignal(key){
+		console.log("Release:", key)
+		polySynth.triggerRelease(key, "+0.1");
+	}
+	function noteAttackReleaseSignal(key){
+		console.log("Attack+Release:", key)
+		polySynth.triggerAttackRelease(key, "16n");
+	}
 
 	const Keyboard = () => {
-		let keysHeld = useAppStore((state) => state.app.keysHeld)
-		let keysReleased = useAppStore((state) => state.app.keysReleased)
+		let keysHeld = useControlsStore((state) => state.control.keysHeld)
+		let keysReleased = useControlsStore((state) => state.control.keysReleased)
 		let octave = useSynthStore((state) => state.synth.OSC_A.controls.octave)
 		let semitone = useSynthStore((state) => state.synth.OSC_A.controls.semitone)
+
+		const addKeysHeld = useControlsStore((state) => state.addKeysHeld)
+		const addKeysReleased = useControlsStore((state) => state.addKeysReleased)
+		const removeKeysHeld = useControlsStore((state) => state.filterKeysHeld)
+		const clearKeysReleased = useControlsStore((state) => state.clearKeysReleased)
+
 		console.log("keysHeld array: ", keysHeld)
 		console.log("keysReleased array: ", keysReleased)
 		console.log("Octave:", octave, "Semitone:", semitone)
-
-		const addKeysHeld = useAppStore((state) => state.addKeysHeld)
-		const addKeysReleased = useAppStore((state) => state.addKeysReleased)
-		const removeKeysHeld = useAppStore((state) => state.filterKeysHeld)
-		const clearKeysReleased = useAppStore((state) => state.clearKeysReleased)
 
 		// -- KEYBOARD LOGIC -- //
 		function getNoteFromNumber(number) {
@@ -297,78 +293,75 @@ function Synth() {
 			return notes[(12 + (number % 12)) % 12];
 		}
 
-		// -- TONE SIGNALS -- //
-		function noteAttackSignal(key){
-			console.log("Attack:", key)
-			polySynth.triggerAttack(key, now);
-		}
-		function noteReleaseSignal(key){
-			console.log("Release:", key)
-			polySynth.triggerRelease(key, "+0.1");
-		}
-		function noteAttackReleaseSignal(key){
-			console.log("Attack+Release:", key)
-			polySynth.triggerAttackRelease(key, "16n");
-		}
-
 		useEffect(() => {
-			console.log("keysHeld array: ", keysHeld)
-			console.log("keysReleased array: ", keysReleased)
-
 			console.log("Initializing Keyboard...")
+			// console.log("keysHeld array: ", keysHeld)
+			// console.log("keysReleased array: ", keysReleased)
 
 			let keyboard = document.getElementById("keyboard");
-
-			console.log("SUCCESS!")
+			console.log("KEYBOARD LOADED!")
 
 			keyboard.addEventListener("mouseover", function () {
+				// Focus on keyboard element so it activates physical keyboard input
 				keyboard.cv.focus();
-				console.log("mouse over keyboard!");
+				// console.log("mouse over keyboard!");
 			});
 
 			let heldKeys = []
 			keyboard.addEventListener("change", function (e) {
 				console.log("KEY CHANGE!", e.note)
 				const inputKey = e.note[1]
-				console.log("Input Key: ", inputKey)
 				let keyboardOctave = Math.floor(inputKey / 12);
+				let convertedNote = getNoteFromNumber(inputKey + semitone)
+				let noteAndOctave = convertedNote + (keyboardOctave + octave)
+				console.log("Input Key: ", inputKey)
 				console.log("Keyboard Octave: ", keyboardOctave)
 				console.log("Modifier Octave: ", octave)
-				let convertedNote = getNoteFromNumber(inputKey + semitone)
 				console.log("Converted Note: ", convertedNote)
-				let noteAndOctave = convertedNote + (keyboardOctave + octave)
 
 				if (e.note[0]) {
 					console.log("Held note: ", noteAndOctave)
 					console.log("Modulo test: ", -1 % 12)
 
+					// -- Update State -- //
+					// DEACTIVATED FOR NOW DUE TO BUGS //
 					// addKeysHeld(noteAndOctave)
 
+					// -- Update local array -- //
 					heldKeys.push(noteAndOctave)
+					console.log("heldKeys array: ", heldKeys)
 
+					// -- Direct Tone.js Trigger -- //
 					noteAttackSignal(noteAndOctave)
 					// noteAttackReleaseSignal(noteAndOctave)
 				} else {
 					console.log("Released note: ", noteAndOctave)
 
+					// -- Update State -- //
+					// DEACTIVATED FOR NOW DUE TO BUGS //
 					// addKeysReleased(noteAndOctave)
 					// removeKeysHeld(noteAndOctave)
 
+					// -- Update local array -- //
 					heldKeys = heldKeys.filter((key) => key !== noteAndOctave)
+					console.log("heldKeys array: ", heldKeys)
 
+					// -- Direct Tone.js Trigger -- //
 					noteReleaseSignal([noteAndOctave])
 
 					// Stop all notes if no keys are held (glitch safeguard) //
 					if(heldKeys.length === 0) {
+						console.log("heldKeys array: ", heldKeys)
 						polySynth.releaseAll()
+						clearKeysReleased()
 					}
 					// noteReleaseSignal(keysReleased)
 				}
-				// clearKeysReleased()
 				// console.log("keysHeld array: ", keysHeld)
 				// console.log("keysReleased array: ", keysReleased)
 			});
 		}, [])
+
 
 		return (
 			<div style={{display: 'flex', justifyContent: 'center', margin: '10px'}}>
@@ -394,84 +387,82 @@ function Synth() {
 			<pre>
 				{JSON.stringify(appData, null, 2)}
 			</pre>
+			<h3>Controls Data</h3>
+			<pre>
+				{JSON.stringify(controlsData, null, 2)}
+			</pre>
 			<hr/>
-			{!appData.toneRunning ?
-				<div>
-					<button onClick={startContext}>Start Tone!</button>
-				</div>
-				:
-				<div>
-					<Keyboard/>
-					<h3>Oscillator A</h3>
-					<div style={{display: 'flex'}}>
-						<div style={oscA_dataContainer_style}>
-							<h4>controls</h4>
-							<pre>
-								{JSON.stringify(oscA_state.controls, null, 2)}
-							</pre>
-						</div>
-						<div style={oscA_dataContainer_style}>
-							<h4>oscillator</h4>
-							<pre>
-								{JSON.stringify(oscA_state.settings.oscillator, null, 2)}
-							</pre>
-						</div>
-						<div style={oscA_dataContainer_style}>
-							<h4>envelope</h4>
-							<pre>
-								{JSON.stringify(oscA_state.settings.envelope, null, 2)}
-							</pre>
-						</div>
-						<div style={oscA_dataContainer_style}>
-							<h4>filter</h4>
-							<pre>
-								{JSON.stringify(oscA_state.settings.filter, null, 2)}
-							</pre>
-						</div>
-						<div style={oscA_dataContainer_style}>
-							<h4>filterEnvelope</h4>
-							<pre>
-								{JSON.stringify(oscA_state.settings.filterEnvelope, null, 2)}
-							</pre>
-						</div>
+			<div>
+				<Keyboard/>
+				<h3>Oscillator A</h3>
+				<div style={{display: 'flex'}}>
+					<div style={oscA_dataContainer_style}>
+						<h4>controls</h4>
+						<pre>
+							{JSON.stringify(oscA_state.controls, null, 2)}
+						</pre>
 					</div>
-					{/*<ChangeSynthJSON/>*/}
-					<hr/>
-					<div style={controlContainer}>
-						<OscillatorControls
-							type={"knob"}
-							group={"OSC_A"}
-							control={"octave"}
-							size={100}
-							min={-3}
-							max={3}
-							modifier={3}
-							value={oscA_state.controls.octave}
-							colors={"#FF6188;#2C292D;#D9D9D9"}
-						/>
-						<OscillatorControls
-							type={"knob"}
-							group={"OSC_A"}
-							control={"semitone"}
-							size={100}
-							min={-3}
-							max={3}
-							value={oscA_state.controls.semitone}
-							colors={"#A9DC76;#2C292D;#D9D9D9"}
-						/>
-						<OscillatorControls
-							type={"slider"}
-							group={"OSC_A"}
-							control={"shape"}
-							size={100}
-							min={0}
-							max={4}
-							value={oscA_state.controls.shape}
-							colors={"#78DCE8;#2C292D;#D9D9D9"}
-						/>
+					<div style={oscA_dataContainer_style}>
+						<h4>oscillator</h4>
+						<pre>
+							{JSON.stringify(oscA_state.settings.oscillator, null, 2)}
+						</pre>
+					</div>
+					<div style={oscA_dataContainer_style}>
+						<h4>envelope</h4>
+						<pre>
+							{JSON.stringify(oscA_state.settings.envelope, null, 2)}
+						</pre>
+					</div>
+					<div style={oscA_dataContainer_style}>
+						<h4>filter</h4>
+						<pre>
+							{JSON.stringify(oscA_state.settings.filter, null, 2)}
+						</pre>
+					</div>
+					<div style={oscA_dataContainer_style}>
+						<h4>filterEnvelope</h4>
+						<pre>
+							{JSON.stringify(oscA_state.settings.filterEnvelope, null, 2)}
+						</pre>
 					</div>
 				</div>
-			}
+				{/*<ChangeSynthJSON/>*/}
+				<hr/>
+				<div style={controlContainer}>
+					<OscillatorControls
+						type={"knob"}
+						group={"OSC_A"}
+						control={"octave"}
+						size={100}
+						min={-3}
+						max={3}
+						modifier={3}
+						value={oscA_state.controls.octave}
+						colors={"#FF6188;#2C292D;#D9D9D9"}
+					/>
+					<OscillatorControls
+						type={"knob"}
+						group={"OSC_A"}
+						control={"semitone"}
+						size={100}
+						min={-3}
+						max={3}
+						value={oscA_state.controls.semitone}
+						colors={"#A9DC76;#2C292D;#D9D9D9"}
+					/>
+					<OscillatorControls
+						type={"slider"}
+						group={"OSC_A"}
+						control={"shape"}
+						size={100}
+						min={0}
+						max={4}
+						value={oscA_state.controls.shape}
+						colors={"#78DCE8;#2C292D;#D9D9D9"}
+					/>
+				</div>
+			</div>
 		</div>
 	)
 }

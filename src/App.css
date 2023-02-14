@@ -5,6 +5,13 @@
   /*text-align: center;*/
 }
 
+.clickMe {
+  font-size: 2rem;
+  font-family: 'Inconsolata', monospace;
+  cursor: pointer;
+  user-select: none;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

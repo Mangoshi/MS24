@@ -1,5 +1,10 @@
 {
-  "name": "ms24_test",
+  "name": "ms24",
+  "author": {
+    "name": "Mangoshi",
+    "email": "mangoshimonks@gmail.com",
+    "url": "https://mangoshi.github.io/"
+  },
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +15,6 @@
   },
   "dependencies": {
     "immer": "^9.0.19",
-    "jotai": "^2.0.1",
-    "jotai-devtools": "^0.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tone": "^14.7.77",

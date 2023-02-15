@@ -1,8 +1,25 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=8887179&assignment_repo_type=AssignmentRepo)
-## project_y4 repo
+## N00191671_Y4_FYP: MS24
 
-this is a blank starter repository for the DL836 y4 project.
+Welcome to the MangoSynth24 repository!
 
+This repo contains the source code for my project.
+
+Eventually it will also contain the report, screencast, and development build.
+
+### Technologies
+
+- [x] [React](https://reactjs.org/)
+- [x] [Vite](https://vitejs.dev/)
+- [x] [Zustand](https://github.com/pmndrs/zustand)
+- [x] [Tone.js](https://tonejs.github.io/)
+- [x] [webaudio-controls](https://github.com/g200kg/webaudio-controls)
+
+<hr/>
+
+<details>
+<summary>Project Guidelines</summary>
+
+```
 Please note:
 
 You have to submit your code using Github classroom.
@@ -16,7 +33,6 @@ Please note:
 * If you wish to use larger files that this investigate the large file storage (LFS) option.
 * Include an appropriate .gitignore file for your source code. 
 
-
 ## Source Code
 Upload your source the code for your project to the "Source" folder
 
@@ -25,4 +41,5 @@ Upload your report to the "Docs" folder as a .pdf. You also have to submit this 
 
 ## Screencast
 Create a walkthrough of your project with a voice-over. Upload a .mp4 file to video. 
-
+```
+</details>

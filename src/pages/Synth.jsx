@@ -8,10 +8,39 @@ import {useEffect} from "react";
 // -- JSON -- //
 let controlsData = {
 	keysHeld: [],
-	keysReleased: []
+	keysReleased: [],
+	OSC_A: {
+		octave: 1,
+		semitone: 0,
+		quantize: 0,
+		shape: 0,
+		attack: 1,
+		decay: 500,
+		sustain: 1,
+		release: 1000,
+	},
+	FM: {
+		harmonicity: 1,
+		depth: 0,
+	},
+	OSC_B: {
+		octave: 1,
+		semitone: 7,
+		quantize: 0,
+		shape: 2,
+		attack: 1,
+		decay: 500,
+		sustain: 1,
+		release: 1000,
+	}
 }
 
 let defaultSynthSettings = {
+	SYNTH: {
+		maxPolyphony: 12,
+		glide: 0,
+		volume: 1,
+	},
 	OSC_A: {
 		name: 'OSC A',
 		enabled: 1,
@@ -19,58 +48,101 @@ let defaultSynthSettings = {
 			x: 20,
 			y: 140
 		},
-		controls: {
-			octave: 1,
-			semitone: 0,
-			quantize: 0,
-			shape: 0,
-			attack: 1,
-			decay: 500,
-			sustain: 1,
-			release: 1000,
+		oscillator: {
+			volume: 5,
+			type: "sine",
 		},
-		settings: {
-			oscillator: {
-				volume: -15,
-				type: "sawtooth"
-			},
-			envelope: {
-				attack: 1,
-				decay: 1,
-				sustain: 1,
-				release: 1
-			},
-			filter: {
-				Q: 5,
-				type: "lowpass",
-				rolloff: -12
-			},
-			filterEnvelope: {
-				attack: 0.1,
-				decay: 0.2,
-				sustain: 1,
-				release: 2,
-				baseFrequency: 150
-			},
-			maxPolyphony: 4,
-		}
-	}
+		detune: 0,
+		envelope: {
+			attack: 1,
+			decay: 1,
+			sustain: 1,
+			release: 1
+		},
+	},
+	FM: {
+		harmonicity: 1.2,
+		depth: 1
+	},
+	OSC_B: {
+		name: 'OSC A',
+		enabled: 1,
+		pos: {
+			x: 20,
+			y: 140
+		},
+		oscillator: {
+			volume: 5,
+			type: "sawtooth"
+		},
+		envelope: {
+			attack: 1,
+			decay: 1,
+			sustain: 1,
+			release: 1
+		},
+	},
+	OSC_SUB: {},
+	FILTER: {
+		filter: {
+			Q: 5,
+			type: "lowpass",
+			rolloff: -12
+		},
+		filterEnvelope: {
+			attack: 0.1,
+			decay: 0.2,
+			sustain: 1,
+			release: 2,
+			baseFrequency: 150
+		},
+	},
+	LFO: {},
+	FX: {},
+	MIDI: {}
 }
+
+let partials = new Array(8).fill(0).map(() => Math.random())
 
 // -- Setup & Util -- //
 // const polySynth = new Tone.PolySynth(Tone.MonoSynth).toDestination()
 const autoFilter = new Tone.AutoFilter("8n").toDestination().start();
-const polySynth = new Tone.PolySynth(Tone.MonoSynth, defaultSynthSettings.OSC_A.settings).connect(autoFilter)
+const fmPolySynth = new Tone.PolySynth(Tone.FMSynth, {
+	volume: defaultSynthSettings.SYNTH.volume,
+	oscillator: defaultSynthSettings.OSC_A.oscillator,
+	detune: defaultSynthSettings.OSC_A.detune,
+	envelope: defaultSynthSettings.OSC_A.envelope,
+	modulation: {
+		volume: defaultSynthSettings.OSC_B.oscillator.volume,
+		type: "fm"+defaultSynthSettings.OSC_B.oscillator.type,
+	},
+	modulationEnvelope: defaultSynthSettings.OSC_B.envelope,
+	harmonicity: defaultSynthSettings.FM.harmonicity,
+	modulationIndex: defaultSynthSettings.FM.depth,
+	portamento: defaultSynthSettings.SYNTH.glide,
+}).connect(autoFilter)
+// Chain connections
+// fmPolySynth.chain(autoFilter, Tone.Destination)
+// Chain connections (in parallel)
+// fmPolySynth.fan(autoFilter, Tone.Destination)
 const now = Tone.now()
 // console.log(Tone.context.state)
+console.log(fmPolySynth)
+fmPolySynth.debug = true
 
 // --- zSTATE --- //
 const useControlsStore = create((set) => ({
 	control: controlsData,
-	setControlsData: (targetControl, payload) =>
+	setControlsData: (targetGroup, target, payload) =>
 		set(
 			produce((draft) => {
-				draft.control[targetControl] = payload
+				draft.control[targetGroup][target] = payload
+			})
+		),
+	setOscillatorData: (targetGroup, payload) =>
+		set(
+			produce((draft) => {
+				draft.control[targetGroup].oscillator = payload
 			})
 		),
 	addKeysHeld: (payload) =>
@@ -105,22 +177,10 @@ const useControlsStore = create((set) => ({
 }))
 const useSynthStore = create((set) => ({
 	synth: defaultSynthSettings,
-	setSynthControls: (targetGroup, targetSubgroup, targetControl, payload) =>
+	setSynthSettings: (targetGroup, target, payload) =>
 		set(
 			produce((draft) => {
-				draft.synth[targetGroup][targetSubgroup][targetControl] = payload
-			})
-		),
-	setSynthSettings: (targetGroup, targetSubgroup, payload) =>
-		set(
-			produce((draft) => {
-				draft.synth[targetGroup].settings[targetSubgroup] = payload
-			})
-		),
-	setOscillatorSettings: (targetGroup, targetControl, payload) =>
-		set(
-			produce((draft) => {
-				draft.synth[targetGroup].settings.oscillator[targetControl] = payload
+				draft.synth[targetGroup][target] = payload
 			})
 		),
 }))
@@ -138,7 +198,7 @@ const controlGroup = {
 	alignItems: 'center',
 	paddingRight: '10px'
 }
-const oscA_dataContainer_style = {
+const oscillatorDataContainer = {
 	backgroundColor: 'black',
 	paddingLeft: '10px',
 	paddingRight: '10px',
@@ -148,17 +208,27 @@ const oscA_dataContainer_style = {
 
 
 function Synth({appData}) {
-	// --- zSTATE --- //
-	// -- Getters -- //
-	// let appData = useAppStore((state) => state.app)
-	let synthData = useSynthStore((state) => state.synth)
-	let controlsData = useControlsStore((state) => state.control)
-	// -- Setters -- //
-	// const setAppData = useAppStore((state) => state.setAppData)
-	const updateSynthControls = useSynthStore((state) => state.setSynthControls)
-	const updateSynthSettings = useSynthStore((state) => state.setSynthSettings)
+	// -- State Getters -- //
+	let synthState = useSynthStore((state) => state.synth)
+	let controlsState = useControlsStore((state) => state.control)
+	// -- State Setters -- //
+	const updateSynthState = useSynthStore((state) => state.setSynthSettings)
+	const updateControlsState = useControlsStore((state) => state.setControlsData)
+	const updateOscillatorState = useControlsStore((state) => state.setOscillatorData)
 
-	const OscillatorControls = ({type, group, control, size, min, max, value, modifier, colors}) => {
+	const OscillatorControls = (
+		{
+			type,
+			group,
+			control,
+			size,
+			min,
+			max,
+			step,
+			value,
+			modifier,
+			colors,
+		}) => {
 		// console.log("OscillatorControls:", group, control, size, min, max, value, colors)
 
 		let controlElement;
@@ -175,38 +245,80 @@ function Synth({appData}) {
 			controlElement.addEventListener('change', function (e) {
 				console.log("ID:", e.target.id, "Val:", e.target.value);
 				if(control === "shape") {
-					dynamicGroup = {[group]: {"settings": {"oscillator": {[control]: value}}}}
-					dynamicGroupValue = dynamicGroup[group].settings.oscillator[control]
+					dynamicGroup = {[group]: {"oscillator": {[control]: value}}}
+					dynamicGroupValue = dynamicGroup[group].oscillator[control]
 					console.log("Dynamic Group:", `${group}-${control}`, dynamicGroup)
 					console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
 
 					const newControlsLookup = {
-						0: {type: "sine", volume: -12},
-						1: {type: "square", volume: -12},
-						2: {type: "triangle", volume: -12},
-						3: {type: "sawtooth", volume: -12}
+						0: {type: "sine", volume: 5},
+						1: {type: "triangle", volume: 5},
+						2: {type: "sawtooth", volume: 5},
+						3: {type: "square", volume: 5}
 					};
 
 					const newControls = newControlsLookup[e.target.value] || newControlsLookup[0];
-					console.log("Updating Synth Settings:", group, "settings", newControls)
-					updateSynthControls(group, "controls", control, e.target.value)
-					updateSynthSettings(group, "oscillator", newControls)
-					polySynth.set({
-						oscillator: {
-							volume: newControls.volume,
-							type: newControls.type
-						}
+					console.log("Updating Synth Settings:", group, newControls)
+					updateControlsState(group, control, e.target.value)
+					updateSynthState(group, "oscillator", newControls)
+					if(group === "OSC_A"){
+						console.log("Updating OSC_A")
+						fmPolySynth.set({
+							oscillator: {
+								type: newControls.type,
+								volume: newControls.volume
+							}
+						})
+					} else if (group === "OSC_B"){
+						console.log("Updating OSC_B")
+						fmPolySynth.set({
+							modulation: {
+								type: newControls.type,
+								modulationType: newControls.type,
+								volume: newControls.volume
+							}
+						})
+					}
+				} else if (control === "harmonicity" || control === "depth") {
+					dynamicGroup = {[group] : {[control]: value}}
+					dynamicGroupValue = dynamicGroup[group][control]
+					console.log("Dynamic Group:", `${group}-${control}`, dynamicGroup)
+					console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
+
+					let controlTarget = control
+
+					if(control==="depth") {
+						controlTarget = "modulationIndex"
+					}
+
+					console.log("Updating Synth Controls:", group, control, controlTarget, e.target.value)
+					updateControlsState(group, control, e.target.value)
+
+					fmPolySynth.set({
+						[controlTarget]: e.target.value
 					})
-				} else {
+				}
+				else {
 					dynamicGroup = {[group] : {"controls": {[control]: value}}}
 					dynamicGroupValue = dynamicGroup[group].controls[control]
 					console.log("Dynamic Group:", `${group}-${control}`, dynamicGroup)
 					console.log("Dynamic Group Value:", `${group}-${control}`, dynamicGroupValue)
 
+					// if(group === "OSC_A" && control==="octave") {
+					// 	fmPolySynth.set({
+					// 		frequency: 1 * e.target.value
+					// 	})
+					// } else if (group === "OSC_B" && control==="octave") {
+					// 	fmPolySynth.set({
+					// 		harmonicity: 1 * e.target.value
+					// 	})
+					// }
+
 					controlOutput = e.target.value + modifier;
 					console.log("Updating Synth Controls:", group, "controls", control, e.target.value)
-					updateSynthControls(group, "controls", control, e.target.value)
+					updateControlsState(group, control, e.target.value)
 				}
+				console.log("get:",fmPolySynth.get())
 			})
 		}, [])
 
@@ -215,6 +327,7 @@ function Synth({appData}) {
 				{
 					type === "knob" &&
 					<div style={controlGroup}>
+						<div>{control}</div>
 						<webaudio-knob
 							id={id}
 							diameter={size}
@@ -222,6 +335,7 @@ function Synth({appData}) {
 							max={max}
 							value={value}
 							colors={colors}
+							step={step}
 						></webaudio-knob>
 						<webaudio-param
 							link={id}
@@ -231,6 +345,7 @@ function Synth({appData}) {
 				} {
 				type === "slider" &&
 				<div style={controlGroup}>
+					<div>{control}</div>
 					<webaudio-slider
 						id={id}
 						width={30}
@@ -255,27 +370,25 @@ function Synth({appData}) {
 
 	// --- KEYBOARD & NOTE LOGIC --- //
 
-	const oscA_state = useSynthStore((state) => state.synth.OSC_A)
-
 	// -- TONE SIGNALS -- //
 	function noteAttackSignal(key){
 		console.log("Attack:", key)
-		polySynth.triggerAttack(key, now);
+		fmPolySynth.triggerAttack(key, now);
 	}
 	function noteReleaseSignal(key){
 		console.log("Release:", key)
-		polySynth.triggerRelease(key, "+0.1");
+		fmPolySynth.triggerRelease(key, "+0.1");
 	}
 	function noteAttackReleaseSignal(key){
 		console.log("Attack+Release:", key)
-		polySynth.triggerAttackRelease(key, "16n");
+		fmPolySynth.triggerAttackRelease(key, "16n");
 	}
 
 	const Keyboard = () => {
 		let keysHeld = useControlsStore((state) => state.control.keysHeld)
 		let keysReleased = useControlsStore((state) => state.control.keysReleased)
-		let octave = useSynthStore((state) => state.synth.OSC_A.controls.octave)
-		let semitone = useSynthStore((state) => state.synth.OSC_A.controls.semitone)
+		let octave = useControlsStore((state) => state.control.OSC_A.octave)
+		let semitone = useControlsStore((state) => state.control.OSC_A.semitone)
 
 		const addKeysHeld = useControlsStore((state) => state.addKeysHeld)
 		const addKeysReleased = useControlsStore((state) => state.addKeysReleased)
@@ -347,13 +460,13 @@ function Synth({appData}) {
 					console.log("heldKeys array: ", heldKeys)
 
 					// -- Direct Tone.js Trigger -- //
-					noteReleaseSignal([noteAndOctave])
+					noteReleaseSignal(noteAndOctave)
 
 					// Stop all notes if no keys are held (glitch safeguard) //
 					if(heldKeys.length === 0) {
 						console.log("heldKeys array: ", heldKeys)
-						polySynth.releaseAll()
-						clearKeysReleased()
+						fmPolySynth.releaseAll()
+						// clearKeysReleased()
 					}
 					// noteReleaseSignal(keysReleased)
 				}
@@ -370,98 +483,184 @@ function Synth({appData}) {
 		)
 	}
 
-	function setOscillatorTest () {
-		console.log("Setting oscillator test...")
-		let newSettings = {
-			volume: 0,
-			type: "sine",
-		}
-		updateSynthSettings("OSC_A", "oscillator", newSettings);
-	}
+	// function setOscillatorTest () {
+	// 	console.log("Setting oscillator test...")
+	// 	let newSettings = {
+	// 		volume: 0,
+	// 		type: "sine",
+	// 	}
+	// 	updateSynthStore("OSC_A", "oscillator", newSettings);
+	// }
 
 	// --- JSX --- //
 	return (
 		<div>
-			<button onClick={setOscillatorTest}>Set Oscillator Test</button>
+			{/*<button onClick={setOscillatorTest}>Set Oscillator Test</button>*/}
 			<h3>App Data</h3>
 			<pre>
 				{JSON.stringify(appData, null, 2)}
 			</pre>
-			<h3>Controls Data</h3>
-			<pre>
-				{JSON.stringify(controlsData, null, 2)}
-			</pre>
 			<hr/>
 			<div>
+				<div style={{display: 'flex', flexDirection: 'row'}}>
+					<div style={{display: 'flex', flexDirection: 'column'}}>
+						<h3 style={{alignSelf: 'center'}}>Oscillator A</h3>
+						<div style={{display: 'flex'}}>
+							<div style={oscillatorDataContainer}>
+								<h4>controls</h4>
+								<pre>
+									{JSON.stringify(controlsState.OSC_A, null, 2)}
+								</pre>
+							</div>
+							<div style={oscillatorDataContainer}>
+								<h4>oscillator</h4>
+								<pre>
+									{JSON.stringify(synthState.OSC_A.oscillator, null, 2)}
+								</pre>
+								<h4>envelope</h4>
+								<pre>
+									{JSON.stringify(synthState.OSC_A.envelope, null, 2)}
+								</pre>
+							</div>
+						</div>
+						<div style={{display: 'flex', justifyContent: 'center'}}>
+							<OscillatorControls
+								type={"knob"}
+								group={"OSC_A"}
+								control={"octave"}
+								size={50}
+								min={-3}
+								max={3}
+								step={1}
+								modifier={3}
+								value={controlsState.OSC_A.octave}
+								colors={"#FF6188;#2C292D;#D9D9D9"}
+							/>
+							<OscillatorControls
+								type={"knob"}
+								group={"OSC_A"}
+								control={"semitone"}
+								size={50}
+								min={-12}
+								max={12}
+								step={1}
+								value={controlsState.OSC_A.semitone}
+								colors={"#A9DC76;#2C292D;#D9D9D9"}
+							/>
+							<OscillatorControls
+								type={"slider"}
+								group={"OSC_A"}
+								control={"shape"}
+								size={50}
+								min={0}
+								max={4}
+								value={controlsState.OSC_A.shape}
+								colors={"#78DCE8;#2C292D;#D9D9D9"}
+							/>
+						</div>
+					</div>
+					<div style={{display: 'flex', flexDirection: 'column'}}>
+						<h3 style={{alignSelf: 'center'}}>Oscillator B</h3>
+						<div style={{display: 'flex'}}>
+							<div style={oscillatorDataContainer}>
+								<h4>controls</h4>
+								<pre>
+									{JSON.stringify(controlsState.OSC_B, null, 2)}
+								</pre>
+							</div>
+							<div style={oscillatorDataContainer}>
+								<h4>oscillator</h4>
+								<pre>
+									{JSON.stringify(synthState.OSC_B.oscillator, null, 2)}
+								</pre>
+								<h4>envelope</h4>
+								<pre>
+									{JSON.stringify(synthState.OSC_B.envelope, null, 2)}
+								</pre>
+							</div>
+						</div>
+						<div style={{display: 'flex', justifyContent: 'center'}}>
+							<OscillatorControls
+								type={"knob"}
+								group={"OSC_B"}
+								control={"octave"}
+								size={50}
+								min={-3}
+								max={3}
+								step={1}
+								modifier={3}
+								value={controlsState.OSC_B.octave}
+								colors={"#FF6188;#2C292D;#D9D9D9"}
+							/>
+							<OscillatorControls
+								type={"knob"}
+								group={"OSC_B"}
+								control={"semitone"}
+								size={50}
+								min={-12}
+								max={12}
+								step={1}
+								value={controlsState.OSC_B.semitone}
+								colors={"#A9DC76;#2C292D;#D9D9D9"}
+							/>
+							<OscillatorControls
+								type={"slider"}
+								group={"OSC_B"}
+								control={"shape"}
+								size={50}
+								min={0}
+								max={4}
+								value={controlsState.OSC_B.shape}
+								colors={"#78DCE8;#2C292D;#D9D9D9"}
+							/>
+						</div>
+					</div>
+				</div>
+				<div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+					<div style={{display: 'flex', flexDirection: 'column'}}>
+						<h3 style={{alignSelf: 'center'}}>A/B Frequency Modulation</h3>
+						<div style={{display: 'flex', alignSelf: 'center'}}>
+							<div style={oscillatorDataContainer}>
+								<h4>controls</h4>
+								<pre>
+									{JSON.stringify(controlsState.FM, null, 2)}
+								</pre>
+							</div>
+							<div style={oscillatorDataContainer}>
+								<h4>settings</h4>
+								<pre>
+									{JSON.stringify(synthState.FM, null, 2)}
+								</pre>
+							</div>
+						</div>
+						<div style={{display: 'flex', justifyContent: 'center'}}>
+							<OscillatorControls
+								type={"knob"}
+								group={"FM"}
+								control={"harmonicity"}
+								size={50}
+								min={0}
+								max={5}
+								step={.01}
+								modifier={3}
+								value={controlsState.FM.harmonicity}
+								colors={"#FF6188;#2C292D;#D9D9D9"}
+							/>
+							<OscillatorControls
+								type={"knob"}
+								group={"FM"}
+								control={"depth"}
+								size={50}
+								min={1}
+								max={100}
+								step={.1}
+								value={controlsState.FM.depth}
+								colors={"#A9DC76;#2C292D;#D9D9D9"}
+							/>
+						</div>
+					</div>
+				</div>
 				<Keyboard/>
-				<h3>Oscillator A</h3>
-				<div style={{display: 'flex'}}>
-					<div style={oscA_dataContainer_style}>
-						<h4>controls</h4>
-						<pre>
-							{JSON.stringify(oscA_state.controls, null, 2)}
-						</pre>
-					</div>
-					<div style={oscA_dataContainer_style}>
-						<h4>oscillator</h4>
-						<pre>
-							{JSON.stringify(oscA_state.settings.oscillator, null, 2)}
-						</pre>
-					</div>
-					<div style={oscA_dataContainer_style}>
-						<h4>envelope</h4>
-						<pre>
-							{JSON.stringify(oscA_state.settings.envelope, null, 2)}
-						</pre>
-					</div>
-					<div style={oscA_dataContainer_style}>
-						<h4>filter</h4>
-						<pre>
-							{JSON.stringify(oscA_state.settings.filter, null, 2)}
-						</pre>
-					</div>
-					<div style={oscA_dataContainer_style}>
-						<h4>filterEnvelope</h4>
-						<pre>
-							{JSON.stringify(oscA_state.settings.filterEnvelope, null, 2)}
-						</pre>
-					</div>
-				</div>
-				{/*<ChangeSynthJSON/>*/}
-				<hr/>
-				<div style={controlContainer}>
-					<OscillatorControls
-						type={"knob"}
-						group={"OSC_A"}
-						control={"octave"}
-						size={100}
-						min={-3}
-						max={3}
-						modifier={3}
-						value={oscA_state.controls.octave}
-						colors={"#FF6188;#2C292D;#D9D9D9"}
-					/>
-					<OscillatorControls
-						type={"knob"}
-						group={"OSC_A"}
-						control={"semitone"}
-						size={100}
-						min={-3}
-						max={3}
-						value={oscA_state.controls.semitone}
-						colors={"#A9DC76;#2C292D;#D9D9D9"}
-					/>
-					<OscillatorControls
-						type={"slider"}
-						group={"OSC_A"}
-						control={"shape"}
-						size={100}
-						min={0}
-						max={4}
-						value={oscA_state.controls.shape}
-						colors={"#78DCE8;#2C292D;#D9D9D9"}
-					/>
-				</div>
 			</div>
 		</div>
 	)

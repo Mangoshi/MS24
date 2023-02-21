@@ -1,101 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="shortcut icon"
-      href="/images/logo-with-shadow.png"
-      type="image/x-icon"
-    />
-    <link rel="stylesheet" href="/src/style.css" />
-    <title>Vite & Tailwind</title>
-  </head>
-  <body class="min-h-screen antialiased bg-custom-black">
-    <div class="container pt-16 pb-10 sm:pt-20">
-      <div class="flex flex-row items-center justify-center space-x-8">
-        <a href="https://vitejs.dev/" target="_blank">
-          <img
-            src="/images/logo-with-shadow.png"
-            class="w-44 sm:w-56"
-            alt="vitejs image"
-          />
-        </a>
-        <span class="text-5xl text-custom-white">+</span>
-        <a href="https://tailwindcss.com/" target="_blank">
-          <img
-            src="/images/Tailwind_CSS_Logo.png"
-            class="w-44 sm:w-56"
-            alt="tailwindcss"
-          />
-        </a>
-      </div>
-
-      <h1
-        class="text-custom-white text-xl text-center mt-10 font-semibold sm:text-3xl"
-      >
-        Vite JS &amp; Tailwind CSS Boilerplate
-      </h1>
-      <p class="text-center text-custom-gray mt-6">
-        Vite Next Generation Frontend Tooling
-      </p>
-      <div class="mt-6 flex justify-center items-center gap-x-6">
-        <button
-          id="count"
-          href="https://github.com/sadman-shami/vite-tailwind-boilerplate"
-          class="text-custom-white bg-custom-purple rounded-full border border-custom-black-2 px-6 py-3"
-        >
-          Count: <span id="count-number">0</span>
-        </button>
-        <a
-          href="https://github.com/sadman-shami/vite-tailwind-boilerplate"
-          target="_blank"
-          class="text-custom-white rounded-full border border-custom-black-2 px-6 py-3 transition-all hover:bg-custom-black-2"
-          >View On Github</a
-        >
-      </div>
-
-      <div class="flex gap-8 flex-wrap mt-10 justify-center items-center">
-        <div
-          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
-        >
-          <h2 class="text-xl font-semibold">Optimized Build 📦</h2>
-          <p class="text-custom-gray text-sm">
-            Pre-configured Rollup build with multi-page and library mode
-            support.
-          </p>
-        </div>
-
-        <div
-          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
-        >
-          <h2 class="text-xl font-semibold">Lightning Fast HMR ⚡️</h2>
-          <p class="text-custom-gray text-sm">
-            Hot Module Replacement (HMR) that stays fast regardless of app size.
-          </p>
-        </div>
-
-        <div
-          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
-        >
-          <h2 class="text-xl font-semibold">Rich Features 🛠️</h2>
-          <p class="text-custom-gray text-sm">
-            Out-of-the-box support for TypeScript, JSX, CSS and more.
-          </p>
-        </div>
-
-        <div
-          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
-        >
-          <h2 class="text-xl font-semibold">Instant Server Start 💡</h2>
-          <p class="text-custom-gray text-sm">
-            Pre-configured Rollup build with multi-page and library mode
-            support.
-          </p>
-        </div>
-      </div>
-    </div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<head>
+	<meta charset="UTF-8"/>
+	<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+	<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+	<!--Styles-->
+	<link href="/src/style.css" rel="stylesheet"/>
+	<!--Scripts-->
+	<script src="/src/main.js" type="module" defer></script>
+	<script>
+		WebAudioControlsOptions={
+			useMidi:1,
+			midilearn:1,
+			preserveMidiLearn:1,
+			knobDiameter:70,
+			sliderHeight:70,
+		};
+	</script>
+	<script src="https://g200kg.github.io/webaudio-controls/webaudio-controls.js"></script>
+	<title>MS24</title>
+</head>
+<body class="min-h-screen antialiased bg-gray-400 font-inconsolata font-light">
+<div class="container pt-16 pb-10 sm:pt-20">
+	<main>
+		<div id="consentContainer">
+			<div class="flex flex-col justify-center items-center">
+				<p class="text-2xl font-bold mb-2">MangoSynth24</p>
+				<p class="text-lg text-center">This site uses the Web Audio API to generate sounds. <br> To use this site, you must allow the browser to use the Web Audio API.</p>
+				<button class="bg-gray-700 text-white rounded-lg px-4 py-2 mt-4" id="contextConsentButton">Allow</button>
+			</div>
+		</div>
+		<div class="flex flex-col hidden" id="synthContainer">
+			<!--
+			<div class="mb-3">
+				<h1 class="text-3xl font-bold mb-1">Synth Data</h1>
+				<p id="dataText">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad adipisci aliquam atque, aut autem beatae culpa cupiditate debitis distinctio dolore doloribus esse eveniet hic incidunt, ipsum iusto maiores molestiae molestias nam natus necessitatibus neque nobis odio placeat possimus praesentium quam quasi quod rerum tenetur ullam velit vitae voluptatem. Aliquam, eos!</p>
+			</div>
+			-->
+<!--			<h1 class="text-3xl font-bold mb-1">Synth Controls</h1>-->
+			<div class="flex flex-row justify-center">
+				<div>
+					<p class="font-inika font-bold">OSC A</p>
+					<div class="flex flex-row">
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Octave</p>
+							<webaudio-knob
+								id="osc_a_octave"
+								class="self-center"
+								colors="#FF6188;#2C292D;#D9D9D9"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_a_octave"
+								fontSize="14"
+								class="self-center"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Detune</p>
+							<webaudio-knob
+								id="osc_a_semi"
+								class="self-center"
+								colors="#A9DC76;#2C292D;#D9D9D9"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_a_semi"
+								fontSize="14"
+								class="self-center"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Quantize</p>
+							<webaudio-knob
+								id="osc_a_quantize"
+								class="self-center"
+								colors="#FFD866;#2C292D;#D9D9D9"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_a_quantize"
+								class="self-center"
+								fontSize="14"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Shape</p>
+							<webaudio-slider
+								id="osc_a_shape"
+								class="self-center"
+								colors="#78DCE8;#2C292D;#D9D9D9"
+								min="0"
+								max="4"
+								direction="vert"
+								conv="['sine','tri','saw','square','noise'][x]"
+							></webaudio-slider>
+							<webaudio-param
+								link="osc_a_shape"
+								class="self-center"
+								fontSize="14"
+								width="70"
+							></webaudio-param>
+						</div>
+					</div>
+				</div>
+				<div class="mr-2">
+					<div class="flex flex-row justify-center">
+						<p class="font-inika font-bold">FM</p>
+					</div>
+					<div class="flex flex-col">
+						<div class="border border-gray-700 rounded-xl p-1 mb-1 w-min flex flex-col self-center justify-center">
+							<p class="font-bold self-center text-sm">Depth</p>
+							<webaudio-knob
+								id="osc_ab_fm_depth"
+								class="self-center"
+								colors="#FF6188;#2C292D;#D9D9D9"
+								diameter="40"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_ab_fm_depth"
+								fontSize="10"
+								height="11"
+								width="14"
+								class="self-center"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col self-center">
+							<p class="font-bold self-center text-sm">Rate</p>
+							<webaudio-knob
+								id="osc_ab_fm_rate"
+								class="self-center"
+								colors="#A9DC76;#2C292D;#D9D9D9"
+								diameter="40"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_ab_fm_rate"
+								fontSize="10"
+								height="11"
+								width="14"
+								class="self-center"
+							></webaudio-param>
+						</div>
+					</div>
+				</div>
+				<div>
+					<p class="font-inika font-bold">OSC B</p>
+					<div class="flex flex-row">
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Octave</p>
+							<webaudio-knob
+								id="osc_b_octave"
+								class="self-center"
+								colors="#FF6188;#2C292D;#D9D9D9"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_b_octave"
+								fontSize="14"
+								class="self-center"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Detune</p>
+							<webaudio-knob
+								id="osc_b_semi"
+								class="self-center"
+								colors="#A9DC76;#2C292D;#D9D9D9"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_b_semi"
+								fontSize="14"
+								class="self-center"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Quantize</p>
+							<webaudio-knob
+								id="osc_b_quantize"
+								class="self-center"
+								colors="#FFD866;#2C292D;#D9D9D9"
+								min="0"
+								max="10"
+								step="1"
+							></webaudio-knob>
+							<webaudio-param
+								link="osc_b_quantize"
+								class="self-center"
+								fontSize="14"
+							></webaudio-param>
+						</div>
+						<div class="border border-gray-700 rounded-xl p-1 w-min flex flex-col mr-2">
+							<p class="font-bold self-center">Shape</p>
+							<webaudio-slider
+								id="osc_b_shape"
+								class="self-center"
+								colors="#78DCE8;#2C292D;#D9D9D9"
+								min="0"
+								max="4"
+								step="1"
+								direction="vert"
+								conv="['sine','tri','saw','square','noise'][x]"
+							></webaudio-slider>
+							<webaudio-param
+								link="osc_b_shape"
+								class="self-center"
+								fontSize="14"
+								width="70"
+							></webaudio-param>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="flex flex-row justify-center mt-2">
+				<div class="border border-gray-700 rounded-xl p-2">
+					<webaudio-keyboard
+						id="keyboard"
+						keys="49"
+						class="self-center"
+					></webaudio-keyboard>
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
+</body>
 </html>

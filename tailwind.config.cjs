@@ -4,8 +4,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        // add more fonts ...name: [...source-of-font]
+        'inconsolata': ["Inconsolata", "monospace"],
+        'inika': ["Inika", "serif"],
       },
       container: {
         center: true,
@@ -27,6 +27,6 @@ module.exports = {
     },
   },
   plugins: [
-    // add your tailwind plugins
+    'preflight'
   ],
 };

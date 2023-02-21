@@ -1,0 +1,10 @@
+{
+	"name": "ms24_vanilla",
+	"version": "0.0.1",
+	"description": "MangoSynth24",
+	"license": "",
+	"author": "Seán Óg Durack Monks",
+	"dependencies": {
+		"tone": "^14.7.77"
+	}
+}

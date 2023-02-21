@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="/images/logo-with-shadow.png"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <title>Vite & Tailwind</title>
+  </head>
+  <body class="min-h-screen antialiased bg-custom-black">
+    <div class="container pt-16 pb-10 sm:pt-20">
+      <div class="flex flex-row items-center justify-center space-x-8">
+        <a href="https://vitejs.dev/" target="_blank">
+          <img
+            src="/images/logo-with-shadow.png"
+            class="w-44 sm:w-56"
+            alt="vitejs image"
+          />
+        </a>
+        <span class="text-5xl text-custom-white">+</span>
+        <a href="https://tailwindcss.com/" target="_blank">
+          <img
+            src="/images/Tailwind_CSS_Logo.png"
+            class="w-44 sm:w-56"
+            alt="tailwindcss"
+          />
+        </a>
+      </div>
+
+      <h1
+        class="text-custom-white text-xl text-center mt-10 font-semibold sm:text-3xl"
+      >
+        Vite JS &amp; Tailwind CSS Boilerplate
+      </h1>
+      <p class="text-center text-custom-gray mt-6">
+        Vite Next Generation Frontend Tooling
+      </p>
+      <div class="mt-6 flex justify-center items-center gap-x-6">
+        <button
+          id="count"
+          href="https://github.com/sadman-shami/vite-tailwind-boilerplate"
+          class="text-custom-white bg-custom-purple rounded-full border border-custom-black-2 px-6 py-3"
+        >
+          Count: <span id="count-number">0</span>
+        </button>
+        <a
+          href="https://github.com/sadman-shami/vite-tailwind-boilerplate"
+          target="_blank"
+          class="text-custom-white rounded-full border border-custom-black-2 px-6 py-3 transition-all hover:bg-custom-black-2"
+          >View On Github</a
+        >
+      </div>
+
+      <div class="flex gap-8 flex-wrap mt-10 justify-center items-center">
+        <div
+          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
+        >
+          <h2 class="text-xl font-semibold">Optimized Build 📦</h2>
+          <p class="text-custom-gray text-sm">
+            Pre-configured Rollup build with multi-page and library mode
+            support.
+          </p>
+        </div>
+
+        <div
+          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
+        >
+          <h2 class="text-xl font-semibold">Lightning Fast HMR ⚡️</h2>
+          <p class="text-custom-gray text-sm">
+            Hot Module Replacement (HMR) that stays fast regardless of app size.
+          </p>
+        </div>
+
+        <div
+          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
+        >
+          <h2 class="text-xl font-semibold">Rich Features 🛠️</h2>
+          <p class="text-custom-gray text-sm">
+            Out-of-the-box support for TypeScript, JSX, CSS and more.
+          </p>
+        </div>
+
+        <div
+          class="bg-custom-black-2 text-custom-white rounded-md max-w-sm py-8 px-6 space-y-4"
+        >
+          <h2 class="text-xl font-semibold">Instant Server Start 💡</h2>
+          <p class="text-custom-gray text-sm">
+            Pre-configured Rollup build with multi-page and library mode
+            support.
+          </p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

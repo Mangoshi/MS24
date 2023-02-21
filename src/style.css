@@ -1,0 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@layer base {
+  ::-webkit-scrollbar {
+    @apply w-2 rounded-3xl bg-custom-black-2;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-3xl bg-custom-gray;
+  }
+}
+@tailwind components;
+@tailwind utilities;

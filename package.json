@@ -1,0 +1,19 @@
+{
+  "name": "ms24_vanilla_vite",
+  "version": "0.0.1",
+  "description": "MangoSynth24 (Vanilla JS + Vite Version)",
+  "main": "main.js",
+  "author": "mangoshi",
+  "scripts": {
+    "dev": "vite --port 3000 --host",
+    "build": "vite build",
+    "preview": "vite preview --port 3000 --host"
+  },
+  "private": true,
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.19",
+    "tailwindcss": "^3.2.4",
+    "vite": "^3.2.4"
+  }
+}

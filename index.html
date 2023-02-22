@@ -20,7 +20,7 @@
 	<script src="https://g200kg.github.io/webaudio-controls/webaudio-controls.js"></script>
 	<title>MS24</title>
 </head>
-<body class="min-h-screen antialiased bg-gray-400 font-inconsolata font-light">
+<body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light">
 <div class="container pt-16 pb-10 sm:pt-20">
 	<main>
 		<div id="consentContainer">
@@ -49,10 +49,11 @@
 							<p class="font-bold self-center">Octave</p>
 							<webaudio-knob
 								id="osc_a_octave"
-								class="self-center"
+								class="control self-center"
 								colors="#FF6188;#2C292D;#D9D9D9"
-								min="0"
-								max="10"
+								min="-3"
+								max="3"
+								value="0"
 								step="1"
 							></webaudio-knob>
 							<webaudio-param
@@ -65,10 +66,11 @@
 							<p class="font-bold self-center">Detune</p>
 							<webaudio-knob
 								id="osc_a_semi"
-								class="self-center"
+								class="control self-center"
 								colors="#A9DC76;#2C292D;#D9D9D9"
-								min="0"
-								max="10"
+								min="-12"
+								max="12"
+								value="0"
 								step="1"
 							></webaudio-knob>
 							<webaudio-param
@@ -81,7 +83,7 @@
 							<p class="font-bold self-center">Quantize</p>
 							<webaudio-knob
 								id="osc_a_quantize"
-								class="self-center"
+								class="control self-center"
 								colors="#FFD866;#2C292D;#D9D9D9"
 								min="0"
 								max="10"
@@ -97,7 +99,7 @@
 							<p class="font-bold self-center">Shape</p>
 							<webaudio-slider
 								id="osc_a_shape"
-								class="self-center"
+								class="control self-center"
 								colors="#78DCE8;#2C292D;#D9D9D9"
 								min="0"
 								max="4"
@@ -125,7 +127,7 @@
 							<p class="font-bold self-center text-sm">Depth</p>
 							<webaudio-knob
 								id="osc_ab_fm_depth"
-								class="self-center"
+								class="control self-center"
 								colors="#FF6188;#2C292D;#D9D9D9"
 								diameter="40"
 								min="0"
@@ -144,7 +146,7 @@
 							<p class="font-bold self-center text-sm">Rate</p>
 							<webaudio-knob
 								id="osc_ab_fm_rate"
-								class="self-center"
+								class="control self-center"
 								colors="#A9DC76;#2C292D;#D9D9D9"
 								diameter="40"
 								min="0"
@@ -171,7 +173,7 @@
 							<p class="font-bold self-center">Octave</p>
 							<webaudio-knob
 								id="osc_b_octave"
-								class="self-center"
+								class="control self-center"
 								colors="#FF6188;#2C292D;#D9D9D9"
 								min="0"
 								max="10"
@@ -187,7 +189,7 @@
 							<p class="font-bold self-center">Detune</p>
 							<webaudio-knob
 								id="osc_b_semi"
-								class="self-center"
+								class="control self-center"
 								colors="#A9DC76;#2C292D;#D9D9D9"
 								min="0"
 								max="10"
@@ -203,7 +205,7 @@
 							<p class="font-bold self-center">Quantize</p>
 							<webaudio-knob
 								id="osc_b_quantize"
-								class="self-center"
+								class="control self-center"
 								colors="#FFD866;#2C292D;#D9D9D9"
 								min="0"
 								max="10"
@@ -219,11 +221,12 @@
 							<p class="font-bold self-center">Shape</p>
 							<webaudio-slider
 								id="osc_b_shape"
-								class="self-center"
+								class="control self-center"
 								colors="#78DCE8;#2C292D;#D9D9D9"
 								min="0"
 								max="4"
 								step="1"
+								value="3"
 								direction="vert"
 								conv="['sine','tri','saw','square','noise'][x]"
 							></webaudio-slider>

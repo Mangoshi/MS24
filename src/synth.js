@@ -179,6 +179,12 @@ function triggerToneRelease(target, note, time) {
 let controls = document.getElementsByClassName("control");
 // console.log(controls);
 
+let synthOctaves = {
+	"osc_a_octave": 3,
+	"osc_b_octave": 4,
+	"osc_c_octave": 0,
+}
+
 let octaveValues = {
 	"-3": 0,
 	"-2": 1,
@@ -189,16 +195,24 @@ let octaveValues = {
 	"3": 6,
 }
 
-let synthOctaves = {
-	"osc_a_octave": 3,
-	"osc_b_octave": 4,
-	"osc_c_octave": 0,
-}
-
 let synthSemitones = {
 	"osc_a_semi": 0,
 	"osc_b_semi": 7,
 	"osc_c_semi": 0,
+}
+
+let synthShapes = {
+	"osc_a_shape": "sine",
+	"osc_b_shape": "sine",
+	"osc_c_shape": "sine",
+}
+
+let shapeValues = {
+	"0": "sine",
+	"1": "triangle",
+	"2": "sawtooth",
+	"3": "square",
+	"4": "sine",
 }
 
 for (let i = 0; i < controls.length; i++) {
@@ -214,6 +228,36 @@ for (let i = 0; i < controls.length; i++) {
 			// set oscillator-a note accordingly
 			synthSemitones["osc_a_semi"] = e.target.value
 			console.log(synthSemitones)
+		}
+		if(e.target.id === "osc_a_shape") {
+			// set oscillator-a note accordingly
+			synthShapes["osc_a_shape"] = shapeValues[e.target.value]
+			SYNTH_A.set({
+				oscillator: {
+					type: synthShapes["osc_a_shape"]
+				}
+			})
+			console.log(synthShapes)
+		}
+		if(e.target.id === "osc_b_octave") {
+			// set oscillator-b note accordingly
+			synthOctaves["osc_b_octave"] = octaveValues[e.target.value]
+			console.log(synthOctaves)
+		}
+		if(e.target.id === "osc_b_semi") {
+			// set oscillator-b note accordingly
+			synthSemitones["osc_b_semi"] = e.target.value
+			console.log(synthSemitones)
+		}
+		if(e.target.id === "osc_b_shape") {
+			// set oscillator-b note accordingly
+			synthShapes["osc_b_shape"] = shapeValues[e.target.value]
+			SYNTH_B.set({
+				oscillator: {
+					type: synthShapes["osc_b_shape"]
+				}
+			})
+			console.log(synthShapes)
 		}
 	})
 }
@@ -241,60 +285,60 @@ keyboard.addEventListener("mouseover", function () {
 	keyboard.cv.focus();
 	console.log("mouse over keyboard!");
 });
-let heldKeys = []
 
 keyboard.addEventListener("change", function (e) {
-
-	// let note = getNoteFromNumber(e.note[1], synthSemitones.osc_a_semi) + getOctaveFromNumber(e.note[1]);
-	// let note_plus = getNoteFromNumber(e.note[1], synthSemitones.osc_b_semi) + (getOctaveFromNumber(e.note[1])+1);
-	// let note_minus = getNoteFromNumber(e.note[1], synthSemitones.osc_c_semi) + (getOctaveFromNumber(e.note[1])+2);
-
+	// Calculate the notes to play based on the keyboard input and synth settings
 	let note_a = getNoteFromNumber(e.note[1], synthSemitones.osc_a_semi, synthOctaves.osc_a_octave);
 	let note_b = getNoteFromNumber(e.note[1], synthSemitones.osc_b_semi, synthOctaves.osc_b_octave);
 	let note_c = getNoteFromNumber(e.note[1], synthSemitones.osc_c_semi, synthOctaves.osc_c_octave);
 
-	console.log("note_a" , note_a, e.note[0] ? "on" : "off");
-	console.log("note_b" , note_b, e.note[0] ? "on" : "off");
-	console.log("note_c" , note_c, e.note[0] ? "on" : "off");
+	console.log("note_a", note_a, e.note[0] ? "on" : "off");
+	console.log("note_b", note_b, e.note[0] ? "on" : "off");
+	console.log("note_c", note_c, e.note[0] ? "on" : "off");
 
+	// Initialize an empty array to keep track of the currently playing keys
+	let playingKeys = [];
+	// If note on
 	if (e.note[0]) {
-		// Note on
-		// triggerToneAttack(ENV_A, note, now())
-		// OSC_A.start()
-		// ENV_A.triggerAttack("8n")
-		// OSC_B.start()
-		// ENV_B.triggerAttack("8n")
-		// OSC_C.start()
-		// ENV_C.triggerAttack("8n")
-		// if not isn't already in heldKeys array, push it
-		if(!heldKeys.includes(note_a || note_b || note_c)){
-			heldKeys.push(note_a)
-			heldKeys.push(note_b)
-			heldKeys.push(note_c)
-			SYNTH_A.triggerAttack(note_a, "8n")
-			SYNTH_B.triggerAttack(note_b, "8n")
-			SYNTH_C.triggerAttack(note_c, "8n")
+		// Trigger the attack for the new notes and add them to the playingKeys array
+		if (!playingKeys.includes(note_a)) {
+			SYNTH_A.triggerAttack(note_a, "8n");
+			playingKeys.push(note_a);
+		}
+		if (!playingKeys.includes(note_b)) {
+			SYNTH_B.triggerAttack(note_b, "8n");
+			playingKeys.push(note_b);
+		}
+		if (!playingKeys.includes(note_c)) {
+			SYNTH_C.triggerAttack(note_c, "8n");
+			playingKeys.push(note_c);
+		}
+	// If note off
+	} else {
+		// Trigger the release for the playing notes and remove them from the playingKeys array
+		if (playingKeys.includes(note_a)) {
+			SYNTH_A.triggerRelease(note_a, "8n");
+			playingKeys = playingKeys.filter(item => item !== note_a);
+		}
+		if (playingKeys.includes(note_b)) {
+			SYNTH_B.triggerRelease(note_b, "8n");
+			playingKeys = playingKeys.filter(item => item !== note_b);
+		}
+		if (playingKeys.includes(note_c)) {
+			SYNTH_C.triggerRelease(note_c, "8n");
+			playingKeys = playingKeys.filter(item => item !== note_c);
 		}
 	}
-	if (!e.note[0]) {
-		// Note off
-		// triggerToneRelease(ENV_A, note, "+0.1")
-		// ENV_A.triggerRelease("8n")
-		// OSC_A.stop()
-		// ENV_B.triggerRelease("8n")
-		// OSC_B.stop()
-		// ENV_C.triggerRelease("8n")
-		// OSC_C.stop()
-		heldKeys = heldKeys.filter(item => item !== note_a && item !== note_b && item !== note_c)
-		SYNTH_A.triggerRelease(note_a, "8n")
-		SYNTH_B.triggerRelease(note_b, "8n")
-		SYNTH_C.triggerRelease(note_c, "8n")
+
+	console.log("playingKeys:", playingKeys)
+
+	if (playingKeys.length === 0) {
+		console.log("empty!");
+		// Stop all playing notes when no keys are held down
+		SYNTH_A.releaseAll();
+		SYNTH_B.releaseAll();
+		SYNTH_C.releaseAll();
 	}
-	console.log(heldKeys)
-	if(heldKeys.length === 0) {
-		console.log("empty!")
-		SYNTH_A.releaseAll()
-		SYNTH_B.releaseAll()
-		SYNTH_C.releaseAll()
-	}
-})
+});
+
+

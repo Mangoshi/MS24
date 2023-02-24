@@ -1,9 +1,14 @@
 {
-  "name": "ms24_vanilla_vite",
+  "name": "ms24",
+  "description": "MangoSynth24: Web Audio API Synthesizer",
+  "author": {
+    "name": "mangoshi",
+    "email": "mangoshimonks@gmail.com",
+    "url": "https://mangoshi.github.io/"
+  },
   "version": "0.0.1",
-  "description": "MangoSynth24 (Vanilla JS + Vite Version)",
+  "type": "module",
   "main": "main.js",
-  "author": "mangoshi",
   "scripts": {
     "dev": "vite --port 3000 --host",
     "build": "vite build",

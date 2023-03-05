@@ -105,7 +105,7 @@ SYNTH_A.set({
 const SYNTH_B = new Tone.PolySynth(Tone.Synth)
 SYNTH_B.set({
 	oscillator: {
-		type: 'square'
+		type: 'triangle'
 	}
 })
 
@@ -127,36 +127,58 @@ const FILTER = new Tone.Filter(1000, "lowpass", -12)
 const LFO = new Tone.LFO(0, 200, 2000)
 
 // FX - Param 1, Param2, Param3, Mix, Input Gains
-const FX_REVERB = new Tone.Reverb({
-	decay: 4,
-	preDelay: 0.01
-})
-const FX_DELAY = new Tone.FeedbackDelay({
-	delayTime: "8n",
-	feedback: 0.5
-})
 const FX_DISTORTION = new Tone.Distortion({
 	distortion: 0,
 	oversample: "none",
+	wet: 0.5,
+})
+const FX_CHEBYSHEV = new Tone.Chebyshev({
+	order: 1,
 	wet: 0.5
 })
-const FX_CHORUS = new Tone.Chorus({
-	frequency: 1.5,
-	delayTime: 3.5,
-	depth: 0.7,
-	type: "sine",
-	spread: 180
+const FX_PHASER = new Tone.Phaser({
+	frequency: 0.5,
+	octaves: 5,
+	spread: 0,
+	wet: 0.5
 })
-const FX_BITCRUSHER = new Tone.BitCrusher(4)
+const FX_TREMOLO = new Tone.Tremolo({
+	frequency: 10,
+	depth: 0.5,
+	spread: 0,
+	wet: 0.5
+}).start()
+const FX_VIBRATO = new Tone.Vibrato({
+	frequency: 5,
+	depth: 0.1,
+	type: "sine",
+	wet: 0.5
+})
+const FX_DELAY = new Tone.FeedbackDelay({
+	delayTime: "8n",
+	feedback: 0.5,
+	wet: 0.5
+})
+const FX_REVERB = new Tone.Reverb({
+	decay: 4,
+	preDelay: 0.01,
+	wet: 0.5
+})
 const FX_PITCHSHIFT = new Tone.PitchShift({
 	pitch: 0,
 	windowSize: 0.1,
 	delayTime: 0,
-	feedback: 0
+	feedback: 0,
+	wet: 0.5
 })
-const FX_FREQSHIFT = new Tone.FrequencyShifter(0)
+const FX_FREQSHIFT = new Tone.FrequencyShifter({
+	frequency: 0,
+	wet: 0.5
+})
 
-const SELECTED_FX = FX_DISTORTION
+
+
+let SELECTED_FX = FX_DISTORTION
 
 // NOTES - Arpeggiator, Glide, Voice, Unison
 const ARP = new Tone.Pattern(function(time, note){
@@ -239,7 +261,7 @@ let subOctaveValues = {
 
 let synthSemitones = {
 	"osc_a_semi": 0,
-	"osc_b_semi": 7,
+	"osc_b_semi": 0,
 	"osc_c_semi": 0,
 }
 
@@ -278,6 +300,14 @@ let fxOversampleValues = {
 	"2": "4x",
 }
 
+let fxDelayTimeValues = {
+	"0": "16n",
+	"1": "8n",
+	"2": "4n",
+	"3": "2n",
+	"4": "1n",
+}
+
 // TODO (?) [idea]:
 //  - Infinite loop / listener to fire attack/release signals on array of notes playing
 //  - This is kept outside the event listeners
@@ -289,13 +319,87 @@ let fxOversampleValues = {
 let fxEnabled = true
 let fxMix = 0.5
 
+let fxParam1 = document.getElementById("fx_param1")
+let fxParam1Readout = document.getElementById("fx_param1_readout")
+let fxParam1Label = document.getElementById("fx_param1_label")
+let fxParam1Group = document.getElementById("fx_param1_group")
+
+let fxParam2 = document.getElementById("fx_param2")
+let fxParam2Readout = document.getElementById("fx_param2_readout")
+let fxParam2Label = document.getElementById("fx_param2_label")
+let fxParam2Group = document.getElementById("fx_param2_group")
+
+let fxParam3 = document.getElementById("fx_param3")
+let fxParam3Readout = document.getElementById("fx_param3_readout")
+let fxParam3Label = document.getElementById("fx_param3_label")
+let fxParam3Group = document.getElementById("fx_param3_group")
+
+let fxParam4 = document.getElementById("fx_param4")
+let fxParam4Readout = document.getElementById("fx_param4_readout")
+let fxParam4Label = document.getElementById("fx_param4_label")
+let fxParam4Group = document.getElementById("fx_param4_group")
+
+
+function setParamGroup(target, enable, min, max, step, value, label) {
+	if(target===1){
+		$('#fx_param1')[0].min=min;
+		$('#fx_param1')[0].max=max;
+		$('#fx_param1')[0].step=step;
+		$('#fx_param1')[0].value=value;
+		$('#fx_param1')[0].enable=enable;
+		fxParam1Readout.value = value
+		fxParam1Label.innerHTML = label
+		if(!enable){
+			fxParam1Group.setAttribute("style", "display: none;")
+		} else {
+			fxParam1Group.setAttribute("style", "display: flex;")
+		}
+	} else if(target===2){
+		$('#fx_param2')[0].min=min;
+		$('#fx_param2')[0].max=max;
+		$('#fx_param2')[0].step=step;
+		$('#fx_param2')[0].value=value;
+		$('#fx_param2')[0].enable=enable;
+		fxParam2Readout.value = value
+		fxParam2Label.innerHTML = label
+		if(!enable){
+			fxParam2Group.setAttribute("style", "display: none;")
+		} else {
+			fxParam2Group.setAttribute("style", "display: flex;")
+		}
+	} else if(target===3){
+		$('#fx_param3')[0].min=min;
+		$('#fx_param3')[0].max=max;
+		$('#fx_param3')[0].step=step;
+		$('#fx_param3')[0].value=value;
+		$('#fx_param3')[0].enable=enable;
+		fxParam3Readout.value = value
+		fxParam3Label.innerHTML = label
+		if(!enable){
+			fxParam3Group.setAttribute("style", "display: none;")
+		} else {
+			fxParam3Group.setAttribute("style", "display: flex;")
+		}
+	} else if(target===4){
+		$('#fx_param4')[0].min=min;
+		$('#fx_param4')[0].max=max;
+		$('#fx_param4')[0].step=step;
+		$('#fx_param4')[0].value=value;
+		$('#fx_param4')[0].enable=enable;
+		fxParam4Readout.value = value
+		fxParam4Label.innerHTML = label
+		if(!enable){
+			fxParam4Group.setAttribute("style", "display: none;")
+		} else {
+			fxParam4Group.setAttribute("style", "display: flex;")
+		}
+	}
+}
+
 for (let i = 0; i < controls.length; i++) {
 	// add event listener to each control
+
 	controls[i].addEventListener("change", function (e) {
-		console.log(e.target.id, e.target.value);
-		// -------------------- //
-		// --- OSCILLATOR A --- //
-		// -------------------- //
 		if(e.target.id === "osc_a_switch") {
 			// toggle oscillator-a on/off
 			if(e.target.value === 0) {
@@ -306,6 +410,61 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_A.connect(OUTPUT)
 			}
 		}
+		if(e.target.id === "osc_b_switch") {
+			// toggle oscillator-a on/off
+			if(e.target.value === 0) {
+				// turn off
+				SYNTH_B.disconnect()
+			} else {
+				// turn on
+				SYNTH_B.connect(OUTPUT)
+			}
+		}
+		if(e.target.id === "osc_c_switch") {
+			// toggle oscillator-a on/off
+			if(e.target.value === 0) {
+				// turn off
+				SYNTH_C.disconnect()
+			} else {
+				// turn on
+				SYNTH_C.connect(OUTPUT)
+			}
+		}
+		if(e.target.id === "filter_switch") {
+			// if filter toggle off...
+			if(e.target.value === 0) {
+				OUTPUT.chain(SELECTED_FX, MASTER_GAIN)
+				// if filter toggle on...
+			} else {
+				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
+			}
+		}
+		if(e.target.id === "fx_switch") {
+			// if fx toggle value is 0...
+			if(e.target.value === 0) {
+				// set fxEnabled to false
+				fxEnabled = false
+				// if filter is enabled...
+				SELECTED_FX.set({
+					"wet": 0
+				})
+				// if fx toggle value is 1...
+			} else {
+				// set fxEnabled to true
+				fxEnabled = true
+				// if filter is enabled...
+				SELECTED_FX.set({
+					"wet": fxMix
+				})
+			}
+		}
+	})
+	// using "input" instead of "change" to allow for continuous changes
+	controls[i].addEventListener("input", function (e) {
+		console.log(e.target.id, e.target.value);
+		// -------------------- //
+		// --- OSCILLATOR A --- //
+		// -------------------- //
 		if(e.target.id === "osc_a_octave") {
 			// set oscillator-a note accordingly
 			synthOctaves["osc_a_octave"] = octaveValues[e.target.value]
@@ -340,16 +499,6 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------------- //
 		// --- OSCILLATOR B --- //
 		// -------------------- //
-		if(e.target.id === "osc_b_switch") {
-			// toggle oscillator-a on/off
-			if(e.target.value === 0) {
-				// turn off
-				SYNTH_B.disconnect()
-			} else {
-				// turn on
-				SYNTH_B.connect(OUTPUT)
-			}
-		}
 		if(e.target.id === "osc_b_octave") {
 			// set oscillator-b note accordingly
 			synthOctaves["osc_b_octave"] = octaveValues[e.target.value]
@@ -373,16 +522,6 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------------- //
 		// --- OSCILLATOR C --- //
 		// -------------------- //
-		if(e.target.id === "osc_c_switch") {
-			// toggle oscillator-a on/off
-			if(e.target.value === 0) {
-				// turn off
-				SYNTH_C.disconnect()
-			} else {
-				// turn on
-				SYNTH_C.connect(OUTPUT)
-			}
-		}
 		if(e.target.id === "osc_c_octave") {
 			// set oscillator-c note accordingly
 			synthOctaves["osc_c_octave"] = subOctaveValues[e.target.value]
@@ -406,15 +545,6 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------- //
 		// --- FILTER --- //
 		// -------------- //
-		if(e.target.id === "filter_switch") {
-			// if filter toggle off...
-			if(e.target.value === 0) {
-				OUTPUT.chain(SELECTED_FX, MASTER_GAIN)
-			// if filter toggle on...
-			} else {
-				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
-			}
-		}
 		if(e.target.id === "filter_cutoff") {
 			// set filter cutoff accordingly
 			FILTER.set({
@@ -442,48 +572,306 @@ for (let i = 0; i < controls.length; i++) {
 		// ---------- //
 		// --- FX --- //
 		// ---------- //
-		if(e.target.id === "fx_switch") {
-			// if fx toggle value is 0...
-			if(e.target.value === 0) {
-				// set fxEnabled to false
-				fxEnabled = false
-				// if filter is enabled...
-				FX_DISTORTION.set({
-					"wet": 0
-				})
-			// if fx toggle value is 1...
-			} else {
-				// set fxEnabled to true
-				fxEnabled = true
-				// if filter is enabled...
-				FX_DISTORTION.set({
-					"wet": fxMix
-				})
+		if(e.target.id === "fx_selector") {
+			// reset all fx wet values to 0 (off)
+			FX_DISTORTION.set({wet: 0})
+			FX_CHEBYSHEV.set({wet: 0})
+			FX_PHASER.set({wet: 0})
+			FX_TREMOLO.set({wet: 0})
+			FX_VIBRATO.set({wet: 0})
+			FX_DELAY.set({wet: 0})
+			FX_REVERB.set({wet: 0})
+			FX_PITCHSHIFT.set({wet: 0})
+			FX_FREQSHIFT.set({wet: 0})
+
+			// log params before change
+			// console.group("p1 before")
+			// console.log("label:", fxParam1Label)
+			// console.log("control:", fxParam1)
+			// console.log("readout:", fxParam1Readout)
+			// console.groupEnd()
+			// console.group("p2 before")
+			// console.log("label:", fxParam2Label)
+			// console.log("control:", fxParam2)
+			// console.log("readout:", fxParam2Readout)
+			// console.groupEnd()
+			// console.group("p3 before")
+			// console.log("label:", fxParam3Label)
+			// console.log("control:", fxParam3)
+			// console.log("readout:", fxParam3Readout)
+			// console.groupEnd()
+			// console.group("p4 before")
+			// console.log("label:", fxParam4Label)
+			// console.log("control:", fxParam4)
+			// console.log("readout:", fxParam4Readout)
+			// console.groupEnd()
+
+			// set Tone & HTML depending on which FX is selected
+			if(e.target.value === "Distortion") {
+				console.log("Distortion Selected")
+				SELECTED_FX = FX_DISTORTION
+
+				// since setAttribute doesn't work,
+				// we have to do this with jQuery
+				// taken from webaudio-controls documentation:
+				// (https://g200kg.github.io/webaudio-controls/docs/detailspecs.html) - setValue doesn't work
+				// (https://g200kg.github.io/webaudio-controls/docs/resizetest.html) - jQuery logic here does
+
+				setParamGroup(1,1, 0, 100, 0.5, 0, "Intensity")
+				setParamGroup(2, 1, 0, 2, 1, 0, "Oversample" )
+				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix" )
+				setParamGroup(4, 0)
+
+			} else if(e.target.value === "Chebyshev") {
+				console.log("Chebyshev Selected")
+				SELECTED_FX = FX_CHEBYSHEV
+
+				setParamGroup(1, 1, 1, 100, 1, 0, "Order")
+				setParamGroup(2, 1, 0, 1, 0.1, 0.5, "Mix")
+				setParamGroup(3, 0)
+				setParamGroup(4, 0)
+
+			} else if(e.target.value === "Phaser") {
+				console.log("Phaser Selected")
+				SELECTED_FX = FX_PHASER
+
+				setParamGroup(1, 1, 0, 20, 0.01, 0.1, "Frequency")
+				setParamGroup(2, 1, 0, 12, 0.1, 2, "Octaves")
+				setParamGroup(3, 1, 0, 100, 0.1, 1, "Q")
+				setParamGroup(4, 1, 0, 1, 0.1, 1, "Mix")
+
+			} else if(e.target.value === "Tremolo") {
+				console.log("Tremolo Selected")
+				SELECTED_FX = FX_TREMOLO
+
+				setParamGroup(1, 1, 0, 20000, 0.1, 0, "Frequency")
+				setParamGroup(2, 1, 0, 1, 0.01, 0, "Depth")
+				setParamGroup(3, 1, 0, 100, 0.01, 0, "Spread")
+				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			} else if(e.target.value === "Vibrato") {
+				console.log("Vibrato Selected")
+				SELECTED_FX = FX_VIBRATO
+
+				setParamGroup(1, 1, 0, 1200, 1, 0, "Frequency")
+				setParamGroup(2, 1, 0, 1, 0.01, 0, "Depth")
+				setParamGroup(3, 1, 0, 4, 1, 0, "Type")
+				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			} else if(e.target.value === "Delay") {
+				console.log("Delay Selected")
+				SELECTED_FX = FX_DELAY
+
+				setParamGroup(1, 1, 0, 1, 0.01, 0, "Time")
+				setParamGroup(2, 1, 0, 1, 0.01, 0.5, "Feedback")
+				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix")
+				setParamGroup(4, 0)
+
+			} else if(e.target.value === "Reverb") {
+				console.log("Reverb Selected")
+				SELECTED_FX = FX_REVERB
+
+				setParamGroup(1, 1, 0, 100, 1, 10, "Decay")
+				setParamGroup(2, 1, 0, 5, 0.1, 0, "Pre-delay")
+				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix")
+				setParamGroup(4, 0)
+
+			} else if(e.target.value === "PitchShift") {
+				console.log("PitchShift Selected")
+				SELECTED_FX = FX_PITCHSHIFT
+
+				setParamGroup(1, 1, 0, 120, 0.1, 10, "Pitch")
+				setParamGroup(2, 1, 0, 5, 0.1, 0, "Delay")
+				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Feedback")
+				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			} else if(e.target.value === "FreqShift") {
+				console.log("FreqShift Selected")
+				SELECTED_FX = FX_FREQSHIFT
+
+				setParamGroup(1, 1, 0, 5000, 0.1, 10, "Frequency")
+				setParamGroup(2, 1, 0, 1, 0.1, 0.5, "Mix")
+				setParamGroup(3, 0)
+				setParamGroup(4, 0)
+
+			}
+
+			// log params after change
+			// console.group("p1 after")
+			// console.log("label:", fxParam1Label)
+			// console.log("control:", fxParam1)
+			// console.log("readout:", fxParam1Readout)
+			// console.groupEnd()
+			// console.group("p2 after")
+			// console.log("label:", fxParam2Label)
+			// console.log("control:", fxParam2)
+			// console.log("readout:", fxParam2Readout)
+			// console.groupEnd()
+			// console.group("p3 after")
+			// console.log("label:", fxParam3Label)
+			// console.log("control:", fxParam3)
+			// console.log("readout:", fxParam3Readout)
+			// console.groupEnd()
+			// console.group("p4 after")
+			// console.log("label:", fxParam4Label)
+			// console.log("control:", fxParam4)
+			// console.log("readout:", fxParam4Readout)
+			// console.groupEnd()
+
+			if(fxEnabled){
+				// set selected FX wet value to fxMix
+				SELECTED_FX.set({wet: fxMix})
+				// log selected FX
+				console.log("Setting FX to " + SELECTED_FX + "...")
+				// set output chain to filter -> selected FX -> master gain
+				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
 			}
 		}
 		if(e.target.id === "fx_param1") {
 			// set fx param 1 accordingly
-			FX_DISTORTION.set({
-				"distortion": e.target.value
-			})
+			if(SELECTED_FX === FX_DISTORTION) {
+				FX_DISTORTION.set({
+					"distortion": e.target.value
+				})
+			} else if(SELECTED_FX === FX_CHEBYSHEV) {
+				FX_CHEBYSHEV.set({
+					"order": e.target.value
+				})
+			} else if(SELECTED_FX === FX_PHASER) {
+				FX_PHASER.set({
+					"frequency": e.target.value
+				})
+			} else if(SELECTED_FX === FX_TREMOLO) {
+				FX_TREMOLO.set({
+					"frequency": e.target.value
+				})
+			} else if(SELECTED_FX === FX_VIBRATO) {
+				FX_VIBRATO.set({
+					"frequency": e.target.value
+				})
+			} else if(SELECTED_FX === FX_DELAY) {
+				FX_DELAY.set({
+					"delayTime": e.target.value
+				})
+			} else if(SELECTED_FX === FX_REVERB) {
+				FX_REVERB.set({
+					"decay": e.target.value
+				})
+			} else if(SELECTED_FX === FX_PITCHSHIFT) {
+				FX_PITCHSHIFT.set({
+					"pitch": e.target.value
+				})
+			} else if(SELECTED_FX === FX_FREQSHIFT) {
+				FX_FREQSHIFT.set({
+					"frequency": e.target.value
+				})
+			}
 		}
 		if(e.target.id === "fx_param2") {
 			// set fx param 2 accordingly
-			FX_DISTORTION.set({
-				"oversample": fxOversampleValues[e.target.value]
-			})
+			if(SELECTED_FX === FX_DISTORTION) {
+				FX_DISTORTION.set({
+					"oversample": fxOversampleValues[e.target.value]
+				})
+			} else if(SELECTED_FX === FX_CHEBYSHEV) {
+				FX_CHEBYSHEV.set({
+					"wet": e.target.value
+				})
+			} else if(SELECTED_FX === FX_PHASER) {
+				FX_PHASER.set({
+					"octaves": e.target.value
+				})
+			} else if(SELECTED_FX === FX_TREMOLO) {
+				FX_TREMOLO.set({
+					"depth": e.target.value
+				})
+			} else if(SELECTED_FX === FX_VIBRATO) {
+				FX_VIBRATO.set({
+					"depth": e.target.value
+				})
+			} else if(SELECTED_FX === FX_DELAY) {
+				FX_DELAY.set({
+					"feedback": e.target.value
+				})
+			} else if(SELECTED_FX === FX_REVERB) {
+				FX_REVERB.set({
+					"preDelay": e.target.value
+				})
+			} else if(SELECTED_FX === FX_PITCHSHIFT) {
+				FX_PITCHSHIFT.set({
+					"windowSize": e.target.value
+				})
+			} else if(SELECTED_FX === FX_FREQSHIFT) {
+				FX_FREQSHIFT.set({
+					"wet": e.target.value
+				})
+			}
 		}
 		if(e.target.id === "fx_param3") {
 			// set fx param 3 accordingly
-			console.log("fx_param3 changed")
+			if(SELECTED_FX === FX_DISTORTION) {
+				FX_DISTORTION.set({
+					"wet": e.target.value
+				})
+			} else if(SELECTED_FX === FX_PHASER) {
+				FX_PHASER.set({
+					"Q": e.target.value
+				})
+			} else if(SELECTED_FX === FX_TREMOLO) {
+				FX_TREMOLO.set({
+					"spread": e.target.value
+				})
+			} else if(SELECTED_FX === FX_VIBRATO) {
+				FX_VIBRATO.set({
+					"type": shapeValues[e.target.value]
+				})
+			} else if(SELECTED_FX === FX_DELAY) {
+				FX_DELAY.set({
+					"delayTime": e.target.value
+				})
+			} else if(SELECTED_FX === FX_REVERB) {
+				FX_REVERB.set({
+					"wet": e.target.value
+				})
+			} else if(SELECTED_FX === FX_PITCHSHIFT) {
+				FX_PITCHSHIFT.set({
+					"feedback": e.target.value
+				})
+			}
 		}
 		if(e.target.id === "fx_param4") {
 			fxMix = e.target.value
 			// set fx param 4 accordingly
 			if(fxEnabled) {
-				FX_DISTORTION.set({
-					"wet": e.target.value
-				})
+				if(SELECTED_FX === FX_DISTORTION) {
+					FX_DISTORTION.set({
+						"wet": e.target.value
+					})
+				} else if(SELECTED_FX === FX_PHASER) {
+					FX_PHASER.set({
+						"wet": e.target.value
+					})
+				} else if(SELECTED_FX === FX_TREMOLO) {
+					FX_TREMOLO.set({
+						"wet": e.target.value
+					})
+				} else if(SELECTED_FX === FX_VIBRATO) {
+					FX_VIBRATO.set({
+						"wet": e.target.value
+					})
+				} else if(SELECTED_FX === FX_DELAY) {
+					FX_DELAY.set({
+						"wet": e.target.value
+					})
+				} else if(SELECTED_FX === FX_REVERB) {
+					FX_REVERB.set({
+						"wet": e.target.value
+					})
+				} else if(SELECTED_FX === FX_PITCHSHIFT) {
+					FX_PITCHSHIFT.set({
+						"wet": e.target.value
+					})
+				}
 			}
 		}
 	})

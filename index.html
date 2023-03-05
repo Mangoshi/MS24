@@ -20,6 +20,7 @@
 		};
 	</script>
 	<script src="https://g200kg.github.io/webaudio-controls/webaudio-controls.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<title>MS24</title>
 </head>
 <body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light">
@@ -51,7 +52,7 @@
 						></webaudio-switch>
 						<p class="font-inika font-bold self-center">OSC A</p>
 					</div>
-					<div class="flex flex-row">
+					<div class="flex flex-row w-[384px]">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Octave</p>
 							<webaudio-knob
@@ -184,7 +185,7 @@
 						></webaudio-switch>
 						<p class="font-inika font-bold self-center">OSC B</p>
 					</div>
-					<div class="flex flex-row">
+					<div class="flex flex-row w-[384px]">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Octave</p>
 							<webaudio-knob
@@ -210,7 +211,7 @@
 								colors="#A9DC76;#2C292D;#D9D9D9"
 								min="-12"
 								max="12"
-								value="7"
+								value="0"
 								step="1"
 							></webaudio-knob>
 							<webaudio-param
@@ -244,7 +245,7 @@
 								min="0"
 								max="4"
 								step="1"
-								value="3"
+								value="1"
 								direction="vert"
 								conv="['sine','tri','saw','square','noise'][x]"
 							></webaudio-slider>
@@ -276,7 +277,7 @@
 						></webaudio-switch>
 						<p class="font-inika font-bold self-center">SUB OSC</p>
 					</div>
-					<div class="flex flex-row">
+					<div class="flex flex-row w-[384px]">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Octave</p>
 							<webaudio-knob
@@ -369,7 +370,7 @@
 						></webaudio-switch>
 						<p class="font-inika font-bold self-center">FILTER</p>
 					</div>
-					<div class="flex flex-row">
+					<div class="flex flex-row w-[384px]">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Cutoff</p>
 							<webaudio-knob
@@ -464,7 +465,7 @@
 						></webaudio-switch>
 						<p class="font-inika font-bold self-center">LFO</p>
 					</div>
-					<div class="flex flex-row">
+					<div class="flex flex-row w-[384px]">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Grid</p>
 							<webaudio-knob
@@ -602,22 +603,23 @@
 							&nbsp;
 							<select
 								id="fx_selector"
-								class="font-light"
+								class="control font-light"
 							>
-								<option value="0">Distortion</option>
-								<option value="1">Chorus</option>
-								<option value="2">Flanger</option>
-								<option value="3">Phaser</option>
-								<option value="4">Tremolo</option>
-								<option value="5">Vibrato</option>
-								<option value="6">Delay</option>
-								<option value="7">Reverb</option>
+								<option value="Distortion" selected="selected">Distortion</option>
+								<option value="Chebyshev">Chebyshev Distortion</option>
+								<option value="Phaser">Phaser</option>
+								<option value="Tremolo">Tremolo</option>
+								<option value="Vibrato">Vibrato</option>
+								<option value="Delay">Delay</option>
+								<option value="Reverb">Reverb</option>
+								<option value="PitchShift">Pitch Shift</option>
+								<option value="FreqShift">Freq Shift</option>
 							</select>
 						</label>
 					</div>
-					<div class="flex flex-row">
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
-							<p class="font-bold self-center">Intensity</p>
+					<div class="flex flex-row w-[384px]">
+						<div id="fx_param1_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
+							<p id="fx_param1_label" class="font-bold self-center">Intensity</p>
 							<webaudio-knob
 								id="fx_param1"
 								class="control self-center"
@@ -628,14 +630,15 @@
 								step="0.5"
 							></webaudio-knob>
 							<webaudio-param
+								id="fx_param1_readout"
 								link="fx_param1"
 								fontSize="14"
 								width="40"
 								class="self-center"
 							></webaudio-param>
 						</div>
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
-							<p class="font-bold self-center">Oversample</p>
+						<div id="fx_param2_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
+							<p id="fx_param2_label" class="font-bold self-center">Oversample</p>
 							<webaudio-knob
 								id="fx_param2"
 								class="control self-center"
@@ -646,29 +649,32 @@
 								step="1"
 							></webaudio-knob>
 							<webaudio-param
+								id="fx_param2_readout"
 								link="fx_param2"
 								fontSize="14"
 								class="self-center"
 							></webaudio-param>
 						</div>
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
-							<p class="font-bold self-center">Gain</p>
+						<div id="fx_param3_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
+							<p id="fx_param3_label" class="font-bold self-center">Mix</p>
 							<webaudio-knob
 								id="fx_param3"
 								class="control self-center"
 								colors="#FFD866;#2C292D;#D9D9D9"
 								min="0"
-								max="5"
-								step="1"
+								max="1"
+								step=".01"
+								value="0.5"
 							></webaudio-knob>
 							<webaudio-param
+								id="fx_param3_readout"
 								link="fx_param3"
 								class="self-center"
 								fontSize="14"
 							></webaudio-param>
 						</div>
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px]">
-							<p class="font-bold self-center">Mix</p>
+						<div id="fx_param4_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] hidden">
+							<p id="fx_param4_label" class="font-bold self-center">Mix</p>
 							<webaudio-knob
 								id="fx_param4"
 								class="control self-center"
@@ -679,6 +685,7 @@
 								value="0.5"
 							></webaudio-knob>
 							<webaudio-param
+								id="fx_param4_readout"
 								link="fx_param4"
 								class="self-center"
 								fontSize="14"

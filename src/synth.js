@@ -52,7 +52,6 @@ const ENV_A = new Tone.AmplitudeEnvelope({
 	sustain: 1.0,
 	release: 0.8
 })
-
 const OSC_A = new Tone.Oscillator(440)
 
 // FM A/B - Ratio, Depth, Mix(?)
@@ -64,7 +63,6 @@ const ENV_B = new Tone.AmplitudeEnvelope({
 	sustain: 1.0,
 	release: 0.8
 })
-
 const OSC_B = new Tone.Oscillator(220)
 
 // OSC C - Octave, Detune, Partials(?), ADSR
@@ -74,7 +72,6 @@ const ENV_C = new Tone.AmplitudeEnvelope({
 	sustain: 1.0,
 	release: 0.8
 })
-
 const OSC_C = new Tone.Oscillator(110)
 
 // ALT IDEA: Use Tone.PolySynths //
@@ -94,6 +91,10 @@ let SYNTH_A_ENV = synthData.OSC_A.envelope
 // 	modulationIndex: 1,
 // 	portamento: 1,
 // })
+
+const OUTPUT = Tone.Destination
+const MASTER_GAIN = new Tone.Gain(1)
+
 const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
@@ -115,9 +116,9 @@ SYNTH_C.set({
 	}
 })
 
-// SYNTH_A.debug = true
-// SYNTH_B.debug = true
-// SYNTH_C.debug = true
+SYNTH_A.debug = true
+SYNTH_B.debug = true
+SYNTH_C.debug = true
 
 // FILTER - Type, Cutoff, Resonance, ADSR, Input Gains
 const FILTER = new Tone.Filter(1000, "lowpass", -12)
@@ -155,9 +156,13 @@ const FX_PITCHSHIFT = new Tone.PitchShift({
 })
 const FX_FREQSHIFT = new Tone.FrequencyShifter(0)
 
+const SELECTED_FX = FX_DISTORTION
+
 // NOTES - Arpeggiator, Glide, Voice, Unison
 const ARP = new Tone.Pattern(function(time, note){
-	synth.triggerAttackRelease(note, 0.25);
+	SYNTH_A.triggerAttackRelease(note, 0.25);
+	SYNTH_B.triggerAttackRelease(note, 0.25);
+	SYNTH_C.triggerAttackRelease(note, 0.25);
 }, ["C4", "D4", "E4", "G4", "A4"]);
 
 // MASTER - Volume
@@ -184,9 +189,15 @@ const ARP = new Tone.Pattern(function(time, note){
 // SYNTH_A.chain(FILTER, FX_DISTORTION, Tone.Destination)
 // SYNTH_B.chain(FILTER, FX_DISTORTION, Tone.Destination)
 // SYNTH_C.chain(FILTER, FX_DISTORTION, Tone.Destination)
-SYNTH_A.chain(FX_DISTORTION, FILTER, Tone.Destination)
-SYNTH_B.chain(FX_DISTORTION, FILTER, Tone.Destination)
-SYNTH_C.chain(FX_DISTORTION, FILTER, Tone.Destination)
+// SYNTH_A.chain(FX_DISTORTION, FILTER, Tone.Destination)
+// SYNTH_B.chain(FX_DISTORTION, FILTER, Tone.Destination)
+// SYNTH_C.chain(FX_DISTORTION, FILTER, Tone.Destination)
+
+SYNTH_A.connect(OUTPUT)
+SYNTH_B.connect(OUTPUT)
+SYNTH_C.connect(OUTPUT)
+
+OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
 
 function triggerToneAttackRelease(target, note, duration) {
 	target.triggerAttackRelease(note, duration)
@@ -274,6 +285,10 @@ let fxOversampleValues = {
 //  - onRelease removes note from array
 //  - Controls changes the array / signals
 
+// Initialize FX variables
+let fxEnabled = true
+let fxMix = 0.5
+
 for (let i = 0; i < controls.length; i++) {
 	// add event listener to each control
 	controls[i].addEventListener("change", function (e) {
@@ -281,6 +296,16 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------------- //
 		// --- OSCILLATOR A --- //
 		// -------------------- //
+		if(e.target.id === "osc_a_switch") {
+			// toggle oscillator-a on/off
+			if(e.target.value === 0) {
+				SYNTH_A.disconnect()
+
+			} else {
+				// turn on
+				SYNTH_A.connect(OUTPUT)
+			}
+		}
 		if(e.target.id === "osc_a_octave") {
 			// set oscillator-a note accordingly
 			synthOctaves["osc_a_octave"] = octaveValues[e.target.value]
@@ -291,6 +316,11 @@ for (let i = 0; i < controls.length; i++) {
 			console.log(synthOctaves)
 			// let newKey = "C4"
 			// playingKeys[1] = newKey
+			// SYNTH_A.set({
+			// 	oscillator: {
+			// 		modulationFrequency: 'C4'
+			// 	}
+			// })
 		}
 		if(e.target.id === "osc_a_semi") {
 			// set oscillator-a note accordingly
@@ -310,6 +340,16 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------------- //
 		// --- OSCILLATOR B --- //
 		// -------------------- //
+		if(e.target.id === "osc_b_switch") {
+			// toggle oscillator-a on/off
+			if(e.target.value === 0) {
+				// turn off
+				SYNTH_B.disconnect()
+			} else {
+				// turn on
+				SYNTH_B.connect(OUTPUT)
+			}
+		}
 		if(e.target.id === "osc_b_octave") {
 			// set oscillator-b note accordingly
 			synthOctaves["osc_b_octave"] = octaveValues[e.target.value]
@@ -333,6 +373,16 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------------- //
 		// --- OSCILLATOR C --- //
 		// -------------------- //
+		if(e.target.id === "osc_c_switch") {
+			// toggle oscillator-a on/off
+			if(e.target.value === 0) {
+				// turn off
+				SYNTH_C.disconnect()
+			} else {
+				// turn on
+				SYNTH_C.connect(OUTPUT)
+			}
+		}
 		if(e.target.id === "osc_c_octave") {
 			// set oscillator-c note accordingly
 			synthOctaves["osc_c_octave"] = subOctaveValues[e.target.value]
@@ -356,6 +406,15 @@ for (let i = 0; i < controls.length; i++) {
 		// -------------- //
 		// --- FILTER --- //
 		// -------------- //
+		if(e.target.id === "filter_switch") {
+			// if filter toggle off...
+			if(e.target.value === 0) {
+				OUTPUT.chain(SELECTED_FX, MASTER_GAIN)
+			// if filter toggle on...
+			} else {
+				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
+			}
+		}
 		if(e.target.id === "filter_cutoff") {
 			// set filter cutoff accordingly
 			FILTER.set({
@@ -383,6 +442,25 @@ for (let i = 0; i < controls.length; i++) {
 		// ---------- //
 		// --- FX --- //
 		// ---------- //
+		if(e.target.id === "fx_switch") {
+			// if fx toggle value is 0...
+			if(e.target.value === 0) {
+				// set fxEnabled to false
+				fxEnabled = false
+				// if filter is enabled...
+				FX_DISTORTION.set({
+					"wet": 0
+				})
+			// if fx toggle value is 1...
+			} else {
+				// set fxEnabled to true
+				fxEnabled = true
+				// if filter is enabled...
+				FX_DISTORTION.set({
+					"wet": fxMix
+				})
+			}
+		}
 		if(e.target.id === "fx_param1") {
 			// set fx param 1 accordingly
 			FX_DISTORTION.set({
@@ -400,10 +478,13 @@ for (let i = 0; i < controls.length; i++) {
 			console.log("fx_param3 changed")
 		}
 		if(e.target.id === "fx_param4") {
+			fxMix = e.target.value
 			// set fx param 4 accordingly
-			FX_DISTORTION.set({
-				"wet": e.target.value
-			})
+			if(fxEnabled) {
+				FX_DISTORTION.set({
+					"wet": e.target.value
+				})
+			}
 		}
 	})
 }
@@ -496,14 +577,17 @@ keyboard.addEventListener("change", function (e) {
 			if (!playingKeys.includes(note_a)) {
 				SYNTH_A.triggerAttack(note_a, "8n");
 				playingKeys.push(note_a);
+				console.log("OSC_A Frequency:", SYNTH_A.toFrequency(note_a))
 			}
 			if (!playingKeys.includes(note_b)) {
 				SYNTH_B.triggerAttack(note_b, "8n");
 				playingKeys.push(note_b);
+				console.log("OSC_B Frequency:", SYNTH_B.toFrequency(note_b))
 			}
 			if (!playingKeys.includes(note_c)) {
 				SYNTH_C.triggerAttack(note_c, "8n");
 				playingKeys.push(note_c);
+				console.log("OSC_C Frequency:", SYNTH_C.toFrequency(note_c))
 			}
 			console.log("playingKeys:", playingKeys)
 			console.log("heldKeys:", heldKeys)

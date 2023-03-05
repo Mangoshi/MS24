@@ -41,7 +41,16 @@
 				<!--	OSCILLATOR A	-->
 				<!--********************-->
 				<div class="self-center border border-gray-600 rounded-lg p-1 mr-2">
-					<p class="font-inika font-bold">OSC A</p>
+					<div class="flex">
+						<webaudio-switch
+							id="osc_a_switch"
+							class="control self-center"
+							colors="#A9DC76;#2C292D;#D9D9D9"
+							diameter="30"
+							value="1"
+						></webaudio-switch>
+						<p class="font-inika font-bold self-center">OSC A</p>
+					</div>
 					<div class="flex flex-row">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Octave</p>
@@ -165,7 +174,16 @@
 				<!--	OSCILLATOR B	-->
 				<!--********************-->
 				<div class="self-center border border-gray-600 rounded-lg p-1">
-					<p class="font-inika font-bold">OSC B</p>
+					<div class="flex">
+						<webaudio-switch
+							id="osc_b_switch"
+							class="control self-center"
+							colors="#A9DC76;#2C292D;#D9D9D9"
+							diameter="30"
+							value="1"
+						></webaudio-switch>
+						<p class="font-inika font-bold self-center">OSC B</p>
+					</div>
 					<div class="flex flex-row">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Octave</p>
@@ -248,7 +266,16 @@
 				<!--  SUB OSCILLATOR	-->
 				<!--********************-->
 				<div class="self-center border border-gray-600 rounded-lg p-1 mr-2">
-					<p class="font-inika font-bold">SUB OSC</p>
+					<div class="flex">
+						<webaudio-switch
+							id="osc_c_switch"
+							class="control self-center"
+							colors="#A9DC76;#2C292D;#D9D9D9"
+							diameter="30"
+							value="1"
+						></webaudio-switch>
+						<p class="font-inika font-bold self-center">SUB OSC</p>
+					</div>
 					<div class="flex flex-row">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Octave</p>
@@ -332,7 +359,16 @@
 				<!--    MULTI FILTER    -->
 				<!--********************-->
 				<div class="self-center border border-gray-600 rounded-lg p-1">
-					<p class="font-inika font-bold">FILTER</p>
+					<div class="flex">
+						<webaudio-switch
+							id="filter_switch"
+							class="control self-center"
+							colors="#A9DC76;#2C292D;#D9D9D9"
+							diameter="30"
+							value="1"
+						></webaudio-switch>
+						<p class="font-inika font-bold self-center">FILTER</p>
+					</div>
 					<div class="flex flex-row">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Cutoff</p>
@@ -418,7 +454,16 @@
 				<!--   LOW FREQ OSC 	-->
 				<!--********************-->
 				<div class="self-center border border-gray-600 rounded-lg p-1 mr-2">
-					<p class="font-inika font-bold">LFO</p>
+					<div class="flex">
+						<webaudio-switch
+							id="lfo_switch"
+							class="control self-center"
+							colors="#A9DC76;#2C292D;#D9D9D9"
+							diameter="30"
+							value="1"
+						></webaudio-switch>
+						<p class="font-inika font-bold self-center">LFO</p>
+					</div>
 					<div class="flex flex-row">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Grid</p>
@@ -544,7 +589,32 @@
 				<!--     MULTI FX       -->
 				<!--********************-->
 				<div class="self-center border border-gray-600 rounded-lg p-1">
-					<p class="font-inika font-bold">FX - Distortion</p>
+					<div class="flex">
+						<webaudio-switch
+							id="fx_switch"
+							class="control self-center"
+							colors="#A9DC76;#2C292D;#D9D9D9"
+							diameter="30"
+							value="1"
+						></webaudio-switch>
+						<label class="font-inika font-bold self-center" for="fx_selector">
+							FX
+							&nbsp;
+							<select
+								id="fx_selector"
+								class="font-light"
+							>
+								<option value="0">Distortion</option>
+								<option value="1">Chorus</option>
+								<option value="2">Flanger</option>
+								<option value="3">Phaser</option>
+								<option value="4">Tremolo</option>
+								<option value="5">Vibrato</option>
+								<option value="6">Delay</option>
+								<option value="7">Reverb</option>
+							</select>
+						</label>
+					</div>
 					<div class="flex flex-row">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
 							<p class="font-bold self-center">Intensity</p>

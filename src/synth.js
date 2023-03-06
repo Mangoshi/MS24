@@ -217,6 +217,11 @@ const ARP = new Tone.Pattern(function(time, note){
 
 const LIMITER = new Tone.Limiter(-20)
 
+// TODO: lossless exporting ???
+// https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
+// https://github.com/mmig/libflac.js
+// https://youtu.be/VHCv3waFkRo
+
 const RECORDER = new Tone.Recorder()
 
 let LFO_TARGET = FILTER.frequency
@@ -523,8 +528,7 @@ for (let i = 0; i < controls.length; i++) {
 				// create anchor element
 				const anchor = document.createElement("a")
 				// set file name & format
-				// TODO: encode correct file format so some players don't complain
-				anchor.download = "recording.flac"
+				anchor.download = "recording.ogg"
 				// set anchor href to url
 				anchor.href = url
 				// click anchor (download)

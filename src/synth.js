@@ -217,6 +217,8 @@ const ARP = new Tone.Pattern(function(time, note){
 
 const LIMITER = new Tone.Limiter(-20)
 
+const RECORDER = new Tone.Recorder()
+
 let LFO_TARGET = FILTER.frequency
 let SELECTED_FX = FX_DISTORTION
 
@@ -227,6 +229,8 @@ SYNTH_C.connect(OUTPUT)
 OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
 
 LFO.connect(LFO_TARGET)
+
+OUTPUT.connect(RECORDER)
 // LFO.disconnect(LFO_TARGET)
 // LFO.debug = true
 // console.log(LFO)
@@ -429,13 +433,15 @@ function setParamGroup(target, enable, min, max, step, value, label) {
 	}
 }
 
+let recorderLabel = document.getElementById("rec_label")
+
 for (let i = 0; i < controls.length; i++) {
 	// add event listener to each control
 
-	controls[i].addEventListener("change", function (e) {
-		if(e.target.id === "osc_a_switch") {
+	controls[i].addEventListener("change", async function (e) {
+		if (e.target.id === "osc_a_switch") {
 			// toggle oscillator-a on/off
-			if(e.target.value === 0) {
+			if (e.target.value === 0) {
 				SYNTH_A.disconnect()
 
 			} else {
@@ -443,9 +449,9 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_A.connect(OUTPUT)
 			}
 		}
-		if(e.target.id === "osc_b_switch") {
+		if (e.target.id === "osc_b_switch") {
 			// toggle oscillator-a on/off
-			if(e.target.value === 0) {
+			if (e.target.value === 0) {
 				// turn off
 				SYNTH_B.disconnect()
 			} else {
@@ -453,9 +459,9 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_B.connect(OUTPUT)
 			}
 		}
-		if(e.target.id === "osc_c_switch") {
+		if (e.target.id === "osc_c_switch") {
 			// toggle oscillator-a on/off
-			if(e.target.value === 0) {
+			if (e.target.value === 0) {
 				// turn off
 				SYNTH_C.disconnect()
 			} else {
@@ -463,18 +469,18 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_C.connect(OUTPUT)
 			}
 		}
-		if(e.target.id === "filter_switch") {
+		if (e.target.id === "filter_switch") {
 			// if filter toggle off...
-			if(e.target.value === 0) {
+			if (e.target.value === 0) {
 				OUTPUT.chain(SELECTED_FX, MASTER_GAIN)
 				// if filter toggle on...
 			} else {
 				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
 			}
 		}
-		if(e.target.id === "lfo_switch") {
+		if (e.target.id === "lfo_switch") {
 			// if lfo toggle value is 0...
-			if(e.target.value === 0) {
+			if (e.target.value === 0) {
 				LFO.stop()
 				// LFO.disconnect(LFO_TARGET)
 			} else {
@@ -482,9 +488,9 @@ for (let i = 0; i < controls.length; i++) {
 				// LFO.connect(LFO_TARGET)
 			}
 		}
-		if(e.target.id === "fx_switch") {
+		if (e.target.id === "fx_switch") {
 			// if fx toggle value is 0...
-			if(e.target.value === 0) {
+			if (e.target.value === 0) {
 				// set fxEnabled to false
 				fxEnabled = false
 				// if filter is enabled...
@@ -499,6 +505,32 @@ for (let i = 0; i < controls.length; i++) {
 				SELECTED_FX.set({
 					"wet": fxMix
 				})
+			}
+		}
+		if (e.target.id === "rec_switch") {
+			// if rec toggle is enabled...
+			if (e.target.value === 1) {
+				// start recording
+				await RECORDER.start()
+				// set label to "recording..."
+				recorderLabel.innerHTML = "Recording..."
+			// if rec toggle is disabled...
+			} else {
+				// stop recording & assign to variable
+				const recording = RECORDER.stop()
+				// create download link
+				const url = URL.createObjectURL(await recording)
+				// create anchor element
+				const anchor = document.createElement("a")
+				// set file name & format
+				// TODO: encode correct file format so some players don't complain
+				anchor.download = "recording.flac"
+				// set anchor href to url
+				anchor.href = url
+				// click anchor (download)
+				anchor.click()
+				// return label to default
+				recorderLabel.innerHTML = "Record"
 			}
 		}
 	})

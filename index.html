@@ -714,12 +714,25 @@
 			<!-- 	  KEYBOARD 	    -->
 			<!--********************-->
 			<div class="flex flex-row justify-center border border-gray-700 p-1">
+				<div class="w-full">&nbsp;</div>
 				<div class="border border-gray-500 rounded-xl self-center p-2">
 					<webaudio-keyboard
 						id="keyboard"
 						keys="49"
 						class="self-center"
 					></webaudio-keyboard>
+				</div>
+				<div class="w-full flex flex-col">
+					<div class="h-full self-end flex items-end">
+						<p id="rec_label" class="mr-1">Record</p>
+						<webaudio-switch
+							id="rec_switch"
+							class="control"
+							colors="#FF6188;#2C292D;#D9D9D9"
+							diameter="30"
+							value="0"
+						></webaudio-switch>
+					</div>
 				</div>
 			</div>
 		</div>

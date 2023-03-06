@@ -537,6 +537,12 @@ for (let i = 0; i < controls.length; i++) {
 	// using "input" instead of "change" to allow for continuous changes
 	controls[i].addEventListener("input", function (e) {
 		console.log(e.target.id, e.target.value);
+		if (e.target.id === "master_gain") {
+			// set master gain
+			MASTER_GAIN.set({
+				"gain": e.target.value
+			})
+		}
 		// -------------------- //
 		// --- OSCILLATOR A --- //
 		// -------------------- //

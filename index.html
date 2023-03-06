@@ -463,7 +463,20 @@
 							diameter="30"
 							value="1"
 						></webaudio-switch>
-						<p class="font-inika font-bold self-center">LFO</p>
+						<label class="font-inika font-bold self-center" for="lfo_selector">
+							LFO
+							&nbsp;
+							<select
+								id="lfo_selector"
+								class="control font-light"
+							>
+								<option value="FilterFrequency" selected="selected">Filter Frequency</option>
+								<option value="FilterResonance">Filter Resonance</option>
+								<option value="OscAVol">OSC A Volume</option>
+								<option value="OscBVol">OSC B Volume</option>
+								<option value="OscCVol">OSC C Volume</option>
+							</select>
+						</label>
 					</div>
 					<div class="flex flex-row w-[384px]">
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
@@ -472,10 +485,11 @@
 								id="lfo_grid"
 								class="control self-center"
 								colors="#FF6188;#2C292D;#D9D9D9"
-								min="1"
-								max="32"
-								value="8"
+								min="0"
+								max="9"
+								value="5"
 								step="1"
+								conv="['8/1','4/1','2/1','1/1','1/2','1/4','1/8','1/16','1/32','1/64'][x]"
 							></webaudio-knob>
 							<webaudio-param
 								link="lfo_grid"
@@ -484,34 +498,35 @@
 							></webaudio-param>
 						</div>
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
-							<p class="font-bold self-center">Rate</p>
+							<p class="font-bold self-center">Min</p>
 							<webaudio-knob
-								id="lfo_rate"
+								id="lfo_min"
 								class="control self-center"
 								colors="#A9DC76;#2C292D;#D9D9D9"
-								min="1"
-								max="32"
-								value="1"
+								min="0"
+								max="10000"
+								value="0"
 								step="1"
 							></webaudio-knob>
 							<webaudio-param
-								link="lfo_rate"
+								link="lfo_min"
 								fontSize="14"
 								class="self-center"
 							></webaudio-param>
 						</div>
 						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-2">
-							<p class="font-bold self-center">Smooth</p>
+							<p class="font-bold self-center">Max</p>
 							<webaudio-knob
-								id="lfo_smooth"
+								id="lfo_max"
 								class="control self-center"
 								colors="#FFD866;#2C292D;#D9D9D9"
 								min="0"
-								max="10"
+								max="10000"
+								value="1000"
 								step="1"
 							></webaudio-knob>
 							<webaudio-param
-								link="lfo_smooth"
+								link="lfo_max"
 								class="self-center"
 								fontSize="14"
 							></webaudio-param>

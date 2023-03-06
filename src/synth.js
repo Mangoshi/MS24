@@ -123,8 +123,12 @@ SYNTH_C.debug = true
 // FILTER - Type, Cutoff, Resonance, ADSR, Input Gains
 const FILTER = new Tone.Filter(1000, "lowpass", -12)
 
+console.log(FILTER.frequency.value)
+
+let filterFreq = 1000
+
 // LFO - Grid, Rate, Smooth, Shape, Target
-const LFO = new Tone.LFO(0, 200, 2000)
+const LFO = new Tone.LFO("4n", 0, filterFreq).start()
 
 // FX - Param 1, Param2, Param3, Mix, Input Gains
 const FX_DISTORTION = new Tone.Distortion({
@@ -176,10 +180,6 @@ const FX_FREQSHIFT = new Tone.FrequencyShifter({
 	wet: 0.5
 })
 
-
-
-let SELECTED_FX = FX_DISTORTION
-
 // NOTES - Arpeggiator, Glide, Voice, Unison
 const ARP = new Tone.Pattern(function(time, note){
 	SYNTH_A.triggerAttackRelease(note, 0.25);
@@ -215,11 +215,31 @@ const ARP = new Tone.Pattern(function(time, note){
 // SYNTH_B.chain(FX_DISTORTION, FILTER, Tone.Destination)
 // SYNTH_C.chain(FX_DISTORTION, FILTER, Tone.Destination)
 
+const LIMITER = new Tone.Limiter(-20)
+
+let LFO_TARGET = FILTER.frequency
+let SELECTED_FX = FX_DISTORTION
+
 SYNTH_A.connect(OUTPUT)
 SYNTH_B.connect(OUTPUT)
 SYNTH_C.connect(OUTPUT)
 
-OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
+OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
+
+LFO.connect(LFO_TARGET)
+// LFO.disconnect(LFO_TARGET)
+// LFO.debug = true
+// console.log(LFO)
+//
+// FILTER.set({
+// 	frequency: 1000,
+// 	type: "lowpass",
+// 	rolloff: -12
+// })
+//
+// OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
+
+
 
 function triggerToneAttackRelease(target, note, duration) {
 	target.triggerAttackRelease(note, duration)
@@ -294,7 +314,20 @@ let filterRolloffs = {
 	"3": -96,
 }
 
-let fxOversampleValues = {
+let lfoGridValues = {
+	"0": '8m',
+	"1": '4m',
+	"2": '2m',
+	"3": '1m',
+	"4": '2n',
+	"5": '4n',
+	"6": '8n',
+	"7": '16n',
+	"8": '32n',
+	"9": '64n',
+}
+
+let distortionOversampleValues = {
 	"0": "none",
 	"1": "2x",
 	"2": "4x",
@@ -439,6 +472,16 @@ for (let i = 0; i < controls.length; i++) {
 				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
 			}
 		}
+		if(e.target.id === "lfo_switch") {
+			// if lfo toggle value is 0...
+			if(e.target.value === 0) {
+				LFO.stop()
+				// LFO.disconnect(LFO_TARGET)
+			} else {
+				LFO.start()
+				// LFO.connect(LFO_TARGET)
+			}
+		}
 		if(e.target.id === "fx_switch") {
 			// if fx toggle value is 0...
 			if(e.target.value === 0) {
@@ -550,6 +593,11 @@ for (let i = 0; i < controls.length; i++) {
 			FILTER.set({
 				frequency: e.target.value
 			})
+			// have to set LFO value when connected,
+			// otherwise filter cutoff doesn't change (O_o)
+			if(LFO_TARGET === FILTER.frequency) {
+				LFO.set({"max": e.target.value})
+			}
 		}
 		if(e.target.id === "filter_resonance") {
 			// set filter resonance accordingly
@@ -567,6 +615,49 @@ for (let i = 0; i < controls.length; i++) {
 			// set filter type accordingly
 			FILTER.set({
 				type: filterTypes[e.target.value]
+			})
+		}
+		// ----------- //
+		// --- LFO --- //
+		// ----------- //
+		if(e.target.id === "lfo_selector") {
+			if(e.target.value === "FilterFrequency"){
+				LFO_TARGET = FILTER.frequency
+			} else if(e.target.value === "FilterResonance"){
+				LFO_TARGET = FILTER.Q
+			} else if(e.target.value === "OscAVol"){
+				LFO_TARGET = SYNTH_A.volume
+			} else if(e.target.value === "OscBVol"){
+				LFO_TARGET = SYNTH_B.volume
+			} else if(e.target.value === "OscCVol"){
+				LFO_TARGET = SYNTH_C.volume
+			}
+			// TODO: figure out how to disconnect LFO from previous target
+			// LFO.connect(LFO_TARGET)
+		}
+		if(e.target.id === "lfo_grid") {
+			// set lfo grid accordingly
+			LFO.set({
+				frequency: lfoGridValues[e.target.value]
+			})
+		}
+		// TODO: set min/max to different values depending on LFO target
+		if(e.target.id === "lfo_min") {
+			// set lfo min accordingly
+			LFO.set({
+				"min": e.target.value
+			})
+		}
+		if(e.target.id === "lfo_max") {
+			// set lfo max accordingly
+			LFO.set({
+				"max": e.target.value
+			})
+		}
+		if(e.target.id === "lfo_shape") {
+			// set lfo shape accordingly
+			LFO.set({
+				type: shapeValues[e.target.value]
 			})
 		}
 		// ---------- //
@@ -771,7 +862,7 @@ for (let i = 0; i < controls.length; i++) {
 			// set fx param 2 accordingly
 			if(SELECTED_FX === FX_DISTORTION) {
 				FX_DISTORTION.set({
-					"oversample": fxOversampleValues[e.target.value]
+					"oversample": distortionOversampleValues[e.target.value]
 				})
 			} else if(SELECTED_FX === FX_CHEBYSHEV) {
 				FX_CHEBYSHEV.set({
@@ -958,6 +1049,7 @@ keyboard.addEventListener("change", function (e) {
 	if (e.note[0]) {
 		// if not already in heldKeys array, push it
 		if (!heldKeys.includes(note_a) || !heldKeys.includes(note_b) || !heldKeys.includes(note_c)) {
+			// LFO.stop()
 			heldKeys.push(note_a);
 			heldKeys.push(note_b);
 			heldKeys.push(note_c);
@@ -979,6 +1071,7 @@ keyboard.addEventListener("change", function (e) {
 			}
 			console.log("playingKeys:", playingKeys)
 			console.log("heldKeys:", heldKeys)
+			// LFO.start()
 		}
 	// If note off
 	} else {
@@ -1006,6 +1099,7 @@ keyboard.addEventListener("change", function (e) {
 			SYNTH_B.releaseAll();
 			SYNTH_C.releaseAll();
 		}
+		// LFO.stop()
 	}
 });
 

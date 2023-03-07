@@ -24,8 +24,8 @@
 	<title>MS24</title>
 </head>
 <body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light">
-<div class="pt-16 pb-10 sm:pt-20">
-	<main>
+<div class="pt-16 pb-5 sm:pt-10">
+	<main class="flex justify-center">
 		<div id="consentContainer">
 			<div class="flex flex-col justify-center items-center">
 				<p class="text-2xl font-bold mb-2">MangoSynth24</p>
@@ -33,31 +33,47 @@
 				<button class="bg-gray-700 text-white rounded-lg px-4 py-2 mt-4" id="contextConsentButton">Allow</button>
 			</div>
 		</div>
-		<div class="flex flex-col hidden" id="synthContainer">
+		<div class="flex flex-col hidden w-min" id="synthContainer">
 			<!--********************-->
 			<!-- 	  TOP ROW 	    -->
 			<!--********************-->
-			<div class="flex flex-row justify-center border border-gray-700 p-1">
-				<div class="w-full flex flex-col">
-					<div class="h-full self-end flex items-end">
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col">
-							<p id="master_gain_label" class="mr-1 text-center">Master</p>
-							<webaudio-knob
-								id="master_gain"
-								class="control self-center"
-								colors="#FFFFFF;#2C292D;#D9D9D9"
-								diameter="40"
-								min="0"
-								max="2"
-								value="1"
-								step="0.01"
-							></webaudio-knob>
-							<webaudio-param
-								link="master_gain"
-								fontSize="14"
-								class="self-center"
-							></webaudio-param>
-						</div>
+			<div class="border border-gray-700 p-1 w-full flex flex-row justify-between">
+				<div class="w-[250px] flex flex-row justify-start">
+					<div class="ml-5 p-1 flex flex-row">
+						<button class="border border-gray-300 rounded-xl p-2 self-center hover:bg-gray-600">
+							Settings
+						</button>
+					</div>
+				</div>
+				<div class="w-[250px] flex flex-row justify-center">
+					<div class="p-1 flex flex-col justify-center">
+						<img
+							src="src/logo.png"
+							alt="logo"
+							class="hover:scale-125 transition-all duration-500 ease-in-out"
+							height="75"
+							width="75"
+						/>
+					</div>
+				</div>
+				<div class="mr-1 w-[250px] flex flex-row justify-end">
+					<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col">
+						<p id="master_gain_label" class="text-center">Master</p>
+						<webaudio-knob
+							id="master_gain"
+							class="control self-center"
+							colors="#FFFFFF;#2C292D;#D9D9D9"
+							diameter="40"
+							min="0"
+							max="2"
+							value="0.5"
+							step="0.01"
+						></webaudio-knob>
+						<webaudio-param
+							link="master_gain"
+							fontSize="14"
+							class="self-center"
+						></webaudio-param>
 					</div>
 				</div>
 			</div>
@@ -203,7 +219,7 @@
 									diameter="30"
 									min="0"
 									max="1"
-									value="1"
+									value="0.3"
 									step="0.001"
 								></webaudio-knob>
 								<webaudio-param
@@ -426,7 +442,7 @@
 									diameter="30"
 									min="0"
 									max="1"
-									value="1"
+									value="0.3"
 									step="0.001"
 								></webaudio-knob>
 								<webaudio-param
@@ -478,7 +494,7 @@
 								class="control self-center"
 								colors="#A9DC76;#2C292D;#D9D9D9"
 								diameter="30"
-								value="1"
+								value="0"
 							></webaudio-switch>
 							<p class="font-inika font-bold self-center">SUB OSC</p>
 						</div>
@@ -606,7 +622,7 @@
 									diameter="30"
 									min="0"
 									max="1"
-									value="1"
+									value="0.3"
 									step="0.001"
 								></webaudio-knob>
 								<webaudio-param

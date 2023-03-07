@@ -32,7 +32,7 @@ let synthContainer = document.getElementById("synthContainer");
 
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
-	synthContainer.style.display = "block";
+	synthContainer.style.display = "flex";
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();
 	}

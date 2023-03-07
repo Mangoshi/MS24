@@ -66,15 +66,12 @@ import synthData from '../json/defaultSynthData.json' assert {type: 'json'}
 // })
 
 const OUTPUT = Tone.Destination
-const MASTER_GAIN = new Tone.Gain(1)
+const MASTER_GAIN = new Tone.Gain(0.5)
 
 const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
 		type: 'sine'
-	},
-	envelope: {
-		sustain: 1
 	}
 })
 
@@ -82,9 +79,6 @@ const SYNTH_B = new Tone.PolySynth(Tone.Synth)
 SYNTH_B.set({
 	oscillator: {
 		type: 'triangle'
-	},
-	envelope: {
-		sustain: 1
 	}
 })
 
@@ -92,9 +86,6 @@ const SYNTH_C = new Tone.PolySynth(Tone.Synth)
 SYNTH_C.set({
 	oscillator: {
 		type: 'sawtooth'
-	},
-	envelope: {
-		sustain: 1
 	}
 })
 
@@ -197,7 +188,7 @@ const ARP = new Tone.Pattern(function(time, note){
 // SYNTH_B.chain(FX_DISTORTION, FILTER, Tone.Destination)
 // SYNTH_C.chain(FX_DISTORTION, FILTER, Tone.Destination)
 
-const LIMITER = new Tone.Limiter(-20)
+const LIMITER = new Tone.Limiter(-10)
 
 // TODO: lossless exporting ???
 // https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
@@ -211,7 +202,7 @@ let SELECTED_FX = FX_DISTORTION
 
 SYNTH_A.connect(OUTPUT)
 SYNTH_B.connect(OUTPUT)
-SYNTH_C.connect(OUTPUT)
+// SYNTH_C.connect(OUTPUT)
 
 OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
 

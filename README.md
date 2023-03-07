@@ -4,7 +4,18 @@ Welcome to the MangoSynth24 repository!
 
 This repo contains the source code for my project.
 
-Eventually it will also contain the report, screencast, and development build.
+Eventually it will also contain the report and a screencast.
+
+It is being hosted [here](https://ms24.vercel.app/), deployed using Vercel.
+
+```
+Note: 
+
+There are some issues with how I've used the webaudio-controls jQuery API on the live version!
+
+As a result, the FX selector and LFO target selector do not work yet...
+```
+
 
 ### Technologies
 

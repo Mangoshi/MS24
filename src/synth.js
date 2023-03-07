@@ -5,9 +5,6 @@ import synthData from '../json/defaultSynthData.json' assert {type: 'json'}
 // -- TONE.JS SETUP -- //
 
 // TODO:
-//  - ENVELOPE A
-//  - ENVELOPE B
-//  - ENVELOPE C
 //  - A/B FM (Ratio & Depth)
 //  - FILTER ENVELOPE
 //  - DYNAMIC LFO
@@ -65,23 +62,31 @@ import synthData from '../json/defaultSynthData.json' assert {type: 'json'}
 // 	portamento: 1,
 // })
 
-const OUTPUT = Tone.Destination
+// MASTER //
+const OUTPUT = Tone.getDestination()
 const MASTER_GAIN = new Tone.Gain(0.5)
+const MASTER_LIMITER = new Tone.Limiter(-10)
 
+// RECORD //
+const RECORDER = new Tone.Recorder()
+// TODO: lossless exporting ???
+// https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
+// https://github.com/mmig/libflac.js
+// https://youtu.be/VHCv3waFkRo
+
+// GENERATORS //
 const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
 		type: 'sine'
 	}
 })
-
 const SYNTH_B = new Tone.PolySynth(Tone.Synth)
 SYNTH_B.set({
 	oscillator: {
 		type: 'triangle'
 	}
 })
-
 const SYNTH_C = new Tone.PolySynth(Tone.Synth)
 SYNTH_C.set({
 	oscillator: {
@@ -93,17 +98,15 @@ SYNTH_A.debug = true
 SYNTH_B.debug = true
 SYNTH_C.debug = true
 
-// FILTER - Type, Cutoff, Resonance, ADSR, Input Gains
+// FILTER //
 const FILTER = new Tone.Filter(1000, "lowpass", -12)
-
 console.log(FILTER.frequency.value)
-
 let filterFreq = 1000
 
-// LFO - Grid, Rate, Smooth, Shape, Target
+// LFO //
 const LFO = new Tone.LFO("4n", 0, filterFreq).start()
 
-// FX - Param 1, Param2, Param3, Mix, Input Gains
+// FX //
 const FX_DISTORTION = new Tone.Distortion({
 	distortion: 0,
 	oversample: "none",
@@ -153,22 +156,19 @@ const FX_FREQSHIFT = new Tone.FrequencyShifter({
 	wet: 0.5
 })
 
-// NOTES - Arpeggiator, Glide, Voice, Unison
+// NOTES //
 const ARP = new Tone.Pattern(function(time, note){
 	SYNTH_A.triggerAttackRelease(note, 0.25);
 	SYNTH_B.triggerAttackRelease(note, 0.25);
 	SYNTH_C.triggerAttackRelease(note, 0.25);
 }, ["C4", "D4", "E4", "G4", "A4"]);
 
-// MASTER - Volume
+// SETTINGS - Keyboard, MIDI, Visuals //
 
-// RECORD - Start, Stop, Save
+// PRESETS - Save, Load, Randomize //
 
-// PRESETS - Save, Load, Randomize
 
-// SETTINGS - Keyboard, MIDI, Audio, Visuals
-
-// CONNECTIONS
+// CONNECTIONS //
 // OSC_A.connect(ENV_A)
 // ENV_A.chain(FILTER, Tone.Destination)
 //
@@ -188,27 +188,32 @@ const ARP = new Tone.Pattern(function(time, note){
 // SYNTH_B.chain(FX_DISTORTION, FILTER, Tone.Destination)
 // SYNTH_C.chain(FX_DISTORTION, FILTER, Tone.Destination)
 
-const LIMITER = new Tone.Limiter(-10)
 
-// TODO: lossless exporting ???
-// https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
-// https://github.com/mmig/libflac.js
-// https://youtu.be/VHCv3waFkRo
 
-const RECORDER = new Tone.Recorder()
 
 let LFO_TARGET = FILTER.frequency
 let SELECTED_FX = FX_DISTORTION
 
-SYNTH_A.connect(OUTPUT)
-SYNTH_B.connect(OUTPUT)
-// SYNTH_C.connect(OUTPUT)
+// CONNECTIONS //
 
-OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
+// Synths to Master
+SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+// SYNTH_C.chain(FILTER, SELECTED_FX)
 
+// Master FX Chain
+OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
+// OUTPUT.connect(FILTER)
+// OUTPUT.connect(SELECTED_FX)
+// OUTPUT.connect(MASTER_GAIN)
+// OUTPUT.connect(MASTER_LIMITER)
+
+// Modulation
 LFO.connect(LFO_TARGET).stop()
 
+// Master Record
 OUTPUT.connect(RECORDER)
+
 // LFO.disconnect(LFO_TARGET)
 // LFO.debug = true
 // console.log(LFO)
@@ -219,9 +224,7 @@ OUTPUT.connect(RECORDER)
 // 	rolloff: -12
 // })
 //
-// OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
-
-
+// OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
 
 function triggerToneAttackRelease(target, note, duration) {
 	target.triggerAttackRelease(note, duration)
@@ -243,7 +246,6 @@ let synthOctaves = {
 	"osc_b_octave": 4,
 	"osc_c_octave": 1,
 }
-
 let octaveValues = {
 	"-3": 0,
 	"-2": 1,
@@ -253,26 +255,22 @@ let octaveValues = {
 	"2": 5,
 	"3": 6,
 }
-
 let subOctaveValues = {
 	"0": 1,
 	"1": 2,
 	"2": 3,
 	"3": 4,
 }
-
 let synthSemitones = {
 	"osc_a_semi": 0,
 	"osc_b_semi": 0,
 	"osc_c_semi": 0,
 }
-
 let synthShapes = {
 	"osc_a_shape": "sine",
 	"osc_b_shape": "square",
 	"osc_c_shape": "sawtooth",
 }
-
 let shapeValues = {
 	"0": "sine",
 	"1": "triangle",
@@ -280,7 +278,6 @@ let shapeValues = {
 	"3": "square",
 	"4": "sine",
 }
-
 let filterTypes = {
 	"0": "lowpass",
 	"1": "highpass",
@@ -288,14 +285,12 @@ let filterTypes = {
 	"3": "allpass",
 	"4": "notch",
 }
-
 let filterRolloffs = {
 	"0": -12,
 	"1": -24,
 	"2": -48,
 	"3": -96,
 }
-
 let lfoGridValues = {
 	"0": '8m',
 	"1": '4m',
@@ -308,13 +303,11 @@ let lfoGridValues = {
 	"8": '32n',
 	"9": '64n',
 }
-
 let distortionOversampleValues = {
 	"0": "none",
 	"1": "2x",
 	"2": "4x",
 }
-
 let fxDelayTimeValues = {
 	"0": "16n",
 	"1": "8n",
@@ -330,7 +323,12 @@ let fxDelayTimeValues = {
 //  - onRelease removes note from array
 //  - Controls changes the array / signals
 
-// Initialize FX variables
+// Initialize Synth variables
+let oscAEnabled = true
+let oscBEnabled = true
+let oscCEnabled = false
+let filterEnabled = true
+let lfoEnabled = false
 let fxEnabled = true
 let fxMix = 0.5
 
@@ -413,6 +411,20 @@ function setParamGroup(target, enable, min, max, step, value, label) {
 
 let recorderLabel = document.getElementById("rec_label")
 
+
+// -- EVENT LISTENERS -- //
+document.addEventListener("keypress", function (e) {
+	// console.log(e)
+	// disable quick-find in browser
+	if (e.key === "/") {
+		e.preventDefault()
+	}
+	// disable quick-find (links only) in browser
+	if (e.key === "'") {
+		e.preventDefault()
+	}
+})
+
 for (let i = 0; i < controls.length; i++) {
 	// add event listener to each control
 
@@ -421,10 +433,19 @@ for (let i = 0; i < controls.length; i++) {
 			// toggle oscillator-a on/off
 			if (e.target.value === 0) {
 				SYNTH_A.disconnect()
-
+				oscAEnabled = false
 			} else {
-				// turn on
-				SYNTH_A.connect(OUTPUT)
+				// depending on filter and fx settings, connect to the correct nodes
+				if(filterEnabled && fxEnabled){
+					SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+				} else if(filterEnabled && !fxEnabled){
+					SYNTH_A.chain(FILTER, OUTPUT)
+				} else if(!filterEnabled && fxEnabled){
+					SYNTH_A.chain(SELECTED_FX, OUTPUT)
+				} else {
+					SYNTH_A.connect(OUTPUT)
+				}
+				oscAEnabled = true
 			}
 		}
 		if (e.target.id === "osc_b_switch") {
@@ -432,9 +453,19 @@ for (let i = 0; i < controls.length; i++) {
 			if (e.target.value === 0) {
 				// turn off
 				SYNTH_B.disconnect()
+				oscBEnabled = false
 			} else {
-				// turn on
-				SYNTH_B.connect(OUTPUT)
+				// depending on filter and fx settings, connect to the correct nodes
+				if(filterEnabled && fxEnabled){
+					SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+				} else if(filterEnabled && !fxEnabled){
+					SYNTH_B.chain(FILTER, OUTPUT)
+				} else if(!filterEnabled && fxEnabled){
+					SYNTH_B.chain(SELECTED_FX, OUTPUT)
+				} else {
+					SYNTH_B.connect(OUTPUT)
+				}
+				oscBEnabled = true
 			}
 		}
 		if (e.target.id === "osc_c_switch") {
@@ -442,18 +473,88 @@ for (let i = 0; i < controls.length; i++) {
 			if (e.target.value === 0) {
 				// turn off
 				SYNTH_C.disconnect()
+				oscCEnabled = false
 			} else {
-				// turn on
-				SYNTH_C.connect(OUTPUT)
+				// depending on filter and fx settings, connect to the correct nodes
+				if(filterEnabled && fxEnabled){
+					SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+				} else if(filterEnabled && !fxEnabled){
+					SYNTH_C.chain(FILTER, OUTPUT)
+				} else if(!filterEnabled && fxEnabled){
+					SYNTH_C.chain(SELECTED_FX, OUTPUT)
+				} else {
+					SYNTH_C.connect(OUTPUT)
+				}
+				oscCEnabled = true
 			}
 		}
 		if (e.target.id === "filter_switch") {
 			// if filter toggle off...
 			if (e.target.value === 0) {
-				OUTPUT.chain(SELECTED_FX, MASTER_GAIN)
-				// if filter toggle on...
+				// and fx is on...
+				if(fxEnabled){
+					if(oscAEnabled){
+						SYNTH_A.disconnect()
+						SYNTH_A.chain(SELECTED_FX, OUTPUT)
+					}
+					if(oscBEnabled){
+						SYNTH_B.disconnect()
+						SYNTH_B.chain(SELECTED_FX, OUTPUT)
+					}
+					if(oscCEnabled){
+						SYNTH_C.disconnect()
+						SYNTH_C.chain(SELECTED_FX, OUTPUT)
+					}
+				// and fx is off...
+				} else {
+					if(oscAEnabled){
+						SYNTH_A.disconnect()
+						SYNTH_A.connect(OUTPUT)
+					}
+					if(oscBEnabled){
+						SYNTH_B.disconnect()
+						SYNTH_B.connect(OUTPUT)
+					}
+					if(oscCEnabled){
+						SYNTH_C.disconnect()
+						SYNTH_C.connect(OUTPUT)
+					}
+				}
+				// set filterEnabled to false
+				filterEnabled = false
+			// if filter toggle on...
 			} else {
-				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
+				// and fx is on...
+				if(fxEnabled){
+					if(oscAEnabled){
+						SYNTH_A.disconnect()
+						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+					}
+					if(oscBEnabled){
+						SYNTH_B.disconnect()
+						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+					}
+					if(oscCEnabled){
+						SYNTH_C.disconnect()
+						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+					}
+				// and fx is off...
+				} else {
+					if(oscAEnabled){
+						SYNTH_A.disconnect()
+						SYNTH_A.chain(FILTER, OUTPUT)
+					}
+					if(oscBEnabled){
+						SYNTH_B.disconnect()
+						SYNTH_B.chain(FILTER, OUTPUT)
+					}
+					if(oscCEnabled){
+						SYNTH_C.disconnect()
+						SYNTH_C.chain(FILTER, OUTPUT)
+					}
+				}
+				// set filterEnabled to true
+				filterEnabled = true
 			}
 		}
 		if (e.target.id === "lfo_switch") {
@@ -461,28 +562,30 @@ for (let i = 0; i < controls.length; i++) {
 			if (e.target.value === 0) {
 				LFO.stop()
 				// LFO.disconnect(LFO_TARGET)
+				lfoEnabled = false
 			} else {
 				LFO.start()
 				// LFO.connect(LFO_TARGET)
+				lfoEnabled = true
 			}
 		}
 		if (e.target.id === "fx_switch") {
 			// if fx toggle value is 0...
 			if (e.target.value === 0) {
-				// set fxEnabled to false
-				fxEnabled = false
 				// if filter is enabled...
 				SELECTED_FX.set({
 					"wet": 0
 				})
-				// if fx toggle value is 1...
+				// set fxEnabled to false
+				fxEnabled = false
+			// if fx toggle value is 1...
 			} else {
-				// set fxEnabled to true
-				fxEnabled = true
 				// if filter is enabled...
 				SELECTED_FX.set({
 					"wet": fxMix
 				})
+				// set fxEnabled to true
+				fxEnabled = true
 			}
 		}
 		if (e.target.id === "rec_switch") {
@@ -793,6 +896,9 @@ for (let i = 0; i < controls.length; i++) {
 		// --- FX --- //
 		// ---------- //
 		if(e.target.id === "fx_selector") {
+
+			let PREVIOUS_FX = SELECTED_FX
+
 			// reset all fx wet values to 0 (off)
 			FX_DISTORTION.set({wet: 0})
 			FX_CHEBYSHEV.set({wet: 0})
@@ -837,7 +943,7 @@ for (let i = 0; i < controls.length; i++) {
 				// (https://g200kg.github.io/webaudio-controls/docs/detailspecs.html) - setValue doesn't work
 				// (https://g200kg.github.io/webaudio-controls/docs/resizetest.html) - jQuery logic here does
 
-				setParamGroup(1,1, 0, 100, 0.5, 0, "Intensity")
+				setParamGroup(1,1, 0, 20, 0.1, 0, "Intensity")
 				setParamGroup(2, 1, 0, 2, 1, 0, "Oversample" )
 				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix" )
 				setParamGroup(4, 0)
@@ -900,7 +1006,7 @@ for (let i = 0; i < controls.length; i++) {
 				console.log("PitchShift Selected")
 				SELECTED_FX = FX_PITCHSHIFT
 
-				setParamGroup(1, 1, 0, 120, 0.1, 10, "Pitch")
+				setParamGroup(1, 1, 0, 120, 0.1, 0, "Pitch")
 				setParamGroup(2, 1, 0, 5, 0.1, 0, "Delay")
 				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Feedback")
 				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
@@ -909,7 +1015,7 @@ for (let i = 0; i < controls.length; i++) {
 				console.log("FreqShift Selected")
 				SELECTED_FX = FX_FREQSHIFT
 
-				setParamGroup(1, 1, 0, 5000, 0.1, 10, "Frequency")
+				setParamGroup(1, 1, 0, 5000, 0.1, 0, "Frequency")
 				setParamGroup(2, 1, 0, 1, 0.1, 0.5, "Mix")
 				setParamGroup(3, 0)
 				setParamGroup(4, 0)
@@ -941,10 +1047,26 @@ for (let i = 0; i < controls.length; i++) {
 			if(fxEnabled){
 				// set selected FX wet value to fxMix
 				SELECTED_FX.set({wet: fxMix})
-				// log selected FX
+				// log selected
+
+				console.log("Removing previous FX: " + PREVIOUS_FX + "...")
+				// disconnect previous FX from output chain
+				SYNTH_A.disconnect()
+				SYNTH_B.disconnect()
+				SYNTH_C.disconnect()
+				FILTER.disconnect()
+
 				console.log("Setting FX to " + SELECTED_FX + "...")
 				// set output chain to filter -> selected FX -> master gain
-				OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN)
+				if(oscAEnabled) {
+					SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+				}
+				if(oscBEnabled) {
+					SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+				}
+				if(oscCEnabled) {
+					SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+				}
 			}
 		}
 		if(e.target.id === "fx_param1") {

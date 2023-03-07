@@ -5,78 +5,51 @@ import synthData from '../json/defaultSynthData.json' assert {type: 'json'}
 // -- TONE.JS SETUP -- //
 
 // TODO:
-//  - OSCILLATOR A
 //  - ENVELOPE A
-//  - OSCILLATOR B
 //  - ENVELOPE B
-//  - OSCILLATOR C
 //  - ENVELOPE C
 //  - A/B FM (Ratio & Depth)
-//  - MULTI-FILTER
 //  - FILTER ENVELOPE
 //  - DYNAMIC LFO
-//  - FX: REVERB
-//  - FX: DELAY
-//  - FX: DISTORTION
-//  - FX: CHORUS
-//  - FX: BIT CRUSHER
-//  - FX: PITCH SHIFT
-//  - FX: FREQ SHIFT
 //  - ARPEGGIATOR
 //  - GLIDE CONTROLS (Portamento)
 //  - VOICE & UNISON CONTROL
-//  - MASTER VOLUME
-//  - AUDIO RECORDING
-
-// DOCS:
-// Oscillator: https://tonejs.github.io/docs/14.7.77/Oscillator
-// Amplitude Envelope: https://tonejs.github.io/docs/14.7.77/AmplitudeEnvelope
-// Filter: https://tonejs.github.io/docs/14.7.77/Filter
-// LFO: https://tonejs.github.io/docs/14.7.77/LFO
-// Reverb: https://tonejs.github.io/docs/14.7.77/Reverb
-// Delay: https://tonejs.github.io/docs/14.7.77/Delay
-// Distortion: https://tonejs.github.io/docs/14.7.77/Distortion
-// Chorus: https://tonejs.github.io/docs/14.7.77/Chorus
-// BitCrusher: https://tonejs.github.io/docs/14.7.77/BitCrusher
-// PitchShift: https://tonejs.github.io/docs/14.7.77/PitchShift
-// FrequencyShifter: https://tonejs.github.io/docs/14.7.77/FrequencyShifter
-// Arpeggiator: https://tonejs.github.io/docs/14.7.77/Arpeggiator
 
 
-const synth = new Tone.PolySynth(Tone.FMSynth).toDestination()
+// const synth = new Tone.PolySynth(Tone.FMSynth).toDestination()
 
 // OSC A - Octave, Detune, Partials, ADSR
-const ENV_A = new Tone.AmplitudeEnvelope({
-	attack: 0.1,
-	decay: 0.2,
-	sustain: 1.0,
-	release: 0.8
-})
-const OSC_A = new Tone.Oscillator(440)
+// const ENV_A = new Tone.AmplitudeEnvelope({
+// 	attack: 0.1,
+// 	decay: 0.2,
+// 	sustain: 1.0,
+// 	release: 0.8
+// })
+// const OSC_A = new Tone.Oscillator(440)
 
 // FM A/B - Ratio, Depth, Mix(?)
 
 // OSC B - Octave, Detune, Partials, ADSR
-const ENV_B = new Tone.AmplitudeEnvelope({
-	attack: 0.1,
-	decay: 0.2,
-	sustain: 1.0,
-	release: 0.8
-})
-const OSC_B = new Tone.Oscillator(220)
+// const ENV_B = new Tone.AmplitudeEnvelope({
+// 	attack: 0.1,
+// 	decay: 0.2,
+// 	sustain: 1.0,
+// 	release: 0.8
+// })
+// const OSC_B = new Tone.Oscillator(220)
 
 // OSC C - Octave, Detune, Partials(?), ADSR
-const ENV_C = new Tone.AmplitudeEnvelope({
-	attack: 0.1,
-	decay: 0.2,
-	sustain: 1.0,
-	release: 0.8
-})
-const OSC_C = new Tone.Oscillator(110)
+// const ENV_C = new Tone.AmplitudeEnvelope({
+// 	attack: 0.1,
+// 	decay: 0.2,
+// 	sustain: 1.0,
+// 	release: 0.8
+// })
+// const OSC_C = new Tone.Oscillator(110)
 
 // ALT IDEA: Use Tone.PolySynths //
-let SYNTH_A_OSC = synthData.OSC_A.oscillator
-let SYNTH_A_ENV = synthData.OSC_A.envelope
+// let SYNTH_A_OSC = synthData.OSC_A.oscillator
+// let SYNTH_A_ENV = synthData.OSC_A.envelope
 // const SYNTH_A = new Tone.PolySynth(Tone.FMSynth, {
 // 	volume: 10,
 // 	oscillator: SYNTH_A_OSC,
@@ -99,6 +72,9 @@ const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
 		type: 'sine'
+	},
+	envelope: {
+		sustain: 1
 	}
 })
 
@@ -106,6 +82,9 @@ const SYNTH_B = new Tone.PolySynth(Tone.Synth)
 SYNTH_B.set({
 	oscillator: {
 		type: 'triangle'
+	},
+	envelope: {
+		sustain: 1
 	}
 })
 
@@ -113,6 +92,9 @@ const SYNTH_C = new Tone.PolySynth(Tone.Synth)
 SYNTH_C.set({
 	oscillator: {
 		type: 'sawtooth'
+	},
+	envelope: {
+		sustain: 1
 	}
 })
 
@@ -233,7 +215,7 @@ SYNTH_C.connect(OUTPUT)
 
 OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
 
-LFO.connect(LFO_TARGET)
+LFO.connect(LFO_TARGET).stop()
 
 OUTPUT.connect(RECORDER)
 // LFO.disconnect(LFO_TARGET)
@@ -571,6 +553,12 @@ for (let i = 0; i < controls.length; i++) {
 			synthSemitones["osc_a_semi"] = e.target.value
 			console.log(synthSemitones)
 		}
+		if(e.target.id === "osc_a_volume") {
+			// set oscillator-a volume accordingly
+			SYNTH_A.set({
+				"volume": e.target.value
+			})
+		}
 		if(e.target.id === "osc_a_shape") {
 			// set oscillator-a shape accordingly
 			synthShapes["osc_a_shape"] = shapeValues[e.target.value]
@@ -580,6 +568,38 @@ for (let i = 0; i < controls.length; i++) {
 				}
 			})
 			console.log(synthShapes)
+		}
+		if(e.target.id === "osc_a_attack") {
+			// set oscillator-a attack accordingly
+			SYNTH_A.set({
+				"envelope": {
+					"attack": e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_a_decay") {
+			// set oscillator-a decay accordingly
+			SYNTH_A.set({
+				"envelope": {
+					"decay": e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_a_sustain") {
+			// set oscillator-a sustain accordingly
+			SYNTH_A.set({
+				"envelope": {
+					"sustain": e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_a_release") {
+			// set oscillator-a release accordingly
+			SYNTH_A.set({
+				"envelope": {
+					"release": e.target.value
+				}
+			})
 		}
 		// -------------------- //
 		// --- OSCILLATOR B --- //
@@ -594,6 +614,12 @@ for (let i = 0; i < controls.length; i++) {
 			synthSemitones["osc_b_semi"] = e.target.value
 			console.log(synthSemitones)
 		}
+		if(e.target.id === "osc_b_volume") {
+			// set oscillator-a volume accordingly
+			SYNTH_B.set({
+				"volume": e.target.value
+			})
+		}
 		if(e.target.id === "osc_b_shape") {
 			// set oscillator-b shape accordingly
 			synthShapes["osc_b_shape"] = shapeValues[e.target.value]
@@ -603,6 +629,38 @@ for (let i = 0; i < controls.length; i++) {
 				}
 			})
 			console.log(synthShapes)
+		}
+		if(e.target.id === "osc_b_attack") {
+			// set oscillator-a attack accordingly
+			SYNTH_B.set({
+				"envelope": {
+					attack: e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_b_decay") {
+			// set oscillator-a decay accordingly
+			SYNTH_B.set({
+				"envelope": {
+					decay: e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_b_sustain") {
+			// set oscillator-a sustain accordingly
+			SYNTH_B.set({
+				"envelope": {
+					sustain: e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_b_release") {
+			// set oscillator-a release accordingly
+			SYNTH_B.set({
+				"envelope": {
+					release: e.target.value
+				}
+			})
 		}
 		// -------------------- //
 		// --- OSCILLATOR C --- //
@@ -617,6 +675,12 @@ for (let i = 0; i < controls.length; i++) {
 			synthSemitones["osc_c_semi"] = e.target.value
 			console.log(synthSemitones)
 		}
+		if(e.target.id === "osc_c_volume") {
+			// set oscillator-a volume accordingly
+			SYNTH_C.set({
+				"volume": e.target.value
+			})
+		}
 		if(e.target.id === "osc_c_shape") {
 			// set oscillator-c shape accordingly
 			synthShapes["osc_c_shape"] = shapeValues[e.target.value]
@@ -626,6 +690,38 @@ for (let i = 0; i < controls.length; i++) {
 				}
 			})
 			console.log(synthShapes)
+		}
+		if(e.target.id === "osc_c_attack") {
+			// set oscillator-a attack accordingly
+			SYNTH_C.set({
+				"envelope": {
+					attack: e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_c_decay") {
+			// set oscillator-a decay accordingly
+			SYNTH_C.set({
+				"envelope": {
+					decay: e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_c_sustain") {
+			// set oscillator-a sustain accordingly
+			SYNTH_C.set({
+				"envelope": {
+					sustain: e.target.value
+				}
+			})
+		}
+		if(e.target.id === "osc_c_release") {
+			// set oscillator-a release accordingly
+			SYNTH_C.set({
+				"envelope": {
+					release: e.target.value
+				}
+			})
 		}
 		// -------------- //
 		// --- FILTER --- //
@@ -1096,21 +1192,19 @@ keyboard.addEventListener("change", function (e) {
 			heldKeys.push(note_b);
 			heldKeys.push(note_c);
 			// Trigger the attack for the new notes and add them to the playingKeys array
-			if (!playingKeys.includes(note_a)) {
-				SYNTH_A.triggerAttack(note_a, "8n");
-				playingKeys.push(note_a);
-				console.log("OSC_A Frequency:", SYNTH_A.toFrequency(note_a))
-			}
-			if (!playingKeys.includes(note_b)) {
-				SYNTH_B.triggerAttack(note_b, "8n");
-				playingKeys.push(note_b);
-				console.log("OSC_B Frequency:", SYNTH_B.toFrequency(note_b))
-			}
-			if (!playingKeys.includes(note_c)) {
-				SYNTH_C.triggerAttack(note_c, "8n");
-				playingKeys.push(note_c);
-				console.log("OSC_C Frequency:", SYNTH_C.toFrequency(note_c))
-			}
+
+			SYNTH_A.triggerAttack(note_a);
+			playingKeys.push(note_a);
+			console.log("OSC_A Frequency:", SYNTH_A.toFrequency(note_a))
+
+			SYNTH_B.triggerAttack(note_b);
+			playingKeys.push(note_b);
+			console.log("OSC_B Frequency:", SYNTH_B.toFrequency(note_b))
+
+			SYNTH_C.triggerAttack(note_c);
+			playingKeys.push(note_c);
+			console.log("OSC_C Frequency:", SYNTH_C.toFrequency(note_c))
+
 			console.log("playingKeys:", playingKeys)
 			console.log("heldKeys:", heldKeys)
 			// LFO.start()
@@ -1121,15 +1215,15 @@ keyboard.addEventListener("change", function (e) {
 		heldKeys = heldKeys.filter(item => item !== note_a && item !== note_b && item !== note_c);
 		// Trigger the release for the playing notes and remove them from the playingKeys array
 		if (playingKeys.includes(note_a)) {
-			SYNTH_A.triggerRelease(note_a, "8n");
+			SYNTH_A.triggerRelease(note_a);
 			playingKeys = playingKeys.filter(item => item !== note_a);
 		}
 		if (playingKeys.includes(note_b)) {
-			SYNTH_B.triggerRelease(note_b, "8n");
+			SYNTH_B.triggerRelease(note_b);
 			playingKeys = playingKeys.filter(item => item !== note_b);
 		}
 		if (playingKeys.includes(note_c)) {
-			SYNTH_C.triggerRelease(note_c, "8n");
+			SYNTH_C.triggerRelease(note_c);
 			playingKeys = playingKeys.filter(item => item !== note_c);
 		}
 		console.log("playingKeys:", playingKeys)

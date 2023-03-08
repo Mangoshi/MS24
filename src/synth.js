@@ -284,6 +284,8 @@ let filterTypes = {
 	"2": "bandpass",
 	"3": "allpass",
 	"4": "notch",
+	"5": "lowshelf",
+	"6": "highshelf",
 }
 let filterRolloffs = {
 	"0": -12,
@@ -328,32 +330,57 @@ let oscAEnabled = true
 let oscBEnabled = true
 let oscCEnabled = false
 let filterEnabled = true
+let selectedFilter = "lowpass"
+let filterResonance = 0
+let filterGain = 0
 let lfoEnabled = false
 let fxEnabled = true
 let fxMix = 0.5
 
-let fxParam1 = document.getElementById("fx_param1")
+let filterResonanceKnob = document.getElementById("filter_resonance")
+let filterResonanceReadout = document.getElementById("filter_resonance_readout")
+let filterResonanceLabel = document.getElementById("filter_resonance_label")
+let filterResonanceGroup = document.getElementById("filter_resonance_group")
+
+
+function updateFilterKnob(target, enable, min, max, step, value, label) {
+	if(target==="filter_resonance"){
+		$('#filter_resonance')[0].min=min;
+		$('#filter_resonance')[0].max=max;
+		$('#filter_resonance')[0].step=step;
+		$('#filter_resonance')[0].value=value;
+		$('#filter_resonance')[0].enable=enable;
+		filterResonanceReadout.value = value
+		filterResonanceLabel.innerHTML = label
+		if(!enable){
+			filterResonanceGroup.setAttribute("style", "display: none;")
+		} else {
+			filterResonanceGroup.setAttribute("style", "display: flex;")
+		}
+	}
+}
+
+let fxParam1Knob = document.getElementById("fx_param1")
 let fxParam1Readout = document.getElementById("fx_param1_readout")
 let fxParam1Label = document.getElementById("fx_param1_label")
 let fxParam1Group = document.getElementById("fx_param1_group")
 
-let fxParam2 = document.getElementById("fx_param2")
+let fxParam2Knob = document.getElementById("fx_param2")
 let fxParam2Readout = document.getElementById("fx_param2_readout")
 let fxParam2Label = document.getElementById("fx_param2_label")
 let fxParam2Group = document.getElementById("fx_param2_group")
 
-let fxParam3 = document.getElementById("fx_param3")
+let fxParam3Knob = document.getElementById("fx_param3")
 let fxParam3Readout = document.getElementById("fx_param3_readout")
 let fxParam3Label = document.getElementById("fx_param3_label")
 let fxParam3Group = document.getElementById("fx_param3_group")
 
-let fxParam4 = document.getElementById("fx_param4")
+let fxParam4Knob = document.getElementById("fx_param4")
 let fxParam4Readout = document.getElementById("fx_param4_readout")
 let fxParam4Label = document.getElementById("fx_param4_label")
 let fxParam4Group = document.getElementById("fx_param4_group")
 
-
-function setParamGroup(target, enable, min, max, step, value, label) {
+function updateFxKnob(target, enable, min, max, step, value, label) {
 	if(target===1){
 		$('#fx_param1')[0].min=min;
 		$('#fx_param1')[0].max=max;
@@ -833,9 +860,17 @@ for (let i = 0; i < controls.length; i++) {
 		}
 		if(e.target.id === "filter_resonance") {
 			// set filter resonance accordingly
-			FILTER.set({
-				Q: e.target.value
-			})
+			if(selectedFilter === 'lowshelf' || selectedFilter === 'highshelf') {
+				FILTER.set({
+					gain: e.target.value
+				})
+				filterGain = e.target.value
+			} else {
+				FILTER.set({
+					Q: e.target.value
+				})
+				filterResonance = e.target.value
+			}
 		}
 		if(e.target.id === "filter_rolloff") {
 			// set filter rolloff accordingly
@@ -848,6 +883,13 @@ for (let i = 0; i < controls.length; i++) {
 			FILTER.set({
 				type: filterTypes[e.target.value]
 			})
+			if(e.target.value === 5 || e.target.value === 6){
+				updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, filterGain.toFixed(1), "Gain")
+			}
+			else {
+				updateFilterKnob("filter_resonance", 1, 0, 100, 1, filterResonance, "Q")
+			}
+			selectedFilter = filterTypes[e.target.value]
 		}
 		// ----------- //
 		// --- LFO --- //
@@ -943,82 +985,82 @@ for (let i = 0; i < controls.length; i++) {
 				// (https://g200kg.github.io/webaudio-controls/docs/detailspecs.html) - setValue doesn't work
 				// (https://g200kg.github.io/webaudio-controls/docs/resizetest.html) - jQuery logic here does
 
-				setParamGroup(1,1, 0, 20, 0.1, 0, "Intensity")
-				setParamGroup(2, 1, 0, 2, 1, 0, "Oversample" )
-				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix" )
-				setParamGroup(4, 0)
+				updateFxKnob(1,1, 0, 20, 0.1, 0, "Intensity")
+				updateFxKnob(2, 1, 0, 2, 1, 0, "Oversample" )
+				updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix" )
+				updateFxKnob(4, 0)
 
 			} else if(e.target.value === "Chebyshev") {
 				console.log("Chebyshev Selected")
 				SELECTED_FX = FX_CHEBYSHEV
 
-				setParamGroup(1, 1, 1, 100, 1, 0, "Order")
-				setParamGroup(2, 1, 0, 1, 0.1, 0.5, "Mix")
-				setParamGroup(3, 0)
-				setParamGroup(4, 0)
+				updateFxKnob(1, 1, 1, 100, 1, 0, "Order")
+				updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(3, 0)
+				updateFxKnob(4, 0)
 
 			} else if(e.target.value === "Phaser") {
 				console.log("Phaser Selected")
 				SELECTED_FX = FX_PHASER
 
-				setParamGroup(1, 1, 0, 20, 0.01, 0.1, "Frequency")
-				setParamGroup(2, 1, 0, 12, 0.1, 2, "Octaves")
-				setParamGroup(3, 1, 0, 100, 0.1, 1, "Q")
-				setParamGroup(4, 1, 0, 1, 0.1, 1, "Mix")
+				updateFxKnob(1, 1, 0, 20, 0.01, 0.1, "Frequency")
+				updateFxKnob(2, 1, 0, 12, 0.1, 2, "Octaves")
+				updateFxKnob(3, 1, 0, 100, 0.1, 1, "Q")
+				updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
 
 			} else if(e.target.value === "Tremolo") {
 				console.log("Tremolo Selected")
 				SELECTED_FX = FX_TREMOLO
 
-				setParamGroup(1, 1, 0, 20000, 0.1, 0, "Frequency")
-				setParamGroup(2, 1, 0, 1, 0.01, 0, "Depth")
-				setParamGroup(3, 1, 0, 100, 0.01, 0, "Spread")
-				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(1, 1, 0, 20000, 0.1, 0, "Frequency")
+				updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
+				updateFxKnob(3, 1, 0, 100, 0.01, 0, "Spread")
+				updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
 			} else if(e.target.value === "Vibrato") {
 				console.log("Vibrato Selected")
 				SELECTED_FX = FX_VIBRATO
 
-				setParamGroup(1, 1, 0, 1200, 1, 0, "Frequency")
-				setParamGroup(2, 1, 0, 1, 0.01, 0, "Depth")
-				setParamGroup(3, 1, 0, 4, 1, 0, "Type")
-				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(1, 1, 0, 1200, 1, 0, "Frequency")
+				updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
+				updateFxKnob(3, 1, 0, 4, 1, 0, "Type")
+				updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
 			} else if(e.target.value === "Delay") {
 				console.log("Delay Selected")
 				SELECTED_FX = FX_DELAY
 
-				setParamGroup(1, 1, 0, 1, 0.01, 0, "Time")
-				setParamGroup(2, 1, 0, 1, 0.01, 0.5, "Feedback")
-				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix")
-				setParamGroup(4, 0)
+				updateFxKnob(1, 1, 0, 1, 0.01, 0, "Time")
+				updateFxKnob(2, 1, 0, 1, 0.01, 0.5, "Feedback")
+				updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(4, 0)
 
 			} else if(e.target.value === "Reverb") {
 				console.log("Reverb Selected")
 				SELECTED_FX = FX_REVERB
 
-				setParamGroup(1, 1, 0, 100, 1, 10, "Decay")
-				setParamGroup(2, 1, 0, 5, 0.1, 0, "Pre-delay")
-				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Mix")
-				setParamGroup(4, 0)
+				updateFxKnob(1, 1, 0, 100, 1, 10, "Decay")
+				updateFxKnob(2, 1, 0, 5, 0.1, 0, "Pre-delay")
+				updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(4, 0)
 
 			} else if(e.target.value === "PitchShift") {
 				console.log("PitchShift Selected")
 				SELECTED_FX = FX_PITCHSHIFT
 
-				setParamGroup(1, 1, 0, 120, 0.1, 0, "Pitch")
-				setParamGroup(2, 1, 0, 5, 0.1, 0, "Delay")
-				setParamGroup(3, 1, 0, 1, 0.1, 0.5, "Feedback")
-				setParamGroup(4, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(1, 1, 0, 120, 0.1, 0, "Pitch")
+				updateFxKnob(2, 1, 0, 5, 0.1, 0, "Delay")
+				updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Feedback")
+				updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
 			} else if(e.target.value === "FreqShift") {
 				console.log("FreqShift Selected")
 				SELECTED_FX = FX_FREQSHIFT
 
-				setParamGroup(1, 1, 0, 5000, 0.1, 0, "Frequency")
-				setParamGroup(2, 1, 0, 1, 0.1, 0.5, "Mix")
-				setParamGroup(3, 0)
-				setParamGroup(4, 0)
+				updateFxKnob(1, 1, 0, 5000, 0.1, 0, "Frequency")
+				updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
+				updateFxKnob(3, 0)
+				updateFxKnob(4, 0)
 
 			}
 

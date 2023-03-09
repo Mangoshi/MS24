@@ -253,9 +253,9 @@
 									class="control self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									min="0"
-									max="4"
+									max="3"
 									direction="vert"
-									conv="['sine','tri','saw','square','noise'][x]"
+									conv="['sine','tri','saw','square'][x]"
 								></webaudio-slider>
 								<webaudio-param
 									link="osc_a_shape"
@@ -474,11 +474,11 @@
 									class="control self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									min="0"
-									max="4"
+									max="3"
 									step="1"
 									value="1"
 									direction="vert"
-									conv="['sine','tri','saw','square','noise'][x]"
+									conv="['sine','tri','saw','square'][x]"
 								></webaudio-slider>
 								<webaudio-param
 									link="osc_b_shape"
@@ -654,11 +654,11 @@
 									class="control self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									min="0"
-									max="4"
+									max="3"
 									step="1"
 									value="2"
 									direction="vert"
-									conv="['sine','tri','saw','square','noise'][x]"
+									conv="['sine','tri','saw','square'][x]"
 								></webaudio-slider>
 								<webaudio-param
 									link="osc_c_shape"
@@ -783,10 +783,10 @@
 									id="filter_cutoff"
 									class="control self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
-									min="20"
-									max="7500"
+									min="1"
+									max="10000"
 									value="1000"
-									step="20"
+									step="9"
 								></webaudio-knob>
 								<webaudio-param
 									link="filter_cutoff"
@@ -987,11 +987,11 @@
 								class="control self-center"
 								colors="#78DCE8;#2C292D;#D9D9D9"
 								min="0"
-								max="4"
+								max="3"
 								step="1"
 								value="0"
 								direction="vert"
-								conv="['sine','tri','saw','square','noise'][x]"
+								conv="['sine','tri','saw','square'][x]"
 							></webaudio-slider>
 							<webaudio-param
 								link="lfo_shape"

@@ -1,80 +1,213 @@
 import * as Tone from 'tone'
 
-import synthData from '../json/defaultSynthData.json' assert {type: 'json'}
-
 // -- TONE.JS SETUP -- //
 
 // TODO:
-//  - A/B FM (Ratio & Depth)
-//  - FILTER ENVELOPE
-//  - DYNAMIC LFO
-//  - ARPEGGIATOR
-//  - GLIDE CONTROLS (Portamento)
-//  - VOICE & UNISON CONTROL
+//  1. PRESETS
+//  2. A/B FM (Ratio & Depth)
+//  3. FILTER ENVELOPE
+//  4. LFO SWITCHING
+//  5. ARPEGGIATOR
+//  6. GLIDE CONTROLS (Portamento)
+//  7. VOICE & UNISON CONTROL
+//  8. TOOLTIPS / HELP TEXT
+//  9. THEME SWITCHING
 
+// TODO: BUG FIXES
+//  1. LFO SWITCHING
+//  2. FX GLITCHES
+//  3. REVERB LOAD
+//  4. STICKY NOTES
 
-// const synth = new Tone.PolySynth(Tone.FMSynth).toDestination()
+// TODO: PRESETS
+//  - Declare object with all default synth data
+//  - When a parameter is changed, update the object
+//  - If a user clicks save, save the object to local storage / download as JSON
+//  - If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
+//  - If a user clicks randomize, randomize the object (this will require min/max values for each parameter)
+//  NEED:
+//  - Object matching synth data structure
+//  - Function for loading a preset & setting all parameters
+//  - Function for saving a preset & downloading as JSON
+//  - Function for randomizing a preset & setting all parameters
 
-// OSC A - Octave, Detune, Partials, ADSR
-// const ENV_A = new Tone.AmplitudeEnvelope({
-// 	attack: 0.1,
-// 	decay: 0.2,
-// 	sustain: 1.0,
-// 	release: 0.8
-// })
-// const OSC_A = new Tone.Oscillator(440)
+// -- PRESET DATA (INITIAL) -- //
 
-// FM A/B - Ratio, Depth, Mix(?)
+let PRESET_DATA = {
+	MASTER: {
+		gain: 0.5
+	},
+	OSC_A: {
+		enabled: true,
+		octave: 3,
+		detune: 0,
+		volume: 0,
+		shape: 0,
+		attack: 0.005,
+		decay: 0.1,
+		sustain: 0.3,
+		release: 1
+	},
+	OSC_B: {
+		enabled: true,
+		octave: 4,
+		detune: 0,
+		volume: 0,
+		shape: 1,
+		attack: 0.005,
+		decay: 0.1,
+		sustain: 0.3,
+		release: 1
+	},
+	OSC_C: {
+		enabled: false,
+		octave: 1,
+		detune: 0,
+		volume: 0,
+		shape: 2,
+		attack: 0.005,
+		decay: 0.1,
+		sustain: 0.3,
+		release: 1
+	},
+	FILTER: {
+		enabled: true,
+		frequency: 1000,
+		Q: 1,
+		rolloff: 0,
+		type: 0,
+		osc_a: true,
+		osc_b: true,
+		osc_c: true
+	},
+	LFO: {
+		enabled: false,
+		target: "FilterFrequency",
+		type: 0,
+		grid: 5,
+		min: 0,
+		max: 1000,
+		osc_a: true,
+		osc_b: true,
+		osc_c: true
+	},
+	FX: {
+		enabled: true,
+		type: "Distortion",
+		param1: 0,
+		param2: 0,
+		param3: 0.5,
+		param4: 0,
+		osc_a: true,
+		osc_b: true,
+		osc_c: true
+	}
+}
 
-// OSC B - Octave, Detune, Partials, ADSR
-// const ENV_B = new Tone.AmplitudeEnvelope({
-// 	attack: 0.1,
-// 	decay: 0.2,
-// 	sustain: 1.0,
-// 	release: 0.8
-// })
-// const OSC_B = new Tone.Oscillator(220)
+// -- MIN/MAX DATA (to be used for randomization) -- //
 
-// OSC C - Octave, Detune, Partials(?), ADSR
-// const ENV_C = new Tone.AmplitudeEnvelope({
-// 	attack: 0.1,
-// 	decay: 0.2,
-// 	sustain: 1.0,
-// 	release: 0.8
-// })
-// const OSC_C = new Tone.Oscillator(110)
+let MIN_MAX_VALUES = {
+	MASTER: {
+		gain: [0, 2]
+	},
+	OSCILLATOR: {
+		octave: [-3, 3],
+		detune: [-12, 12],
+		volume: [-10, 10],
+		shape: [0, 3],
+		attack: [0, 2],
+		decay: [0, 2],
+		sustain: [0, 1],
+		release: [0, 5]
+	},
+	FILTER: {
+		frequency: [1, 10000],
+		Q: [0, 24],
+		rolloff: [0, 3],
+		type: [0, 3],
+		osc_a: [0, 1],
+		osc_b: [0, 1],
+		osc_c: [0, 1]
+	},
+	LFO: {
+		target: [0, 4],
+		grid: [0, 9],
+		shape: [0, 3],
+		osc_a: [0, 1],
+		osc_b: [0, 1],
+		osc_c: [0, 1]
+	},
+	FX: {
+		type: [0, 8],
+		osc_a: [0, 1],
+		osc_b: [0, 1],
+		osc_c: [0, 1]
+	},
+	FX_DISTORTION: {
+		intensity: [0, 20],
+		oversample: [0, 2],
+		mix: [0, 1],
+	},
+	FX_CHEBYSHEV: {
+		order: [0, 100],
+		mix: [0, 1],
+	},
+	FX_PHASER: {
+		frequency: [0, 20],
+		octaves: [0, 12],
+		Q: [0, 100],
+		mix: [0, 1],
+	},
+	FX_TREMOLO: {
+		frequency: [0, 20000],
+		depth: [0, 1],
+		spread: [0, 180],
+		mix: [0, 1],
+	},
+	FX_VIBRATO: {
+		frequency: [0, 20000],
+		depth: [0, 1],
+		shape: [0, 3],
+		mix: [0, 1],
+	},
+	FX_DELAY: {
+		time: [0, 1],
+		feedback: [0, 1],
+		mix: [0, 1],
+	},
+	FX_REVERB: {
+		decay: [0, 100],
+		preDelay: [0, 5],
+		mix: [0, 1],
+	},
+	FX_PITCHSHIFT: {
+		pitch: [-120, 120],
+		size: [0.01, 12],
+		feedback: [0, 1],
+		mix: [0, 1],
+	},
+	FX_FREQSHIFT: {
+		frequency: [0, 20000],
+		mix: [0, 1],
+	}
+}
 
-// ALT IDEA: Use Tone.PolySynths //
-// let SYNTH_A_OSC = synthData.OSC_A.oscillator
-// let SYNTH_A_ENV = synthData.OSC_A.envelope
-// const SYNTH_A = new Tone.PolySynth(Tone.FMSynth, {
-// 	volume: 10,
-// 	oscillator: SYNTH_A_OSC,
-// 	detune: 0,
-// 	envelope: SYNTH_A_ENV,
-// 	modulation: {
-// 		volume: 10,
-// 		type: "fmsine",
-// 	},
-// 	modulationEnvelope: SYNTH_A_ENV,
-// 	harmonicity: 1,
-// 	modulationIndex: 1,
-// 	portamento: 1,
-// })
+// -- MASTER -- //
 
-// MASTER //
 const OUTPUT = Tone.getDestination()
 const MASTER_GAIN = new Tone.Gain(0.5)
 const MASTER_LIMITER = new Tone.Limiter(-10)
 
-// RECORD //
+// -- RECORD -- //
+
 const RECORDER = new Tone.Recorder()
 // TODO: lossless exporting ???
 // https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
 // https://github.com/mmig/libflac.js
 // https://youtu.be/VHCv3waFkRo
 
-// GENERATORS //
+// -- GENERATORS -- //
+
 const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
@@ -98,15 +231,18 @@ SYNTH_A.debug = true
 SYNTH_B.debug = true
 SYNTH_C.debug = true
 
-// FILTER //
+// -- FILTER -- //
+
 const FILTER = new Tone.Filter(1000, "lowpass", -12)
 console.log(FILTER.frequency.value)
 let filterFreq = 1000
 
-// LFO //
+// -- LFO -- //
+
 const LFO = new Tone.LFO("4n", 0, filterFreq).start()
 
-// FX //
+// -- FX -- //
+
 const FX_DISTORTION = new Tone.Distortion({
 	distortion: 0,
 	oversample: "none",
@@ -156,87 +292,35 @@ const FX_FREQSHIFT = new Tone.FrequencyShifter({
 	wet: 0.5
 })
 
-// NOTES //
+// -- NOTES -- //
+
 const ARP = new Tone.Pattern(function(time, note){
 	SYNTH_A.triggerAttackRelease(note, 0.25);
 	SYNTH_B.triggerAttackRelease(note, 0.25);
 	SYNTH_C.triggerAttackRelease(note, 0.25);
 }, ["C4", "D4", "E4", "G4", "A4"]);
 
-// SETTINGS - Keyboard, MIDI, Visuals //
+// -- INITIAL CONNECTIONS -- //
 
-// PRESETS - Save, Load, Randomize //
-
-
-// CONNECTIONS //
-// OSC_A.connect(ENV_A)
-// ENV_A.chain(FILTER, Tone.Destination)
-//
-// OSC_B.connect(ENV_B)
-// ENV_B.chain(FILTER, Tone.Destination)
-//
-// OSC_C.connect(ENV_C)
-// ENV_C.chain(FILTER, Tone.Destination)
-
-// SYNTH_A.chain(FILTER, Tone.Destination)
-// SYNTH_B.chain(FILTER, Tone.Destination)
-// SYNTH_C.chain(FILTER, Tone.Destination)
-// SYNTH_A.chain(FILTER, FX_DISTORTION, Tone.Destination)
-// SYNTH_B.chain(FILTER, FX_DISTORTION, Tone.Destination)
-// SYNTH_C.chain(FILTER, FX_DISTORTION, Tone.Destination)
-// SYNTH_A.chain(FX_DISTORTION, FILTER, Tone.Destination)
-// SYNTH_B.chain(FX_DISTORTION, FILTER, Tone.Destination)
-// SYNTH_C.chain(FX_DISTORTION, FILTER, Tone.Destination)
-
-
-
-
-let LFO_TARGET = FILTER.frequency
 let SELECTED_FX = FX_DISTORTION
 
-// CONNECTIONS //
-
-// Synths to Master
+// Synths to Master //
 SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
 SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
 // SYNTH_C.chain(FILTER, SELECTED_FX)
 
-// Master FX Chain
+// Master FX Chain //
 OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
-// OUTPUT.connect(FILTER)
-// OUTPUT.connect(SELECTED_FX)
-// OUTPUT.connect(MASTER_GAIN)
-// OUTPUT.connect(MASTER_LIMITER)
 
-// Modulation
+// Modulation //
+let LFO_TARGET = FILTER.frequency
+
 LFO.connect(LFO_TARGET).stop()
 
 // Master Record
 OUTPUT.connect(RECORDER)
 
-// LFO.disconnect(LFO_TARGET)
-// LFO.debug = true
-// console.log(LFO)
-//
-// FILTER.set({
-// 	frequency: 1000,
-// 	type: "lowpass",
-// 	rolloff: -12
-// })
-//
-// OUTPUT.chain(FILTER, SELECTED_FX, MASTER_GAIN, LIMITER)
-
-function triggerToneAttackRelease(target, note, duration) {
-	target.triggerAttackRelease(note, duration)
-}
-function triggerToneAttack(target, note, time) {
-	target.triggerAttack(note, time)
-}
-function triggerToneRelease(target, note, time) {
-	target.triggerRelease(note, time)
-}
-
-// -- CONTROLS LOGIC -- //
+// -- CONTROLS DATA -- //
 
 let controls = document.getElementsByClassName("control");
 // console.log(controls);
@@ -342,7 +426,6 @@ let filterResonanceReadout = document.getElementById("filter_resonance_readout")
 let filterResonanceLabel = document.getElementById("filter_resonance_label")
 let filterResonanceGroup = document.getElementById("filter_resonance_group")
 
-
 function updateFilterKnob(target, enable, min, max, step, value, label) {
 	if(target==="filter_resonance"){
 		$('#filter_resonance')[0].min=min;
@@ -437,7 +520,6 @@ function updateFxKnob(target, enable, min, max, step, value, label) {
 }
 
 let recorderLabel = document.getElementById("rec_label")
-
 
 // -- EVENT LISTENERS -- //
 document.addEventListener("keypress", function (e) {
@@ -1048,16 +1130,16 @@ for (let i = 0; i < controls.length; i++) {
 				console.log("PitchShift Selected")
 				SELECTED_FX = FX_PITCHSHIFT
 
-				updateFxKnob(1, 1, 0, 120, 0.1, 0, "Pitch")
-				updateFxKnob(2, 1, 0, 5, 0.1, 0, "Delay")
-				updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Feedback")
+				updateFxKnob(1, 1, -120, 120, 0.1, 0, "Pitch")
+				updateFxKnob(2, 1, 0.01, 12, 0.01, 0.03, "Size")
+				updateFxKnob(3, 1, 0, 1, 0.01, 0.5, "Feedback")
 				updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
 			} else if(e.target.value === "FreqShift") {
 				console.log("FreqShift Selected")
 				SELECTED_FX = FX_FREQSHIFT
 
-				updateFxKnob(1, 1, 0, 5000, 0.1, 0, "Frequency")
+				updateFxKnob(1, 1, 0, 1000, 0.1, 0, "Frequency")
 				updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
 				updateFxKnob(3, 0)
 				updateFxKnob(4, 0)

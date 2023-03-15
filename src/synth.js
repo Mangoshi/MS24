@@ -20,8 +20,8 @@ import * as Tone from 'tone'
 //  4. STICKY NOTES
 
 // TODO: PRESETS
-//  - Declare object with all default synth data
-//  - When a parameter is changed, update the object
+//  ✔ Declare object with all default synth data
+//  ✔ When a parameter is changed, update the object
 //  - If a user clicks save, save the object to local storage / download as JSON
 //  - If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
 //  - If a user clicks randomize, randomize the object (this will require min/max values for each parameter)
@@ -30,83 +30,84 @@ import * as Tone from 'tone'
 //  - Function for loading a preset & setting all parameters
 //  - Function for saving a preset & downloading as JSON
 //  - Function for randomizing a preset & setting all parameters
+//  - Functions for updating the interface based on the current preset
 
 // -- PRESET DATA (INITIAL) -- //
 
-let PRESET_DATA = {
+let PRESET = {
 	MASTER: {
 		gain: 0.5
 	},
 	OSC_A: {
-		enabled: true,
+		enabled: 1,
 		octave: 3,
 		detune: 0,
 		volume: 0,
-		shape: 0,
+		shape: "sine",
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
 		release: 1
 	},
 	OSC_B: {
-		enabled: true,
+		enabled: 1,
 		octave: 4,
 		detune: 0,
 		volume: 0,
-		shape: 1,
+		shape: "triangle",
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
 		release: 1
 	},
 	OSC_C: {
-		enabled: false,
+		enabled: 0,
 		octave: 1,
 		detune: 0,
 		volume: 0,
-		shape: 2,
+		shape: "sawtooth",
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
 		release: 1
 	},
 	FILTER: {
-		enabled: true,
+		enabled: 1,
 		frequency: 1000,
 		Q: 1,
-		rolloff: 0,
-		type: 0,
-		osc_a: true,
-		osc_b: true,
-		osc_c: true
+		rolloff: -12,
+		type: "lowpass",
+		osc_a: 1,
+		osc_b: 1,
+		osc_c: 1
 	},
 	LFO: {
-		enabled: false,
+		enabled: 0,
 		target: "FilterFrequency",
-		type: 0,
-		grid: 5,
+		type: "sine",
+		grid: "4n",
 		min: 0,
 		max: 1000,
-		osc_a: true,
-		osc_b: true,
-		osc_c: true
+		osc_a: 1,
+		osc_b: 1,
+		osc_c: 1
 	},
 	FX: {
-		enabled: true,
+		enabled: 1,
 		type: "Distortion",
 		param1: 0,
 		param2: 0,
 		param3: 0.5,
 		param4: 0,
-		osc_a: true,
-		osc_b: true,
-		osc_c: true
+		osc_a: 1,
+		osc_b: 1,
+		osc_c: 1
 	}
 }
 
 // -- MIN/MAX DATA (to be used for randomization) -- //
 
-let MIN_MAX_VALUES = {
+let MIN_MAX = {
 	MASTER: {
 		gain: [0, 2]
 	},
@@ -192,10 +193,74 @@ let MIN_MAX_VALUES = {
 	}
 }
 
+// -- DATA CONVERSION -- //
+
+let octaveValues = {
+	"-3": 0,
+	"-2": 1,
+	"-1": 2,
+	"0": 3,
+	"1": 4,
+	"2": 5,
+	"3": 6,
+}
+let subOctaveValues = {
+	"0": 1,
+	"1": 2,
+	"2": 3,
+	"3": 4,
+}
+let shapeValues = {
+	"0": "sine",
+	"1": "triangle",
+	"2": "sawtooth",
+	"3": "square",
+	"4": "sine",
+}
+let filterTypeValues = {
+	"0": "lowpass",
+	"1": "highpass",
+	"2": "bandpass",
+	"3": "allpass",
+	"4": "notch",
+	"5": "lowshelf",
+	"6": "highshelf",
+}
+let filterRolloffValues = {
+	"0": -12,
+	"1": -24,
+	"2": -48,
+	"3": -96,
+}
+let lfoGridValues = {
+	"0": '8m',
+	"1": '4m',
+	"2": '2m',
+	"3": '1m',
+	"4": '2n',
+	"5": '4n',
+	"6": '8n',
+	"7": '16n',
+	"8": '32n',
+	"9": '64n',
+}
+let distortionOversampleValues = {
+	"0": "none",
+	"1": "2x",
+	"2": "4x",
+}
+let fxDelayTimeValues = {
+	"0": "16n",
+	"1": "8n",
+	"2": "4n",
+	"3": "2n",
+	"4": "1n",
+}
+
 // -- MASTER -- //
 
 const OUTPUT = Tone.getDestination()
-const MASTER_GAIN = new Tone.Gain(0.5)
+const MASTER_GAIN = new Tone.Gain(PRESET.MASTER.gain)
 const MASTER_LIMITER = new Tone.Limiter(-10)
 
 // -- RECORD -- //
@@ -211,19 +276,19 @@ const RECORDER = new Tone.Recorder()
 const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
-		type: 'sine'
+		type: PRESET.OSC_A.shape
 	}
 })
 const SYNTH_B = new Tone.PolySynth(Tone.Synth)
 SYNTH_B.set({
 	oscillator: {
-		type: 'triangle'
+		type: PRESET.OSC_B.shape
 	}
 })
 const SYNTH_C = new Tone.PolySynth(Tone.Synth)
 SYNTH_C.set({
 	oscillator: {
-		type: 'sawtooth'
+		type: PRESET.OSC_C.shape
 	}
 })
 
@@ -233,13 +298,13 @@ SYNTH_C.debug = true
 
 // -- FILTER -- //
 
-const FILTER = new Tone.Filter(1000, "lowpass", -12)
-console.log(FILTER.frequency.value)
-let filterFreq = 1000
+const FILTER = new Tone.Filter(PRESET.FILTER.frequency, PRESET.FILTER.type, PRESET.FILTER.rolloff)
 
 // -- LFO -- //
 
-const LFO = new Tone.LFO("4n", 0, filterFreq).start()
+let LFO_TARGET_VALUE = PRESET.FILTER.frequency
+
+const LFO = new Tone.LFO("4n", 0, LFO_TARGET_VALUE).start()
 
 // -- FX -- //
 
@@ -305,9 +370,15 @@ const ARP = new Tone.Pattern(function(time, note){
 let SELECTED_FX = FX_DISTORTION
 
 // Synths to Master //
-SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-// SYNTH_C.chain(FILTER, SELECTED_FX)
+if(PRESET.OSC_A.enabled){
+	SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+}
+if(PRESET.OSC_B.enabled){
+	SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+}
+if(PRESET.OSC_C.enabled) {
+	SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+}
 
 // Master FX Chain //
 OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
@@ -324,83 +395,6 @@ OUTPUT.connect(RECORDER)
 
 let controls = document.getElementsByClassName("control");
 // console.log(controls);
-
-let synthOctaves = {
-	"osc_a_octave": 3,
-	"osc_b_octave": 4,
-	"osc_c_octave": 1,
-}
-let octaveValues = {
-	"-3": 0,
-	"-2": 1,
-	"-1": 2,
-	"0": 3,
-	"1": 4,
-	"2": 5,
-	"3": 6,
-}
-let subOctaveValues = {
-	"0": 1,
-	"1": 2,
-	"2": 3,
-	"3": 4,
-}
-let synthSemitones = {
-	"osc_a_semi": 0,
-	"osc_b_semi": 0,
-	"osc_c_semi": 0,
-}
-let synthShapes = {
-	"osc_a_shape": "sine",
-	"osc_b_shape": "square",
-	"osc_c_shape": "sawtooth",
-}
-let shapeValues = {
-	"0": "sine",
-	"1": "triangle",
-	"2": "sawtooth",
-	"3": "square",
-	"4": "sine",
-}
-let filterTypes = {
-	"0": "lowpass",
-	"1": "highpass",
-	"2": "bandpass",
-	"3": "allpass",
-	"4": "notch",
-	"5": "lowshelf",
-	"6": "highshelf",
-}
-let filterRolloffs = {
-	"0": -12,
-	"1": -24,
-	"2": -48,
-	"3": -96,
-}
-let lfoGridValues = {
-	"0": '8m',
-	"1": '4m',
-	"2": '2m',
-	"3": '1m',
-	"4": '2n',
-	"5": '4n',
-	"6": '8n',
-	"7": '16n',
-	"8": '32n',
-	"9": '64n',
-}
-let distortionOversampleValues = {
-	"0": "none",
-	"1": "2x",
-	"2": "4x",
-}
-let fxDelayTimeValues = {
-	"0": "16n",
-	"1": "8n",
-	"2": "4n",
-	"3": "2n",
-	"4": "1n",
-}
 
 // TODO (?) [idea]:
 //  - Infinite loop / listener to fire attack/release signals on array of notes playing
@@ -544,10 +538,13 @@ for (let i = 0; i < controls.length; i++) {
 
 	controls[i].addEventListener("change", async function (e) {
 		switch (e.target.id) {
-			case "osc_a_switch": // toggle oscillator-a on/off
+			case "osc_a_switch":
+				PRESET.OSC_A.enabled = e.target.value
+				// if osc_a toggled off...
 				if (e.target.value === 0) {
 					SYNTH_A.disconnect()
 					oscAEnabled = false
+				// if osc_a toggled on...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
 					if (filterEnabled && fxEnabled) {
@@ -564,11 +561,14 @@ for (let i = 0; i < controls.length; i++) {
 					oscAEnabled = true
 				}
 				break;
-			case "osc_b_switch": // toggle oscillator-a on/off
+			case "osc_b_switch":
+				PRESET.OSC_B.enabled = e.target.value
+				// if osc_b toggled off...
 				if (e.target.value === 0) {
 					// turn off
 					SYNTH_B.disconnect()
 					oscBEnabled = false
+				// if osc_b toggled on...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
 					if (filterEnabled && fxEnabled) {
@@ -585,11 +585,14 @@ for (let i = 0; i < controls.length; i++) {
 					oscBEnabled = true
 				}
 				break;
-			case "osc_c_switch": // toggle oscillator-a on/off
+			case "osc_c_switch":
+				PRESET.OSC_C.enabled = e.target.value
+				// if osc_c toggled on...
 				if (e.target.value === 0) {
 					// turn off
 					SYNTH_C.disconnect()
 					oscCEnabled = false
+				// if osc_c toggled off...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
 					if (filterEnabled && fxEnabled) {
@@ -606,7 +609,9 @@ for (let i = 0; i < controls.length; i++) {
 					oscCEnabled = true
 				}
 				break;
-			case "filter_switch": // if filter toggle off...
+			case "filter_switch":
+				PRESET.FILTER.enabled = e.target.value
+				// if filter toggled off...
 				if (e.target.value === 0) {
 					// and fx is on...
 					if (fxEnabled) {
@@ -622,7 +627,7 @@ for (let i = 0; i < controls.length; i++) {
 							SYNTH_C.disconnect()
 							SYNTH_C.chain(SELECTED_FX, OUTPUT)
 						}
-						// and fx is off...
+					// and fx is off...
 					} else {
 						if (oscAEnabled) {
 							SYNTH_A.disconnect()
@@ -639,7 +644,7 @@ for (let i = 0; i < controls.length; i++) {
 					}
 					// set filterEnabled to false
 					filterEnabled = false
-					// if filter toggle on...
+				// if filter toggled on...
 				} else {
 					// and fx is on...
 					if (fxEnabled) {
@@ -655,7 +660,7 @@ for (let i = 0; i < controls.length; i++) {
 							SYNTH_C.disconnect()
 							SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
 						}
-						// and fx is off...
+					// and fx is off...
 					} else {
 						if (oscAEnabled) {
 							SYNTH_A.disconnect()
@@ -674,18 +679,23 @@ for (let i = 0; i < controls.length; i++) {
 					filterEnabled = true
 				}
 				break;
-			case "lfo_switch": // if lfo toggle value is 0...
+			case "lfo_switch":
+				PRESET.LFO.enabled = e.target.value
+				// if lfo toggled off...
 				if (e.target.value === 0) {
 					LFO.stop()
 					// LFO.disconnect(LFO_TARGET)
 					lfoEnabled = false
+				// if lfo toggled on...
 				} else {
 					LFO.start()
 					// LFO.connect(LFO_TARGET)
 					lfoEnabled = true
 				}
 				break;
-			case "fx_switch": // if fx toggle value is 0...
+			case "fx_switch":
+				PRESET.FX.enabled = e.target.value
+				// if fx toggled off...
 				if (e.target.value === 0) {
 					// if filter is enabled...
 					SELECTED_FX.set({
@@ -693,7 +703,7 @@ for (let i = 0; i < controls.length; i++) {
 					})
 					// set fxEnabled to false
 					fxEnabled = false
-					// if fx toggle value is 1...
+				// if fx toggled on...
 				} else {
 					// if filter is enabled...
 					SELECTED_FX.set({
@@ -703,13 +713,14 @@ for (let i = 0; i < controls.length; i++) {
 					fxEnabled = true
 				}
 				break;
-			case "rec_switch": // if rec toggle is enabled...
+			case "rec_switch":
+				// if rec toggled on...
 				if (e.target.value === 1) {
 					// start recording
 					await RECORDER.start()
 					// set label to "recording..."
 					recorderLabel.innerHTML = "Recording..."
-					// if rec toggle is disabled...
+				// if rec toggled off...
 				} else {
 					// stop recording & assign to variable
 					const recording = RECORDER.stop()
@@ -737,6 +748,7 @@ for (let i = 0; i < controls.length; i++) {
 			// --- MASTER --- //
 			// -------------- //
 			case "master_gain":
+				PRESET.MASTER.gain = e.target.value
 				MASTER_GAIN.set({
 					"gain": e.target.value
 				})
@@ -745,7 +757,7 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR A --- //
 			// -------------------- //
 			case "osc_a_octave":
-				synthOctaves["osc_a_octave"] = octaveValues[e.target.value]
+				PRESET.OSC_A.octave = octaveValues[e.target.value]
 				// SYNTH_A.releaseAll()
 				// SYNTH_B.releaseAll()
 				// SYNTH_C.releaseAll()
@@ -760,22 +772,24 @@ for (let i = 0; i < controls.length; i++) {
 				// })
 				break;
 			case "osc_a_semi":
-				synthSemitones["osc_a_semi"] = e.target.value
+				PRESET.OSC_A.detune = e.target.value
 				break;
 			case "osc_a_volume":
+				PRESET.OSC_A.volume = e.target.value
 				SYNTH_A.set({
 					"volume": e.target.value
 				})
 				break;
 			case "osc_a_shape":
-				synthShapes["osc_a_shape"] = shapeValues[e.target.value]
+				PRESET.OSC_A.shape = shapeValues[e.target.value]
 				SYNTH_A.set({
 					oscillator: {
-						type: synthShapes["osc_a_shape"]
+						type: PRESET.OSC_A.shape
 					}
 				})
 				break;
 			case "osc_a_attack":
+				PRESET.OSC_A.attack = e.target.value
 				SYNTH_A.set({
 					"envelope": {
 						"attack": e.target.value
@@ -783,6 +797,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_a_decay":
+				PRESET.OSC_A.decay = e.target.value
 				SYNTH_A.set({
 					"envelope": {
 						"decay": e.target.value
@@ -790,6 +805,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_a_sustain":
+				PRESET.OSC_A.sustain = e.target.value
 				SYNTH_A.set({
 					"envelope": {
 						"sustain": e.target.value
@@ -797,6 +813,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_a_release":
+				PRESET.OSC_A.release = e.target.value
 				SYNTH_A.set({
 					"envelope": {
 						"release": e.target.value
@@ -807,25 +824,27 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR B --- //
 			// -------------------- //
 			case "osc_b_octave":
-				synthOctaves["osc_b_octave"] = octaveValues[e.target.value]
+				PRESET.OSC_B.octave = octaveValues[e.target.value]
 				break;
 			case "osc_b_semi":
-				synthSemitones["osc_b_semi"] = e.target.value
+				PRESET.OSC_B.detune = e.target.value
 				break;
 			case "osc_b_volume":
+				PRESET.OSC_B.volume = e.target.value
 				SYNTH_B.set({
 					"volume": e.target.value
 				})
 				break;
 			case "osc_b_shape":
-				synthShapes["osc_b_shape"] = shapeValues[e.target.value]
+				PRESET.OSC_B.shape = shapeValues[e.target.value]
 				SYNTH_B.set({
 					oscillator: {
-						type: synthShapes["osc_b_shape"]
+						type: PRESET.OSC_B.shape
 					}
 				})
 				break;
 			case "osc_b_attack":
+				PRESET.OSC_B.attack = e.target.value
 				SYNTH_B.set({
 					"envelope": {
 						attack: e.target.value
@@ -833,6 +852,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_b_decay":
+				PRESET.OSC_B.decay = e.target.value
 				SYNTH_B.set({
 					"envelope": {
 						decay: e.target.value
@@ -840,6 +860,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_b_sustain":
+				PRESET.OSC_B.sustain = e.target.value
 				SYNTH_B.set({
 					"envelope": {
 						sustain: e.target.value
@@ -847,6 +868,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_b_release":
+				PRESET.OSC_B.release = e.target.value
 				SYNTH_B.set({
 					"envelope": {
 						release: e.target.value
@@ -857,25 +879,27 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR C --- //
 			// -------------------- //
 			case "osc_c_octave":
-				synthOctaves["osc_c_octave"] = subOctaveValues[e.target.value]
+				PRESET.OSC_C.octave = subOctaveValues[e.target.value]
 				break;
 			case "osc_c_semi":
-				synthSemitones["osc_c_semi"] = e.target.value
+				PRESET.OSC_C.detune = e.target.value
 				break;
 			case "osc_c_volume":
+				PRESET.OSC_C.volume = e.target.value
 				SYNTH_C.set({
 					"volume": e.target.value
 				})
 				break;
 			case "osc_c_shape":
-				synthShapes["osc_c_shape"] = shapeValues[e.target.value]
+				PRESET.OSC_C.shape = shapeValues[e.target.value]
 				SYNTH_C.set({
 					oscillator: {
-						type: synthShapes["osc_c_shape"]
+						type: PRESET.OSC_C.shape
 					}
 				})
 				break;
 			case "osc_c_attack":
+				PRESET.OSC_C.attack = e.target.value
 				SYNTH_C.set({
 					"envelope": {
 						attack: e.target.value
@@ -883,6 +907,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_c_decay":
+				PRESET.OSC_C.decay = e.target.value
 				SYNTH_C.set({
 					"envelope": {
 						decay: e.target.value
@@ -890,6 +915,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_c_sustain":
+				PRESET.OSC_C.sustain = e.target.value
 				SYNTH_C.set({
 					"envelope": {
 						sustain: e.target.value
@@ -897,6 +923,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_c_release":
+				PRESET.OSC_C.release = e.target.value
 				SYNTH_C.set({
 					"envelope": {
 						release: e.target.value
@@ -907,43 +934,53 @@ for (let i = 0; i < controls.length; i++) {
 			// --- FILTER --- //
 			// -------------- //
 			case "filter_cutoff":
+				PRESET.FILTER.cutoff = e.target.value
 				FILTER.set({
 					frequency: e.target.value
 				})
 				// have to set LFO value when connected,
 				// otherwise filter cutoff doesn't change (O_o)
 				if (LFO_TARGET === FILTER.frequency) {
+					PRESET.LFO.max = e.target.value
 					LFO.set({"max": e.target.value})
 				}
 				break;
-			case "filter_resonance": // set filter resonance accordingly
+			case "filter_resonance":
 				if (selectedFilter === 'lowshelf' || selectedFilter === 'highshelf') {
+					PRESET.FILTER.gain = e.target.value
 					FILTER.set({
 						gain: e.target.value
 					})
 					filterGain = e.target.value
 				} else {
+					PRESET.FILTER.Q = e.target.value
 					FILTER.set({
 						Q: e.target.value
 					})
 					filterResonance = e.target.value
 				}
 				break;
-			case "filter_rolloff": // set filter rolloff accordingly
+			case "filter_rolloff":
+				PRESET.FILTER.rolloff = filterRolloffValues[e.target.value]
 				FILTER.set({
-					rolloff: filterRolloffs[e.target.value]
+					rolloff: filterRolloffValues[e.target.value]
 				})
 				break;
-			case "filter_type": // set filter type accordingly
+			case "filter_type":
+				PRESET.FILTER.type = filterTypeValues[e.target.value]
 				FILTER.set({
-					type: filterTypes[e.target.value]
+					type: filterTypeValues[e.target.value]
 				})
+				// If filter type is lowshelf or highshelf...
 				if (e.target.value === 5 || e.target.value === 6) {
+					// ...change the filter Q knob to gain knob
 					updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, filterGain.toFixed(1), "Gain")
+				// Else if filter type is not lowshelf or highshelf...
 				} else {
+					// ...change the filter gain knob to Q knob
 					updateFilterKnob("filter_resonance", 1, 0, 100, 1, filterResonance, "Q")
 				}
-				selectedFilter = filterTypes[e.target.value]
+				selectedFilter = filterTypeValues[e.target.value]
 				break;
 			// ----------- //
 			// --- LFO --- //
@@ -951,18 +988,23 @@ for (let i = 0; i < controls.length; i++) {
 			case "lfo_selector":
 				switch (e.target.value) {
 					case "FilterFrequency":
+						PRESET.LFO.target = "FilterFrequency"
 						LFO_TARGET = FILTER.frequency
 						break;
 					case "FilterResonance":
+						PRESET.LFO.target = "FilterResonance"
 						LFO_TARGET = FILTER.Q
 						break;
 					case "OscAVol":
+						PRESET.LFO.target = "OscAVol"
 						LFO_TARGET = SYNTH_A.volume
 						break;
 					case "OscBVol":
+						PRESET.LFO.target = "OscBVol"
 						LFO_TARGET = SYNTH_B.volume
 						break;
 					case "OscCVol":
+						PRESET.LFO.target = "OscCVol"
 						LFO_TARGET = SYNTH_C.volume
 						break;
 					default:
@@ -971,22 +1013,26 @@ for (let i = 0; i < controls.length; i++) {
 				// TODO: figure out how to disconnect LFO from previous target
 				// LFO.connect(LFO_TARGET)
 				break;
-			case "lfo_grid": // set lfo grid accordingly
+			case "lfo_grid":
+				PRESET.LFO.grid = lfoGridValues[e.target.value]
 				LFO.set({
 					frequency: lfoGridValues[e.target.value]
 				})
 				break;
-			case "lfo_min": // set lfo min accordingly
+			case "lfo_min":
+				PRESET.LFO.min = e.target.value
 				LFO.set({
 					"min": e.target.value
 				})
 				break;
-			case "lfo_max": // set lfo max accordingly
+			case "lfo_max":
+				PRESET.LFO.max = e.target.value
 				LFO.set({
 					"max": e.target.value
 				})
 				break;
-			case "lfo_shape": // set lfo shape accordingly
+			case "lfo_shape":
+				PRESET.LFO.shape = shapeValues[e.target.value]
 				LFO.set({
 					type: shapeValues[e.target.value]
 				})
@@ -1033,6 +1079,7 @@ for (let i = 0; i < controls.length; i++) {
 				// set Tone & HTML depending on which FX is selected
 				switch (e.target.value) {
 					case "Distortion":
+						PRESET.FX.type = "Distortion"
 						SELECTED_FX = FX_DISTORTION
 
 						// since setAttribute doesn't work,
@@ -1047,6 +1094,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 0)
 						break;
 					case "Chebyshev":
+						PRESET.FX.type = "Chebyshev"
 						SELECTED_FX = FX_CHEBYSHEV
 
 						updateFxKnob(1, 1, 1, 100, 1, 0, "Order")
@@ -1055,6 +1103,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 0)
 						break;
 					case "Phaser":
+						PRESET.FX.type = "Phaser"
 						SELECTED_FX = FX_PHASER
 
 						updateFxKnob(1, 1, 0, 20, 0.01, 0.1, "Frequency")
@@ -1063,6 +1112,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
 						break;
 					case "Tremolo":
+						PRESET.FX.type = "Tremolo"
 						SELECTED_FX = FX_TREMOLO
 
 						updateFxKnob(1, 1, 0, 20000, 0.1, 0, "Frequency")
@@ -1071,6 +1121,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 						break;
 					case "Vibrato":
+						PRESET.FX.type = "Vibrato"
 						SELECTED_FX = FX_VIBRATO
 
 						updateFxKnob(1, 1, 0, 1200, 1, 0, "Frequency")
@@ -1079,6 +1130,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 						break;
 					case "Delay":
+						PRESET.FX.type = "Delay"
 						SELECTED_FX = FX_DELAY
 
 						updateFxKnob(1, 1, 0, 1, 0.01, 0, "Time")
@@ -1087,6 +1139,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 0)
 						break;
 					case "Reverb":
+						PRESET.FX.type = "Reverb"
 						SELECTED_FX = FX_REVERB
 
 						updateFxKnob(1, 1, 0, 100, 1, 10, "Decay")
@@ -1095,6 +1148,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 0)
 						break;
 					case "PitchShift":
+						PRESET.FX.type = "PitchShift"
 						SELECTED_FX = FX_PITCHSHIFT
 
 						updateFxKnob(1, 1, -120, 120, 0.1, 0, "Pitch")
@@ -1103,6 +1157,7 @@ for (let i = 0; i < controls.length; i++) {
 						updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 						break;
 					case "FreqShift":
+						PRESET.FX.type = "FreqShift"
 						SELECTED_FX = FX_FREQSHIFT
 
 						updateFxKnob(1, 1, 0, 1000, 0.1, 0, "Frequency")
@@ -1162,7 +1217,7 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 			case "fx_param1":
-				// set fx param 1 accordingly
+				PRESET.FX.param1 = e.target.value
 				switch (SELECTED_FX) {
 					case FX_DISTORTION:
 						FX_DISTORTION.set({
@@ -1214,7 +1269,7 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 			case "fx_param2":
-				// set fx param 2 accordingly
+				PRESET.FX.param2 = e.target.value
 				switch (SELECTED_FX) {
 					case FX_DISTORTION:
 						FX_DISTORTION.set({
@@ -1222,6 +1277,7 @@ for (let i = 0; i < controls.length; i++) {
 						})
 						break;
 					case FX_CHEBYSHEV:
+						fxMix = e.target.value
 						FX_CHEBYSHEV.set({
 							"wet": e.target.value
 						})
@@ -1257,6 +1313,7 @@ for (let i = 0; i < controls.length; i++) {
 						})
 						break;
 					case FX_FREQSHIFT:
+						fxMix = e.target.value
 						FX_FREQSHIFT.set({
 							"wet": e.target.value
 						})
@@ -1265,9 +1322,11 @@ for (let i = 0; i < controls.length; i++) {
 						console.log("Switch default: Nothing set for this case!")
 				}
 				break;
-			case "fx_param3": // set fx param 3 accordingly
+			case "fx_param3":
+				PRESET.FX.param3 = e.target.value
 				switch (SELECTED_FX) {
 					case FX_DISTORTION:
+						fxMix = e.target.value
 						FX_DISTORTION.set({
 							"wet": e.target.value
 						})
@@ -1293,6 +1352,7 @@ for (let i = 0; i < controls.length; i++) {
 						})
 						break;
 					case FX_REVERB:
+						fxMix = e.target.value
 						FX_REVERB.set({
 							"wet": e.target.value
 						})
@@ -1307,14 +1367,10 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 			case "fx_param4":
+				PRESET.FX.param4 = e.target.value
 				fxMix = e.target.value
 				if(fxEnabled) {
 					switch (SELECTED_FX) {
-						case FX_DISTORTION:
-							FX_DISTORTION.set({
-								"wet": e.target.value
-							})
-							break;
 						case FX_PHASER:
 							FX_PHASER.set({
 								"wet": e.target.value
@@ -1327,16 +1383,6 @@ for (let i = 0; i < controls.length; i++) {
 							break;
 						case FX_VIBRATO:
 							FX_VIBRATO.set({
-								"wet": e.target.value
-							})
-							break;
-						case FX_DELAY:
-							FX_DELAY.set({
-								"wet": e.target.value
-							})
-							break;
-						case FX_REVERB:
-							FX_REVERB.set({
 								"wet": e.target.value
 							})
 							break;
@@ -1355,6 +1401,12 @@ for (let i = 0; i < controls.length; i++) {
 		}
 	})
 }
+
+let presetsButton = document.getElementById("presets_button")
+
+presetsButton.addEventListener("click", function() {
+	console.log(PRESET)
+})
 
 // -- KEYBOARD LOGIC -- //
 
@@ -1413,9 +1465,9 @@ let playingKeys = [];
 
 keyboard.addEventListener("change", function (e) {
 	// Calculate the notes to play based on the keyboard input and synth settings
-	let note_a = getNoteFromNumber(e.note[1], synthSemitones.osc_a_semi, synthOctaves.osc_a_octave);
-	let note_b = getNoteFromNumber(e.note[1], synthSemitones.osc_b_semi, synthOctaves.osc_b_octave);
-	let note_c = getNoteFromNumber(e.note[1], synthSemitones.osc_c_semi, synthOctaves.osc_c_octave);
+	let note_a = getNoteFromNumber(e.note[1], PRESET.OSC_A.detune, PRESET.OSC_A.octave);
+	let note_b = getNoteFromNumber(e.note[1], PRESET.OSC_B.detune, PRESET.OSC_B.octave);
+	let note_c = getNoteFromNumber(e.note[1], PRESET.OSC_C.detune, PRESET.OSC_C.octave);
 
 	console.log(e.note)
 

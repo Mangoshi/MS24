@@ -43,7 +43,7 @@ let PRESET = {
 	},
 	OSC_A: {
 		enabled: 1,
-		octave: 3,
+		octave: 0,
 		detune: 0,
 		volume: 0,
 		shape: 0,
@@ -54,7 +54,7 @@ let PRESET = {
 	},
 	OSC_B: {
 		enabled: 1,
-		octave: 4,
+		octave: 1,
 		detune: 0,
 		volume: 0,
 		shape: 1,
@@ -65,7 +65,7 @@ let PRESET = {
 	},
 	OSC_C: {
 		enabled: 0,
-		octave: 1,
+		octave: 0,
 		detune: 0,
 		volume: 0,
 		shape: 2,
@@ -78,6 +78,7 @@ let PRESET = {
 		enabled: 1,
 		frequency: 1000,
 		Q: 1,
+		gain: 0,
 		rolloff: 0,
 		type: 0,
 		osc_a: 1,
@@ -96,7 +97,7 @@ let PRESET = {
 		osc_c: 1
 	},
 	FX: {
-		enabled: 0,
+		enabled: 1,
 		type: "Distortion",
 		param1: 0,
 		param2: 0,
@@ -249,6 +250,18 @@ let lfoGridValues = {
 	"7": '16n',
 	"8": '32n',
 	"9": '64n',
+}
+let lfoGridReadoutValues = {
+	"0": '8/1',
+	"1": '4/1',
+	"2": '2/1',
+	"3": '1/1',
+	"4": '1/2',
+	"5": '1/4',
+	"6": '1/8',
+	"7": '1/16',
+	"8": '1/32',
+	"9": '1/64',
 }
 let distortionOversampleValues = {
 	"0": "none",
@@ -589,7 +602,6 @@ document.addEventListener("keypress", function (e) {
 	}
 })
 
-
 // Button events (dropdowns) //
 function toggleDropdown(target) {
 	if (target.classList.contains("hidden")) {
@@ -653,8 +665,13 @@ presetSaveButton.addEventListener("click", function() {
 	anchor.click();
 	toggleDropdown(presetsDropdown)
 })
-function updateKnobValue(target, value){
-	$('#fx_param1')[0].value = value;
+function updateGUI(target, value, readout){
+	let jQtarget = "#"+target
+	$(jQtarget)[0].value = value;
+	if(readout){
+		let jQtargetReadout = document.getElementById(target+"_readout")
+		jQtargetReadout.value = readout
+	}
 }
 presetLoadButton.addEventListener("click", function() {
 	console.log("This button will load a preset from disk!")
@@ -672,11 +689,64 @@ presetLoadButton.addEventListener("click", function() {
 			console.log("Preset before:", PRESET)
 			PRESET = JSON.parse(e.target.result)
 			console.log("Preset after:", PRESET)
+			// Update GUI //
+			// MASTER
+			updateGUI("master_gain", PRESET.MASTER.gain, PRESET.MASTER.gain)
+			// OSC A
+			updateGUI("osc_a_switch", PRESET.OSC_A.enabled)
+			updateGUI("osc_a_octave", PRESET.OSC_A.octave, PRESET.OSC_A.octave)
+			updateGUI("osc_a_semi", PRESET.OSC_A.detune, PRESET.OSC_A.detune)
+			updateGUI("osc_a_volume", PRESET.OSC_A.volume, PRESET.OSC_A.volume)
+			updateGUI("osc_a_shape", PRESET.OSC_A.shape, shapeValues[PRESET.OSC_A.shape])
+			updateGUI("osc_a_attack", PRESET.OSC_A.attack, PRESET.OSC_A.attack)
+			updateGUI("osc_a_decay", PRESET.OSC_A.decay, PRESET.OSC_A.decay)
+			updateGUI("osc_a_sustain", PRESET.OSC_A.sustain, PRESET.OSC_A.sustain)
+			updateGUI("osc_a_release", PRESET.OSC_A.release, PRESET.OSC_A.release)
+			// OSC B
+			updateGUI("osc_b_switch", PRESET.OSC_B.enabled)
+			updateGUI("osc_b_octave", PRESET.OSC_B.octave, PRESET.OSC_B.octave)
+			updateGUI("osc_b_semi", PRESET.OSC_B.detune, PRESET.OSC_B.detune)
+			updateGUI("osc_b_volume", PRESET.OSC_B.volume, PRESET.OSC_B.volume)
+			updateGUI("osc_b_shape", PRESET.OSC_B.shape, shapeValues[PRESET.OSC_B.shape])
+			updateGUI("osc_b_attack", PRESET.OSC_B.attack, PRESET.OSC_B.attack)
+			updateGUI("osc_b_decay", PRESET.OSC_B.decay, PRESET.OSC_B.decay)
+			updateGUI("osc_b_sustain", PRESET.OSC_B.sustain, PRESET.OSC_B.sustain)
+			updateGUI("osc_b_release", PRESET.OSC_B.release, PRESET.OSC_B.release)
+			// OSC C
+			updateGUI("osc_c_switch", PRESET.OSC_C.enabled)
+			updateGUI("osc_c_octave", PRESET.OSC_C.octave, PRESET.OSC_C.octave)
+			updateGUI("osc_c_semi", PRESET.OSC_C.detune, PRESET.OSC_C.detune)
+			updateGUI("osc_c_volume", PRESET.OSC_C.volume, PRESET.OSC_C.volume)
+			updateGUI("osc_c_shape", PRESET.OSC_C.shape, shapeValues[PRESET.OSC_C.shape])
+			updateGUI("osc_c_attack", PRESET.OSC_C.attack, PRESET.OSC_C.attack)
+			updateGUI("osc_c_decay", PRESET.OSC_C.decay, PRESET.OSC_C.decay)
+			updateGUI("osc_c_sustain", PRESET.OSC_C.sustain, PRESET.OSC_C.sustain)
+			updateGUI("osc_c_release", PRESET.OSC_C.release, PRESET.OSC_C.release)
+			// FILTER
+			updateGUI("filter_switch", PRESET.FILTER.enabled)
+			updateGUI("filter_cutoff", PRESET.FILTER.frequency, PRESET.FILTER.frequency)
+			updateGUI("filter_resonance", PRESET.FILTER.Q, PRESET.FILTER.Q)
+			updateGUI("filter_rolloff", PRESET.FILTER.rolloff, filterRolloffValues[PRESET.FILTER.rolloff])
+			updateGUI("filter_type", PRESET.FILTER.type, filterTypeValues[PRESET.FILTER.type])
+			updateGUI("osc_a_filter_switch", PRESET.FILTER.osc_a)
+			updateGUI("osc_b_filter_switch", PRESET.FILTER.osc_b)
+			updateGUI("osc_c_filter_switch", PRESET.FILTER.osc_c)
+			// LFO
+			updateGUI("lfo_switch", PRESET.LFO.enabled)
+			updateGUI("lfo_grid", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
+			updateGUI("lfo_min", PRESET.LFO.min, PRESET.LFO.min)
+			updateGUI("lfo_max", PRESET.LFO.max, PRESET.LFO.max)
+			updateGUI("lfo_shape", PRESET.LFO.shape, shapeValues[PRESET.LFO.shape])
+			// FX
+			updateGUI("fx_switch", PRESET.FX.enabled)
+			updateGUI("fx_param1", PRESET.FX.param1, PRESET.FX.param1)
+			updateGUI("fx_param2", PRESET.FX.param2, PRESET.FX.param2)
+			updateGUI("fx_param3", PRESET.FX.param3, PRESET.FX.param3)
+			updateGUI("fx_param4", PRESET.FX.param4, PRESET.FX.param4)
 		}
 		reader.readAsText(file)
 	}
 	toggleDropdown(presetsDropdown)
-	updateKnobValue("osc_a_octave", PRESET.OSC_A.octave)
 })
 
 // Control events //
@@ -684,6 +754,7 @@ for (let i = 0; i < controls.length; i++) {
 	// add event listener to each control
 
 	controls[i].addEventListener("change", async function (e) {
+		console.log(e.target.id, e.target.value)
 		switch (e.target.id) {
 			case "osc_a_switch":
 				PRESET.OSC_A.enabled = e.target.value
@@ -776,20 +847,59 @@ for (let i = 0; i < controls.length; i++) {
 					PRESET.FILTER.enabled = false
 				// if filter toggled on...
 				} else {
-					if (PRESET.OSC_A.enabled) {
+					if (PRESET.OSC_A.enabled && PRESET.FILTER.osc_a) {
 						SYNTH_A.disconnect()
 						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
-					if (PRESET.OSC_B.enabled) {
+					if (PRESET.OSC_B.enabled && PRESET.FILTER.osc_b) {
 						SYNTH_B.disconnect()
 						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
-					if (PRESET.OSC_C.enabled) {
+					if (PRESET.OSC_C.enabled && PRESET.FILTER.osc_c) {
 						SYNTH_C.disconnect()
 						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
 					// set PRESET.FILTER.enabled to true
 					PRESET.FILTER.enabled = true
+				}
+				break;
+			case "osc_a_filter_switch":
+				PRESET.FILTER.osc_a = e.target.value
+				// if osc_a filter toggled off...
+				if (e.target.value === 0 && PRESET.OSC_A.enabled) {
+					// turn off
+					SYNTH_A.disconnect()
+					SYNTH_A.chain(SELECTED_FX, OUTPUT)
+				} else if (e.target.value === 1 && PRESET.OSC_A.enabled) {
+					// turn on
+					SYNTH_A.disconnect()
+					SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+				}
+				break;
+			case "osc_b_filter_switch":
+				PRESET.FILTER.osc_b = e.target.value
+				// if osc_b filter toggled off...
+				if (e.target.value === 0 && PRESET.OSC_B.enabled) {
+					// turn off
+					SYNTH_B.disconnect()
+					SYNTH_B.chain(SELECTED_FX, OUTPUT)
+				} else if (e.target.value === 1 && PRESET.OSC_B.enabled) {
+					// turn on
+					SYNTH_B.disconnect()
+					SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+				}
+				break;
+			case "osc_c_filter_switch":
+				PRESET.FILTER.osc_c = e.target.value
+				// if osc_c filter toggled off...
+				if (e.target.value === 0 && PRESET.OSC_C.enabled) {
+					// turn off
+					SYNTH_C.disconnect()
+					SYNTH_C.chain(SELECTED_FX, OUTPUT)
+				} else if (e.target.value === 1 && PRESET.OSC_C.enabled) {
+					// turn on
+					SYNTH_C.disconnect()
+					SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
 				}
 				break;
 			case "lfo_switch":
@@ -870,7 +980,7 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR A --- //
 			// -------------------- //
 			case "osc_a_octave":
-				PRESET.OSC_A.octave = octaveValues[e.target.value]
+				PRESET.OSC_A.octave = e.target.value
 				// SYNTH_A.releaseAll()
 				// SYNTH_B.releaseAll()
 				// SYNTH_C.releaseAll()
@@ -894,11 +1004,10 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_a_shape":
-				PRESET.OSC_A.shape = shapeValues[e.target.value]
-				PRESET.OSC_A.shapeNum = e.target.value
+				PRESET.OSC_A.shape = e.target.value
 				SYNTH_A.set({
 					oscillator: {
-						type: PRESET.OSC_A.shape
+						type: shapeValues[PRESET.OSC_A.shape]
 					}
 				})
 				break;
@@ -938,7 +1047,7 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR B --- //
 			// -------------------- //
 			case "osc_b_octave":
-				PRESET.OSC_B.octave = octaveValues[e.target.value]
+				PRESET.OSC_B.octave = e.target.value
 				break;
 			case "osc_b_semi":
 				PRESET.OSC_B.detune = e.target.value
@@ -950,10 +1059,10 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_b_shape":
-				PRESET.OSC_B.shape = shapeValues[e.target.value]
+				PRESET.OSC_B.shape = e.target.value
 				SYNTH_B.set({
 					oscillator: {
-						type: PRESET.OSC_B.shape
+						type: shapeValues[PRESET.OSC_B.shape]
 					}
 				})
 				break;
@@ -993,7 +1102,7 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR C --- //
 			// -------------------- //
 			case "osc_c_octave":
-				PRESET.OSC_C.octave = subOctaveValues[e.target.value]
+				PRESET.OSC_C.octave = e.target.value
 				break;
 			case "osc_c_semi":
 				PRESET.OSC_C.detune = e.target.value
@@ -1005,10 +1114,10 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "osc_c_shape":
-				PRESET.OSC_C.shape = shapeValues[e.target.value]
+				PRESET.OSC_C.shape = e.target.value
 				SYNTH_C.set({
 					oscillator: {
-						type: PRESET.OSC_C.shape
+						type: shapeValues[PRESET.OSC_C.shape]
 					}
 				})
 				break;
@@ -1573,9 +1682,9 @@ let playingKeys = [];
 
 keyboard.addEventListener("change", function (e) {
 	// Calculate the notes to play based on the keyboard input and synth settings
-	let note_a = getNoteFromNumber(e.note[1], PRESET.OSC_A.detune, PRESET.OSC_A.octave);
-	let note_b = getNoteFromNumber(e.note[1], PRESET.OSC_B.detune, PRESET.OSC_B.octave);
-	let note_c = getNoteFromNumber(e.note[1], PRESET.OSC_C.detune, PRESET.OSC_C.octave);
+	let note_a = getNoteFromNumber(e.note[1], PRESET.OSC_A.detune, octaveValues[PRESET.OSC_A.octave]);
+	let note_b = getNoteFromNumber(e.note[1], PRESET.OSC_B.detune, octaveValues[PRESET.OSC_B.octave]);
+	let note_c = getNoteFromNumber(e.note[1], PRESET.OSC_C.detune, subOctaveValues[PRESET.OSC_C.octave]);
 
 	console.log(e.note)
 

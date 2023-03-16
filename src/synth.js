@@ -23,16 +23,16 @@ import * as Tone from 'tone'
 //  ✔ Declare object with all default synth data
 //  ✔ When a parameter is changed, update the object
 //  ✔ If a user clicks save, save the object to local storage / download as JSON
-//  - If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
+//  ✔ If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
 //  - If a user clicks randomize, randomize the object (this will require min/max values for each parameter)
 //  - Split preset button out into two buttons (save & load)
 //  - Add a "Download Preset" button
 //  NEED:
 //  ✔ Object matching synth data structure
-//  - Function for loading a preset & setting all parameters
+//  ✔ Function for loading a preset & setting all parameters
 //  ✔ Function for saving a preset & downloading as JSON
 //  - Function for randomizing a preset & setting all parameters
-//  - Functions for updating the interface based on the current preset
+//  ✔ Functions for updating the interface based on the current preset
 
 // -- PRESET DATA (INITIAL) -- //
 
@@ -388,6 +388,201 @@ const FX_FREQSHIFT = new Tone.FrequencyShifter({
 	frequency: 0,
 	wet: 0.5
 })
+let fxSelectValues = {
+	"Distortion" : FX_DISTORTION,
+	"Chebyshev" : FX_CHEBYSHEV,
+	"Phaser" : FX_PHASER,
+	"Tremolo" : FX_TREMOLO,
+	"Vibrato" : FX_VIBRATO,
+	"Delay" : FX_DELAY,
+	"Reverb" : FX_REVERB,
+	"PitchShift" : FX_PITCHSHIFT,
+	"FreqShift" : FX_FREQSHIFT,
+}
+function setFXParam1(value) {
+	switch (SELECTED_FX) {
+		case FX_DISTORTION:
+			FX_DISTORTION.set({
+				"distortion": value
+			})
+			break;
+		case FX_CHEBYSHEV:
+			FX_CHEBYSHEV.set({
+				"order": value
+			})
+			break;
+		case FX_PHASER:
+			FX_PHASER.set({
+				"frequency": value
+			})
+			break;
+		case FX_TREMOLO:
+			FX_TREMOLO.set({
+				"frequency": value
+			})
+			break;
+		case FX_VIBRATO:
+			FX_VIBRATO.set({
+				"frequency": value
+			})
+			break;
+		case FX_DELAY:
+			FX_DELAY.set({
+				"delayTime": value
+			})
+			break;
+		case FX_REVERB:
+			FX_REVERB.set({
+				"decay": value
+			})
+			break;
+		case FX_PITCHSHIFT:
+			FX_PITCHSHIFT.set({
+				"pitch": value
+			})
+			break;
+		case FX_FREQSHIFT:
+			FX_FREQSHIFT.set({
+				"frequency": value
+			})
+			break;
+		default:
+			console.log("Switch default: Nothing set for this case!")
+	}
+}
+function setFXParam2(value){
+	switch (SELECTED_FX) {
+		case FX_DISTORTION:
+			FX_DISTORTION.set({
+				"oversample": distortionOversampleValues[value]
+			})
+			break;
+		case FX_CHEBYSHEV:
+			PRESET.FX.mix = value
+			FX_CHEBYSHEV.set({
+				"wet": value
+			})
+			break;
+		case FX_PHASER:
+			FX_PHASER.set({
+				"octaves": value
+			})
+			break;
+		case FX_TREMOLO:
+			FX_TREMOLO.set({
+				"depth": value
+			})
+			break;
+		case FX_VIBRATO:
+			FX_VIBRATO.set({
+				"depth": value
+			})
+			break;
+		case FX_DELAY:
+			FX_DELAY.set({
+				"feedback": value
+			})
+			break;
+		case FX_REVERB:
+			FX_REVERB.set({
+				"preDelay": value
+			})
+			break;
+		case FX_PITCHSHIFT:
+			FX_PITCHSHIFT.set({
+				"windowSize": value
+			})
+			break;
+		case FX_FREQSHIFT:
+			PRESET.FX.mix = value
+			FX_FREQSHIFT.set({
+				"wet": value
+			})
+			break;
+		default:
+			console.log("Switch default: Nothing set for this case!")
+	}
+}
+function setFXParam3(value){
+	switch (SELECTED_FX) {
+		case FX_DISTORTION:
+			PRESET.FX.mix = value
+			FX_DISTORTION.set({
+				"wet": value
+			})
+			break;
+		case FX_PHASER:
+			FX_PHASER.set({
+				"Q": value
+			})
+			break;
+		case FX_TREMOLO:
+			FX_TREMOLO.set({
+				"spread": value
+			})
+			break;
+		case FX_VIBRATO:
+			FX_VIBRATO.set({
+				"type": shapeValues[value]
+			})
+			break;
+		case FX_DELAY:
+			FX_DELAY.set({
+				"delayTime": value
+			})
+			break;
+		case FX_REVERB:
+			PRESET.FX.mix = value
+			FX_REVERB.set({
+				"wet": value
+			})
+			break;
+		case FX_PITCHSHIFT:
+			FX_PITCHSHIFT.set({
+				"feedback": value
+			})
+			break;
+		default:
+			console.log("Switch default: Nothing set for this case!")
+	}
+}
+function setFXParam4(value){
+	switch (SELECTED_FX) {
+		case FX_PHASER:
+			FX_PHASER.set({
+				"wet": value
+			})
+			break;
+		case FX_TREMOLO:
+			FX_TREMOLO.set({
+				"wet": value
+			})
+			break;
+		case FX_VIBRATO:
+			FX_VIBRATO.set({
+				"wet": value
+			})
+			break;
+		case FX_PITCHSHIFT:
+			FX_PITCHSHIFT.set({
+				"wet": value
+			})
+			break;
+		default:
+			console.log("Switch default: Nothing set for this case!")
+	}
+}
+function resetFX() {
+	FX_DISTORTION.set({wet: 0})
+	FX_CHEBYSHEV.set({wet: 0})
+	FX_PHASER.set({wet: 0})
+	FX_TREMOLO.set({wet: 0})
+	FX_VIBRATO.set({wet: 0})
+	FX_DELAY.set({wet: 0})
+	FX_REVERB.set({wet: 0})
+	FX_PITCHSHIFT.set({wet: 0})
+	FX_FREQSHIFT.set({wet: 0})
+}
 
 // -- NOTES -- //
 
@@ -397,87 +592,108 @@ const ARP = new Tone.Pattern(function(time, note){
 	SYNTH_C.triggerAttackRelease(note, 0.25);
 }, ["C4", "D4", "E4", "G4", "A4"]);
 
-// -- INITIAL CONNECTIONS -- //
-
 let SELECTED_FX = FX_DISTORTION
-
-// Synths to Master //
-switch (true) {
-	case PRESET.FILTER.enabled && PRESET.FX.enabled:
-		if (PRESET.OSC_A.enabled) {
-			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_B.enabled) {
-			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_C.enabled) {
-			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		SELECTED_FX.set({wet: PRESET.FX.mix})
-		break;
-	case PRESET.FILTER.enabled && !PRESET.FX.enabled:
-		if (PRESET.OSC_A.enabled) {
-			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_B.enabled) {
-			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_C.enabled) {
-			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		SELECTED_FX.set({wet: 0})
-		break;
-	case !PRESET.FILTER.enabled && PRESET.FX.enabled:
-		if (PRESET.OSC_A.enabled) {
-			SYNTH_A.chain(SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_B.enabled) {
-			SYNTH_B.chain(SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_C.enabled) {
-			SYNTH_C.chain(SELECTED_FX, OUTPUT)
-		}
-		SELECTED_FX.set({wet: PRESET.FX.mix})
-		break;
-	case !PRESET.FILTER.enabled && !PRESET.FX.enabled:
-		if (PRESET.OSC_A.enabled) {
-			SYNTH_A.chain(SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_B.enabled) {
-			SYNTH_B.chain(SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_C.enabled) {
-			SYNTH_C.chain(SELECTED_FX, OUTPUT)
-		}
-		SELECTED_FX.set({wet: 0})
-		break;
-	default:
-		if (PRESET.OSC_A.enabled) {
-			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_B.enabled) {
-			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		if (PRESET.OSC_C.enabled) {
-			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-		}
-		break;
-}
-
-// Master FX Chain //
-OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
-
-// Modulation //
 let LFO_TARGET = FILTER.frequency
 
-if(PRESET.LFO.enabled){
-	LFO.connect(LFO_TARGET).start()
-} else {
-	LFO.connect(LFO_TARGET).stop()
-}
+// -- INITIAL CONNECTIONS -- //
 
-// Master Record
-OUTPUT.connect(RECORDER)
+function connectTone() {
+	console.log("OSC_A: " + PRESET.OSC_A.enabled)
+	console.log("OSC_B: " + PRESET.OSC_B.enabled)
+	console.log("OSC_C: " + PRESET.OSC_C.enabled)
+	SYNTH_A.disconnect()
+	SYNTH_B.disconnect()
+	SYNTH_C.disconnect()
+	FILTER.disconnect()
+	LFO.stop()
+	resetFX()
+	switch (true) {
+		case PRESET.FILTER.enabled && PRESET.FX.enabled:
+			if (PRESET.OSC_A.enabled) {
+				SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_B.enabled) {
+				SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_C.enabled) {
+				SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			SELECTED_FX.set({wet: PRESET.FX.mix})
+			break;
+		case PRESET.FILTER.enabled && !PRESET.FX.enabled:
+			if (PRESET.OSC_A.enabled) {
+				SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_B.enabled) {
+				SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_C.enabled) {
+				SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			SELECTED_FX.set({wet: 0})
+			break;
+		case !PRESET.FILTER.enabled && PRESET.FX.enabled:
+			if (PRESET.OSC_A.enabled) {
+				SYNTH_A.chain(SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_B.enabled) {
+				SYNTH_B.chain(SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_C.enabled) {
+				SYNTH_C.chain(SELECTED_FX, OUTPUT)
+			}
+			SELECTED_FX.set({wet: PRESET.FX.mix})
+			break;
+		case !PRESET.FILTER.enabled && !PRESET.FX.enabled:
+			if (PRESET.OSC_A.enabled) {
+				SYNTH_A.chain(SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_B.enabled) {
+				SYNTH_B.chain(SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_C.enabled) {
+				SYNTH_C.chain(SELECTED_FX, OUTPUT)
+			}
+			SELECTED_FX.set({wet: 0})
+			break;
+		default:
+			if (PRESET.OSC_A.enabled) {
+				SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_B.enabled) {
+				SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			if (PRESET.OSC_C.enabled) {
+				SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+			}
+			break;
+	}
+
+	// FX //
+	if(PRESET.FX.enabled) {
+		SELECTED_FX.set({
+			"wet": PRESET.FX.mix
+		})
+	} else {
+		SELECTED_FX.set({
+			"wet": 0
+		})
+	}
+
+	// Master FX Chain //
+	OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
+
+	// Modulation //
+	if(PRESET.LFO.enabled){
+		LFO.connect(LFO_TARGET).start()
+	} else {
+		// LFO.connect(LFO_TARGET).stop()
+	}
+
+	// Master Record
+	OUTPUT.connect(RECORDER)
+}
+connectTone()
 
 // -- CONTROLS DATA -- //
 
@@ -732,8 +948,8 @@ function toggleDropdown(target) {
 }
 
 // Dropdown states
-let settingsDropdownOpen = false
-let presetsDropdownOpen = false
+let settingsDropdownOpen = 0
+let presetsDropdownOpen = 0
 
 // Button elements
 let presetsButton = document.getElementById("presets_button")
@@ -865,6 +1081,100 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("fx_param2", PRESET.FX.param2, PRESET.FX.param2)
 			updateGUI("fx_param3", PRESET.FX.param3, PRESET.FX.param3)
 			updateGUI("fx_param4", PRESET.FX.param4, PRESET.FX.param4)
+
+			// Update Tone.js //
+			// OSC A
+			SYNTH_A.set({
+				"oscillator": {
+					"type": shapeValues[PRESET.OSC_A.shape]
+				},
+				"envelope": {
+					"attack": PRESET.OSC_A.attack,
+					"decay": PRESET.OSC_A.decay,
+					"sustain": PRESET.OSC_A.sustain,
+					"release": PRESET.OSC_A.release
+				},
+				"volume": PRESET.OSC_A.volume
+			})
+			// OSC B
+			SYNTH_B.set({
+				"oscillator": {
+					"type": shapeValues[PRESET.OSC_B.shape]
+				},
+				"envelope": {
+					"attack": PRESET.OSC_B.attack,
+					"decay": PRESET.OSC_B.decay,
+					"sustain": PRESET.OSC_B.sustain,
+					"release": PRESET.OSC_B.release
+				},
+				"volume": PRESET.OSC_B.volume
+			})
+			// OSC C
+			SYNTH_C.set({
+				"oscillator": {
+					"type": shapeValues[PRESET.OSC_C.shape]
+				},
+				"envelope": {
+					"attack": PRESET.OSC_C.attack,
+					"decay": PRESET.OSC_C.decay,
+					"sustain": PRESET.OSC_C.sustain,
+					"release": PRESET.OSC_C.release
+				},
+				"volume": PRESET.OSC_C.volume
+			})
+			// FILTER
+			FILTER.set({
+				"type": filterTypeValues[PRESET.FILTER.type],
+				"frequency": PRESET.FILTER.frequency,
+				"Q": PRESET.FILTER.Q,
+				"gain": PRESET.FILTER.gain,
+				"rolloff": filterRolloffValues[PRESET.FILTER.rolloff]
+			})
+			// LFO
+			if(PRESET.LFO.enabled) {
+				switch (PRESET.LFO.target) {
+					case "FilterFrequency":
+						LFO_TARGET = FILTER.frequency
+						LFO.connect(FILTER.frequency)
+						break
+					case "OscAVol":
+						LFO_TARGET = SYNTH_A.volume
+						LFO.connect(SYNTH_A.volume)
+						break
+					case "OscBVol":
+						LFO_TARGET = SYNTH_B.volume
+						LFO.connect(SYNTH_B.volume)
+						break
+					case "OscCVol":
+						LFO_TARGET = SYNTH_C.volume
+						LFO.connect(SYNTH_C.volume)
+						break
+				}
+			}
+			LFO.set({
+				"frequency": lfoGridValues[PRESET.LFO.grid],
+				"min": PRESET.LFO.min,
+				"max": PRESET.LFO.max,
+				"type": shapeValues[PRESET.LFO.type]
+			})
+			// FX
+			SELECTED_FX = fxSelectValues[PRESET.FX.type]
+			if(PRESET.FX.enabled) {
+				SELECTED_FX.set({
+					"wet": PRESET.FX.mix
+				})
+			} else {
+				SELECTED_FX.set({
+					"wet": 0
+				})
+			}
+			setFXParam1(PRESET.FX.param1)
+			setFXParam2(PRESET.FX.param2)
+			setFXParam3(PRESET.FX.param3)
+			setFXParam4(PRESET.FX.param4)
+			// CONNECTIONS
+			connectTone()
+
 		}
 		reader.readAsText(file)
 	}
@@ -883,7 +1193,7 @@ for (let i = 0; i < controls.length; i++) {
 				// if osc_a toggled off...
 				if (e.target.value === 0) {
 					SYNTH_A.disconnect()
-					PRESET.OSC_A.enabled = false
+					PRESET.OSC_A.enabled = 0
 				// if osc_a toggled on...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
@@ -898,7 +1208,7 @@ for (let i = 0; i < controls.length; i++) {
 							SYNTH_A.connect(OUTPUT)
 						}
 					}
-					PRESET.OSC_A.enabled = true
+					PRESET.OSC_A.enabled = 1
 				}
 				break;
 			case "osc_b_switch":
@@ -907,7 +1217,7 @@ for (let i = 0; i < controls.length; i++) {
 				if (e.target.value === 0) {
 					// turn off
 					SYNTH_B.disconnect()
-					PRESET.OSC_B.enabled = false
+					PRESET.OSC_B.enabled = 0
 				// if osc_b toggled on...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
@@ -922,7 +1232,7 @@ for (let i = 0; i < controls.length; i++) {
 							SYNTH_B.connect(OUTPUT)
 						}
 					}
-					PRESET.OSC_B.enabled = true
+					PRESET.OSC_B.enabled = 1
 				}
 				break;
 			case "osc_c_switch":
@@ -931,7 +1241,7 @@ for (let i = 0; i < controls.length; i++) {
 				if (e.target.value === 0) {
 					// turn off
 					SYNTH_C.disconnect()
-					PRESET.OSC_C.enabled = false
+					PRESET.OSC_C.enabled = 0
 				// if osc_c toggled off...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
@@ -946,7 +1256,7 @@ for (let i = 0; i < controls.length; i++) {
 							SYNTH_C.connect(OUTPUT)
 						}
 					}
-					PRESET.OSC_C.enabled = true
+					PRESET.OSC_C.enabled = 1
 				}
 				break;
 			case "filter_switch":
@@ -965,8 +1275,8 @@ for (let i = 0; i < controls.length; i++) {
 						SYNTH_C.disconnect()
 						SYNTH_C.chain(SELECTED_FX, OUTPUT)
 					}
-					// set PRESET.FILTER.enabled to false
-					PRESET.FILTER.enabled = false
+					// set PRESET.FILTER.enabled to 0
+					PRESET.FILTER.enabled = 0
 				// if filter toggled on...
 				} else {
 					if (PRESET.OSC_A.enabled && PRESET.FILTER.osc_a) {
@@ -981,8 +1291,8 @@ for (let i = 0; i < controls.length; i++) {
 						SYNTH_C.disconnect()
 						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
-					// set PRESET.FILTER.enabled to true
-					PRESET.FILTER.enabled = true
+					// set PRESET.FILTER.enabled to 1
+					PRESET.FILTER.enabled = 1
 				}
 				break;
 			case "osc_a_filter_switch":
@@ -1030,12 +1340,11 @@ for (let i = 0; i < controls.length; i++) {
 				if (e.target.value === 0) {
 					LFO.stop()
 					// LFO.disconnect(LFO_TARGET)
-					PRESET.LFO.enabled = false
+					PRESET.LFO.enabled = 0
 				// if lfo toggled on...
 				} else {
-					LFO.start()
-					// LFO.connect(LFO_TARGET)
-					PRESET.LFO.enabled = true
+					LFO.connect(LFO_TARGET).start()
+					PRESET.LFO.enabled = 1
 				}
 				break;
 			case "fx_switch":
@@ -1046,16 +1355,16 @@ for (let i = 0; i < controls.length; i++) {
 					SELECTED_FX.set({
 						"wet": 0
 					})
-					// set PRESET.FX.enabled to false
-					PRESET.FX.enabled = false
+					// set PRESET.FX.enabled to 0
+					PRESET.FX.enabled = 0
 				// if fx toggled on...
 				} else {
 					// if filter is enabled...
 					SELECTED_FX.set({
 						"wet": PRESET.FX.mix
 					})
-					// set PRESET.FX.enabled to true
-					PRESET.FX.enabled = true
+					// set PRESET.FX.enabled to 1
+					PRESET.FX.enabled = 1
 				}
 				break;
 			case "rec_switch":
@@ -1327,10 +1636,6 @@ for (let i = 0; i < controls.length; i++) {
 						PRESET.LFO.target = "FilterFrequency"
 						LFO_TARGET = FILTER.frequency
 						break;
-					case "FilterResonance":
-						PRESET.LFO.target = "FilterResonance"
-						LFO_TARGET = FILTER.Q
-						break;
 					case "OscAVol":
 						PRESET.LFO.target = "OscAVol"
 						LFO_TARGET = SYNTH_A.volume
@@ -1350,7 +1655,7 @@ for (let i = 0; i < controls.length; i++) {
 				// LFO.connect(LFO_TARGET)
 				break;
 			case "lfo_grid":
-				PRESET.LFO.grid = lfoGridValues[e.target.value]
+				PRESET.LFO.grid = e.target.value
 				LFO.set({
 					frequency: lfoGridValues[e.target.value]
 				})
@@ -1368,7 +1673,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "lfo_shape":
-				PRESET.LFO.shape = shapeValues[e.target.value]
+				PRESET.LFO.shape = e.target.value
 				LFO.set({
 					type: shapeValues[e.target.value]
 				})
@@ -1380,15 +1685,7 @@ for (let i = 0; i < controls.length; i++) {
 				let PREVIOUS_FX = SELECTED_FX
 
 				// reset all fx wet values to 0 (off)
-				FX_DISTORTION.set({wet: 0})
-				FX_CHEBYSHEV.set({wet: 0})
-				FX_PHASER.set({wet: 0})
-				FX_TREMOLO.set({wet: 0})
-				FX_VIBRATO.set({wet: 0})
-				FX_DELAY.set({wet: 0})
-				FX_REVERB.set({wet: 0})
-				FX_PITCHSHIFT.set({wet: 0})
-				FX_FREQSHIFT.set({wet: 0})
+				resetFX()
 
 				// set Tone & HTML depending on which FX is selected
 				fxGroupUpdate(e.target.value)
@@ -1420,183 +1717,20 @@ for (let i = 0; i < controls.length; i++) {
 				break;
 			case "fx_param1":
 				PRESET.FX.param1 = e.target.value
-				switch (SELECTED_FX) {
-					case FX_DISTORTION:
-						FX_DISTORTION.set({
-							"distortion": e.target.value
-						})
-						break;
-					case FX_CHEBYSHEV:
-						FX_CHEBYSHEV.set({
-							"order": e.target.value
-						})
-						break;
-					case FX_PHASER:
-						FX_PHASER.set({
-							"frequency": e.target.value
-						})
-						break;
-					case FX_TREMOLO:
-						FX_TREMOLO.set({
-							"frequency": e.target.value
-						})
-						break;
-					case FX_VIBRATO:
-						FX_VIBRATO.set({
-							"frequency": e.target.value
-						})
-						break;
-					case FX_DELAY:
-						FX_DELAY.set({
-							"delayTime": e.target.value
-						})
-						break;
-					case FX_REVERB:
-						FX_REVERB.set({
-							"decay": e.target.value
-						})
-						break;
-					case FX_PITCHSHIFT:
-						FX_PITCHSHIFT.set({
-							"pitch": e.target.value
-						})
-						break;
-					case FX_FREQSHIFT:
-						FX_FREQSHIFT.set({
-							"frequency": e.target.value
-						})
-						break;
-					default:
-						console.log("Switch default: Nothing set for this case!")
-				}
+				setFXParam1(e.target.value)
 				break;
 			case "fx_param2":
 				PRESET.FX.param2 = e.target.value
-				switch (SELECTED_FX) {
-					case FX_DISTORTION:
-						FX_DISTORTION.set({
-							"oversample": distortionOversampleValues[e.target.value]
-						})
-						break;
-					case FX_CHEBYSHEV:
-						PRESET.FX.mix = e.target.value
-						FX_CHEBYSHEV.set({
-							"wet": e.target.value
-						})
-						break;
-					case FX_PHASER:
-						FX_PHASER.set({
-							"octaves": e.target.value
-						})
-						break;
-					case FX_TREMOLO:
-						FX_TREMOLO.set({
-							"depth": e.target.value
-						})
-						break;
-					case FX_VIBRATO:
-						FX_VIBRATO.set({
-							"depth": e.target.value
-						})
-						break;
-					case FX_DELAY:
-						FX_DELAY.set({
-							"feedback": e.target.value
-						})
-						break;
-					case FX_REVERB:
-						FX_REVERB.set({
-							"preDelay": e.target.value
-						})
-						break;
-					case FX_PITCHSHIFT:
-						FX_PITCHSHIFT.set({
-							"windowSize": e.target.value
-						})
-						break;
-					case FX_FREQSHIFT:
-						PRESET.FX.mix = e.target.value
-						FX_FREQSHIFT.set({
-							"wet": e.target.value
-						})
-						break;
-					default:
-						console.log("Switch default: Nothing set for this case!")
-				}
+				setFXParam2(e.target.value)
 				break;
 			case "fx_param3":
 				PRESET.FX.param3 = e.target.value
-				switch (SELECTED_FX) {
-					case FX_DISTORTION:
-						PRESET.FX.mix = e.target.value
-						FX_DISTORTION.set({
-							"wet": e.target.value
-						})
-						break;
-					case FX_PHASER:
-						FX_PHASER.set({
-							"Q": e.target.value
-						})
-						break;
-					case FX_TREMOLO:
-						FX_TREMOLO.set({
-							"spread": e.target.value
-						})
-						break;
-					case FX_VIBRATO:
-						FX_VIBRATO.set({
-							"type": shapeValues[e.target.value]
-						})
-						break;
-					case FX_DELAY:
-						FX_DELAY.set({
-							"delayTime": e.target.value
-						})
-						break;
-					case FX_REVERB:
-						PRESET.FX.mix = e.target.value
-						FX_REVERB.set({
-							"wet": e.target.value
-						})
-						break;
-					case FX_PITCHSHIFT:
-						FX_PITCHSHIFT.set({
-							"feedback": e.target.value
-						})
-						break;
-					default:
-						console.log("Switch default: Nothing set for this case!")
-				}
+				setFXParam3(e.target.value)
 				break;
 			case "fx_param4":
 				PRESET.FX.param4 = e.target.value
 				PRESET.FX.mix = e.target.value
-				if(PRESET.FX.enabled) {
-					switch (SELECTED_FX) {
-						case FX_PHASER:
-							FX_PHASER.set({
-								"wet": e.target.value
-							})
-							break;
-						case FX_TREMOLO:
-							FX_TREMOLO.set({
-								"wet": e.target.value
-							})
-							break;
-						case FX_VIBRATO:
-							FX_VIBRATO.set({
-								"wet": e.target.value
-							})
-							break;
-						case FX_PITCHSHIFT:
-							FX_PITCHSHIFT.set({
-								"wet": e.target.value
-							})
-							break;
-						default:
-							console.log("Switch default: Nothing set for this case!")
-					}
-				}
+				setFXParam4(e.target.value)
 				break;
 			default:
 				console.log("Switch default: Nothing set for this case!")

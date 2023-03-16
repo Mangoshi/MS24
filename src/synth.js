@@ -233,6 +233,15 @@ let filterTypeValues = {
 	"5": "lowshelf",
 	"6": "highshelf",
 }
+let filterTypeReadoutValues = {
+	"0": "LPF",
+	"1": "HPF",
+	"2": "BPF",
+	"3": "APF",
+	"4": "Notch",
+	"5": "LSF",
+	"6": "HSF",
+}
 let filterRolloffValues = {
 	"0": -12,
 	"1": -24,
@@ -503,6 +512,17 @@ function updateFilterKnob(target, enable, min, max, step, value, label) {
 		}
 	}
 }
+function filterGroupUpdate(target) {
+	// If filter type is lowshelf or highshelf...
+	if (target === 5 || target === 6) {
+		// ...change the filter Q knob to gain knob
+		updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
+		// Else if filter type is not lowshelf or highshelf...
+	} else {
+		// ...change the filter gain knob to Q knob
+		updateFilterKnob("filter_resonance", 1, 0, 100, 1, PRESET.FILTER.Q, "Q")
+	}
+}
 
 let fxParam1Knob = document.getElementById("fx_param1")
 let fxParam1Readout = document.getElementById("fx_param1_readout")
@@ -582,6 +602,100 @@ function updateFxKnob(target, enable, min, max, step, value, label) {
 				fxParam4Group.setAttribute("style", "display: flex;")
 			}
 			break;
+	}
+}
+
+function fxGroupUpdate(switchTarget){
+	switch (switchTarget) {
+		case "Distortion":
+			PRESET.FX.type = "Distortion"
+			SELECTED_FX = FX_DISTORTION
+
+			// since setAttribute doesn't work,
+			// we have to do this with jQuery
+			// taken from webaudio-controls documentation:
+			// (https://g200kg.github.io/webaudio-controls/docs/detailspecs.html) - setValue doesn't work
+			// (https://g200kg.github.io/webaudio-controls/docs/resizetest.html) - jQuery logic here does
+
+			updateFxKnob(1, 1, 0, 20, 0.1, 0, "Intensity")
+			updateFxKnob(2, 1, 0, 2, 1, 0, "Oversample")
+			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
+			updateFxKnob(4, 0)
+			break;
+		case "Chebyshev":
+			PRESET.FX.type = "Chebyshev"
+			SELECTED_FX = FX_CHEBYSHEV
+
+			updateFxKnob(1, 1, 1, 100, 1, 0, "Order")
+			updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
+			updateFxKnob(3, 0)
+			updateFxKnob(4, 0)
+			break;
+		case "Phaser":
+			PRESET.FX.type = "Phaser"
+			SELECTED_FX = FX_PHASER
+
+			updateFxKnob(1, 1, 0, 20, 0.01, 0.1, "Frequency")
+			updateFxKnob(2, 1, 0, 12, 0.1, 2, "Octaves")
+			updateFxKnob(3, 1, 0, 100, 0.1, 1, "Q")
+			updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
+			break;
+		case "Tremolo":
+			PRESET.FX.type = "Tremolo"
+			SELECTED_FX = FX_TREMOLO
+
+			updateFxKnob(1, 1, 0, 20000, 0.1, 0, "Frequency")
+			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
+			updateFxKnob(3, 1, 0, 100, 0.01, 0, "Spread")
+			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+			break;
+		case "Vibrato":
+			PRESET.FX.type = "Vibrato"
+			SELECTED_FX = FX_VIBRATO
+
+			updateFxKnob(1, 1, 0, 1200, 1, 0, "Frequency")
+			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
+			updateFxKnob(3, 1, 0, 4, 1, 0, "Type")
+			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+			break;
+		case "Delay":
+			PRESET.FX.type = "Delay"
+			SELECTED_FX = FX_DELAY
+
+			updateFxKnob(1, 1, 0, 1, 0.01, 0, "Time")
+			updateFxKnob(2, 1, 0, 1, 0.01, 0.5, "Feedback")
+			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
+			updateFxKnob(4, 0)
+			break;
+		case "Reverb":
+			PRESET.FX.type = "Reverb"
+			SELECTED_FX = FX_REVERB
+
+			updateFxKnob(1, 1, 0, 100, 1, 10, "Decay")
+			updateFxKnob(2, 1, 0, 5, 0.1, 0, "Pre-delay")
+			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
+			updateFxKnob(4, 0)
+			break;
+		case "PitchShift":
+			PRESET.FX.type = "PitchShift"
+			SELECTED_FX = FX_PITCHSHIFT
+
+			updateFxKnob(1, 1, -120, 120, 0.1, 0, "Pitch")
+			updateFxKnob(2, 1, 0.01, 12, 0.01, 0.03, "Size")
+			updateFxKnob(3, 1, 0, 1, 0.01, 0.5, "Feedback")
+			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+			break;
+		case "FreqShift":
+			PRESET.FX.type = "FreqShift"
+			SELECTED_FX = FX_FREQSHIFT
+
+			updateFxKnob(1, 1, 0, 1000, 0.1, 0, "Frequency")
+			updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
+			updateFxKnob(3, 0)
+			updateFxKnob(4, 0)
+			break;
+		default:
+			console.log("Switch default: Nothing set for this case!")
 	}
 }
 
@@ -673,6 +787,10 @@ function updateGUI(target, value, readout){
 		jQtargetReadout.value = readout
 	}
 }
+function updateSelectBox(target, value){
+	let selectBox = document.getElementById(target)
+	selectBox.value = value
+}
 presetLoadButton.addEventListener("click", function() {
 	console.log("This button will load a preset from disk!")
 	fileInput.click();
@@ -723,21 +841,25 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_c_sustain", PRESET.OSC_C.sustain, PRESET.OSC_C.sustain)
 			updateGUI("osc_c_release", PRESET.OSC_C.release, PRESET.OSC_C.release)
 			// FILTER
+			filterGroupUpdate(PRESET.FILTER.type)
 			updateGUI("filter_switch", PRESET.FILTER.enabled)
 			updateGUI("filter_cutoff", PRESET.FILTER.frequency, PRESET.FILTER.frequency)
 			updateGUI("filter_resonance", PRESET.FILTER.Q, PRESET.FILTER.Q)
 			updateGUI("filter_rolloff", PRESET.FILTER.rolloff, filterRolloffValues[PRESET.FILTER.rolloff])
-			updateGUI("filter_type", PRESET.FILTER.type, filterTypeValues[PRESET.FILTER.type])
+			updateGUI("filter_type", PRESET.FILTER.type, filterTypeReadoutValues[PRESET.FILTER.type])
 			updateGUI("osc_a_filter_switch", PRESET.FILTER.osc_a)
 			updateGUI("osc_b_filter_switch", PRESET.FILTER.osc_b)
 			updateGUI("osc_c_filter_switch", PRESET.FILTER.osc_c)
 			// LFO
+			updateSelectBox("lfo_selector", PRESET.LFO.target)
 			updateGUI("lfo_switch", PRESET.LFO.enabled)
 			updateGUI("lfo_grid", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
 			updateGUI("lfo_min", PRESET.LFO.min, PRESET.LFO.min)
 			updateGUI("lfo_max", PRESET.LFO.max, PRESET.LFO.max)
 			updateGUI("lfo_shape", PRESET.LFO.shape, shapeValues[PRESET.LFO.shape])
 			// FX
+			updateSelectBox("fx_selector", PRESET.FX.type)
+			fxGroupUpdate(PRESET.FX.type)
 			updateGUI("fx_switch", PRESET.FX.enabled)
 			updateGUI("fx_param1", PRESET.FX.param1, PRESET.FX.param1)
 			updateGUI("fx_param2", PRESET.FX.param2, PRESET.FX.param2)
@@ -1184,26 +1306,17 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 			case "filter_rolloff":
-				PRESET.FILTER.rolloff = filterRolloffValues[e.target.value]
+				PRESET.FILTER.rolloff = e.target.value
 				FILTER.set({
 					rolloff: filterRolloffValues[e.target.value]
 				})
 				break;
 			case "filter_type":
-				PRESET.FILTER.type = filterTypeValues[e.target.value]
+				PRESET.FILTER.type = e.target.value
 				FILTER.set({
 					type: filterTypeValues[e.target.value]
 				})
-				// If filter type is lowshelf or highshelf...
-				if (e.target.value === 5 || e.target.value === 6) {
-					// ...change the filter Q knob to gain knob
-					updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
-				// Else if filter type is not lowshelf or highshelf...
-				} else {
-					// ...change the filter gain knob to Q knob
-					updateFilterKnob("filter_resonance", 1, 0, 100, 1, PRESET.FILTER.Q, "Q")
-				}
-				PRESET.FILTER.type = filterTypeValues[e.target.value]
+				filterGroupUpdate(e.target.value)
 				break;
 			// ----------- //
 			// --- LFO --- //
@@ -1277,142 +1390,8 @@ for (let i = 0; i < controls.length; i++) {
 				FX_PITCHSHIFT.set({wet: 0})
 				FX_FREQSHIFT.set({wet: 0})
 
-				// log params before change
-				// console.group("p1 before")
-				// console.log("label:", fxParam1Label)
-				// console.log("control:", fxParam1)
-				// console.log("readout:", fxParam1Readout)
-				// console.groupEnd()
-				// console.group("p2 before")
-				// console.log("label:", fxParam2Label)
-				// console.log("control:", fxParam2)
-				// console.log("readout:", fxParam2Readout)
-				// console.groupEnd()
-				// console.group("p3 before")
-				// console.log("label:", fxParam3Label)
-				// console.log("control:", fxParam3)
-				// console.log("readout:", fxParam3Readout)
-				// console.groupEnd()
-				// console.group("p4 before")
-				// console.log("label:", fxParam4Label)
-				// console.log("control:", fxParam4)
-				// console.log("readout:", fxParam4Readout)
-				// console.groupEnd()
-
 				// set Tone & HTML depending on which FX is selected
-				switch (e.target.value) {
-					case "Distortion":
-						PRESET.FX.type = "Distortion"
-						SELECTED_FX = FX_DISTORTION
-
-						// since setAttribute doesn't work,
-						// we have to do this with jQuery
-						// taken from webaudio-controls documentation:
-						// (https://g200kg.github.io/webaudio-controls/docs/detailspecs.html) - setValue doesn't work
-						// (https://g200kg.github.io/webaudio-controls/docs/resizetest.html) - jQuery logic here does
-
-						updateFxKnob(1, 1, 0, 20, 0.1, 0, "Intensity")
-						updateFxKnob(2, 1, 0, 2, 1, 0, "Oversample")
-						updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
-						updateFxKnob(4, 0)
-						break;
-					case "Chebyshev":
-						PRESET.FX.type = "Chebyshev"
-						SELECTED_FX = FX_CHEBYSHEV
-
-						updateFxKnob(1, 1, 1, 100, 1, 0, "Order")
-						updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
-						updateFxKnob(3, 0)
-						updateFxKnob(4, 0)
-						break;
-					case "Phaser":
-						PRESET.FX.type = "Phaser"
-						SELECTED_FX = FX_PHASER
-
-						updateFxKnob(1, 1, 0, 20, 0.01, 0.1, "Frequency")
-						updateFxKnob(2, 1, 0, 12, 0.1, 2, "Octaves")
-						updateFxKnob(3, 1, 0, 100, 0.1, 1, "Q")
-						updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
-						break;
-					case "Tremolo":
-						PRESET.FX.type = "Tremolo"
-						SELECTED_FX = FX_TREMOLO
-
-						updateFxKnob(1, 1, 0, 20000, 0.1, 0, "Frequency")
-						updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
-						updateFxKnob(3, 1, 0, 100, 0.01, 0, "Spread")
-						updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
-						break;
-					case "Vibrato":
-						PRESET.FX.type = "Vibrato"
-						SELECTED_FX = FX_VIBRATO
-
-						updateFxKnob(1, 1, 0, 1200, 1, 0, "Frequency")
-						updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
-						updateFxKnob(3, 1, 0, 4, 1, 0, "Type")
-						updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
-						break;
-					case "Delay":
-						PRESET.FX.type = "Delay"
-						SELECTED_FX = FX_DELAY
-
-						updateFxKnob(1, 1, 0, 1, 0.01, 0, "Time")
-						updateFxKnob(2, 1, 0, 1, 0.01, 0.5, "Feedback")
-						updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
-						updateFxKnob(4, 0)
-						break;
-					case "Reverb":
-						PRESET.FX.type = "Reverb"
-						SELECTED_FX = FX_REVERB
-
-						updateFxKnob(1, 1, 0, 100, 1, 10, "Decay")
-						updateFxKnob(2, 1, 0, 5, 0.1, 0, "Pre-delay")
-						updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
-						updateFxKnob(4, 0)
-						break;
-					case "PitchShift":
-						PRESET.FX.type = "PitchShift"
-						SELECTED_FX = FX_PITCHSHIFT
-
-						updateFxKnob(1, 1, -120, 120, 0.1, 0, "Pitch")
-						updateFxKnob(2, 1, 0.01, 12, 0.01, 0.03, "Size")
-						updateFxKnob(3, 1, 0, 1, 0.01, 0.5, "Feedback")
-						updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
-						break;
-					case "FreqShift":
-						PRESET.FX.type = "FreqShift"
-						SELECTED_FX = FX_FREQSHIFT
-
-						updateFxKnob(1, 1, 0, 1000, 0.1, 0, "Frequency")
-						updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
-						updateFxKnob(3, 0)
-						updateFxKnob(4, 0)
-						break;
-					default:
-						console.log("Switch default: Nothing set for this case!")
-				}
-
-				// log params after change
-				// console.group("p1 after")
-				// console.log("label:", fxParam1Label)
-				// console.log("control:", fxParam1)
-				// console.log("readout:", fxParam1Readout)
-				// console.groupEnd()
-				// console.group("p2 after")
-				// console.log("label:", fxParam2Label)
-				// console.log("control:", fxParam2)
-				// console.log("readout:", fxParam2Readout)
-				// console.groupEnd()
-				// console.group("p3 after")
-				// console.log("label:", fxParam3Label)
-				// console.log("control:", fxParam3)
-				// console.log("readout:", fxParam3Readout)
-				// console.groupEnd()
-				// console.group("p4 after")
-				// console.log("label:", fxParam4Label)
-				// console.log("control:", fxParam4)
-				// console.log("readout:", fxParam4Readout)
-				// console.groupEnd()
+				fxGroupUpdate(e.target.value)
 
 				if (PRESET.FX.enabled) {
 					// set selected FX wet value to PRESET.FX.mix

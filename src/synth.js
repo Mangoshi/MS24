@@ -25,6 +25,8 @@ import * as Tone from 'tone'
 //  ✔ If a user clicks save, save the object to local storage / download as JSON
 //  - If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
 //  - If a user clicks randomize, randomize the object (this will require min/max values for each parameter)
+//  - Split preset button out into two buttons (save & load)
+//  - Add a "Download Preset" button
 //  NEED:
 //  ✔ Object matching synth data structure
 //  - Function for loading a preset & setting all parameters
@@ -35,6 +37,7 @@ import * as Tone from 'tone'
 // -- PRESET DATA (INITIAL) -- //
 
 let PRESET = {
+	NAME: "Init",
 	MASTER: {
 		gain: 0.5
 	},
@@ -43,7 +46,7 @@ let PRESET = {
 		octave: 3,
 		detune: 0,
 		volume: 0,
-		shape: "sine",
+		shape: 0,
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
@@ -54,7 +57,7 @@ let PRESET = {
 		octave: 4,
 		detune: 0,
 		volume: 0,
-		shape: "triangle",
+		shape: 1,
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
@@ -65,7 +68,7 @@ let PRESET = {
 		octave: 1,
 		detune: 0,
 		volume: 0,
-		shape: "sawtooth",
+		shape: 2,
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
@@ -75,8 +78,8 @@ let PRESET = {
 		enabled: 1,
 		frequency: 1000,
 		Q: 1,
-		rolloff: -12,
-		type: "lowpass",
+		rolloff: 0,
+		type: 0,
 		osc_a: 1,
 		osc_b: 1,
 		osc_c: 1
@@ -84,8 +87,8 @@ let PRESET = {
 	LFO: {
 		enabled: 0,
 		target: "FilterFrequency",
-		type: "sine",
-		grid: "4n",
+		type: 0,
+		grid: 5,
 		min: 0,
 		max: 1000,
 		osc_a: 1,
@@ -93,17 +96,20 @@ let PRESET = {
 		osc_c: 1
 	},
 	FX: {
-		enabled: 1,
+		enabled: 0,
 		type: "Distortion",
 		param1: 0,
 		param2: 0,
 		param3: 0.5,
 		param4: 0,
+		mix: 0.5,
 		osc_a: 1,
 		osc_b: 1,
 		osc_c: 1
 	}
 }
+
+// TODO: Add each FX type to the PRESET object
 
 // -- MIN/MAX DATA (to be used for randomization) -- //
 
@@ -276,19 +282,19 @@ const RECORDER = new Tone.Recorder()
 const SYNTH_A = new Tone.PolySynth(Tone.Synth)
 SYNTH_A.set({
 	oscillator: {
-		type: PRESET.OSC_A.shape
+		type: shapeValues[PRESET.OSC_A.shape]
 	}
 })
 const SYNTH_B = new Tone.PolySynth(Tone.Synth)
 SYNTH_B.set({
 	oscillator: {
-		type: PRESET.OSC_B.shape
+		type: shapeValues[PRESET.OSC_B.shape]
 	}
 })
 const SYNTH_C = new Tone.PolySynth(Tone.Synth)
 SYNTH_C.set({
 	oscillator: {
-		type: PRESET.OSC_C.shape
+		type: shapeValues[PRESET.OSC_C.shape]
 	}
 })
 
@@ -298,13 +304,17 @@ SYNTH_C.debug = true
 
 // -- FILTER -- //
 
-const FILTER = new Tone.Filter(PRESET.FILTER.frequency, PRESET.FILTER.type, PRESET.FILTER.rolloff)
+const FILTER = new Tone.Filter(
+	PRESET.FILTER.frequency,
+	filterTypeValues[PRESET.FILTER.type],
+	filterRolloffValues[PRESET.FILTER.rolloff]
+)
 
 // -- LFO -- //
 
 let LFO_TARGET_VALUE = PRESET.FILTER.frequency
 
-const LFO = new Tone.LFO("4n", 0, LFO_TARGET_VALUE).start()
+const LFO = new Tone.LFO(lfoGridValues[PRESET.LFO.grid], 0, LFO_TARGET_VALUE).start()
 
 // -- FX -- //
 
@@ -370,14 +380,66 @@ const ARP = new Tone.Pattern(function(time, note){
 let SELECTED_FX = FX_DISTORTION
 
 // Synths to Master //
-if(PRESET.OSC_A.enabled){
-	SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-}
-if(PRESET.OSC_B.enabled){
-	SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-}
-if(PRESET.OSC_C.enabled) {
-	SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+switch (true) {
+	case PRESET.FILTER.enabled && PRESET.FX.enabled:
+		if (PRESET.OSC_A.enabled) {
+			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_B.enabled) {
+			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_C.enabled) {
+			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		SELECTED_FX.set({wet: PRESET.FX.mix})
+		break;
+	case PRESET.FILTER.enabled && !PRESET.FX.enabled:
+		if (PRESET.OSC_A.enabled) {
+			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_B.enabled) {
+			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_C.enabled) {
+			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		SELECTED_FX.set({wet: 0})
+		break;
+	case !PRESET.FILTER.enabled && PRESET.FX.enabled:
+		if (PRESET.OSC_A.enabled) {
+			SYNTH_A.chain(SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_B.enabled) {
+			SYNTH_B.chain(SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_C.enabled) {
+			SYNTH_C.chain(SELECTED_FX, OUTPUT)
+		}
+		SELECTED_FX.set({wet: PRESET.FX.mix})
+		break;
+	case !PRESET.FILTER.enabled && !PRESET.FX.enabled:
+		if (PRESET.OSC_A.enabled) {
+			SYNTH_A.chain(SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_B.enabled) {
+			SYNTH_B.chain(SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_C.enabled) {
+			SYNTH_C.chain(SELECTED_FX, OUTPUT)
+		}
+		SELECTED_FX.set({wet: 0})
+		break;
+	default:
+		if (PRESET.OSC_A.enabled) {
+			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_B.enabled) {
+			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		if (PRESET.OSC_C.enabled) {
+			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+		}
+		break;
 }
 
 // Master FX Chain //
@@ -386,7 +448,11 @@ OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
 // Modulation //
 let LFO_TARGET = FILTER.frequency
 
-LFO.connect(LFO_TARGET).stop()
+if(PRESET.LFO.enabled){
+	LFO.connect(LFO_TARGET).start()
+} else {
+	LFO.connect(LFO_TARGET).stop()
+}
 
 // Master Record
 OUTPUT.connect(RECORDER)
@@ -402,18 +468,6 @@ let controls = document.getElementsByClassName("control");
 //  - onChange pushes note to array
 //  - onRelease removes note from array
 //  - Controls changes the array / signals
-
-// Initialize Synth variables
-let oscAEnabled = true
-let oscBEnabled = true
-let oscCEnabled = false
-let filterEnabled = true
-let selectedFilter = "lowpass"
-let filterResonance = 0
-let filterGain = 0
-let lfoEnabled = false
-let fxEnabled = true
-let fxMix = 0.5
 
 let filterResonanceKnob = document.getElementById("filter_resonance")
 let filterResonanceReadout = document.getElementById("filter_resonance_readout")
@@ -559,7 +613,9 @@ let presetsDropdownOpen = false
 let presetsButton = document.getElementById("presets_button")
 let presetsDropdown = document.getElementById("presets_dropdown")
 let presetSaveButton = document.getElementById("preset_save_button")
+let presetNameInput = document.getElementById("preset_name_input")
 let presetLoadButton = document.getElementById("preset_load_button")
+let fileInput = document.getElementById("file_input")
 let settingsButton = document.getElementById("settings_button")
 let settingsDropdown = document.getElementById("settings_dropdown")
 let settingsThemeButton = document.getElementById("settings_theme_button")
@@ -593,13 +649,34 @@ presetSaveButton.addEventListener("click", function() {
 	anchor.href = URL.createObjectURL(new Blob([JSON.stringify(PRESET, null, 2)], {
 		type: "text/plain"
 	}));
-	anchor.download = "preset.json";
+	anchor.download = "preset.ms24preset";
 	anchor.click();
 	toggleDropdown(presetsDropdown)
 })
+function updateKnobValue(target, value){
+	$('#fx_param1')[0].value = value;
+}
 presetLoadButton.addEventListener("click", function() {
 	console.log("This button will load a preset from disk!")
+	fileInput.click();
+	fileInput.onchange = function(e) {
+		let file = e.target.files[0];
+		// console.log(file.name.split(".")[1])
+		if (!file || file.name.split(".")[1]!=="ms24preset"){
+			alert("Please select a valid preset file!")
+			return
+		}
+		let reader = new FileReader();
+		reader.onload = function(e) {
+			console.log(e)
+			console.log("Preset before:", PRESET)
+			PRESET = JSON.parse(e.target.result)
+			console.log("Preset after:", PRESET)
+		}
+		reader.readAsText(file)
+	}
 	toggleDropdown(presetsDropdown)
+	updateKnobValue("osc_a_octave", PRESET.OSC_A.octave)
 })
 
 // Control events //
@@ -613,22 +690,22 @@ for (let i = 0; i < controls.length; i++) {
 				// if osc_a toggled off...
 				if (e.target.value === 0) {
 					SYNTH_A.disconnect()
-					oscAEnabled = false
+					PRESET.OSC_A.enabled = false
 				// if osc_a toggled on...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
-					if (filterEnabled && fxEnabled) {
+					if (PRESET.FILTER.enabled && PRESET.FX.enabled) {
 						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
 					} else {
-						if (filterEnabled && !fxEnabled) {
-							SYNTH_A.chain(FILTER, OUTPUT)
-						} else if (!filterEnabled && fxEnabled) {
+						if (PRESET.FILTER.enabled && !PRESET.FX.enabled) {
+							SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+						} else if (!PRESET.FILTER.enabled && PRESET.FX.enabled) {
 							SYNTH_A.chain(SELECTED_FX, OUTPUT)
 						} else {
 							SYNTH_A.connect(OUTPUT)
 						}
 					}
-					oscAEnabled = true
+					PRESET.OSC_A.enabled = true
 				}
 				break;
 			case "osc_b_switch":
@@ -637,22 +714,22 @@ for (let i = 0; i < controls.length; i++) {
 				if (e.target.value === 0) {
 					// turn off
 					SYNTH_B.disconnect()
-					oscBEnabled = false
+					PRESET.OSC_B.enabled = false
 				// if osc_b toggled on...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
-					if (filterEnabled && fxEnabled) {
+					if (PRESET.FILTER.enabled && PRESET.FX.enabled) {
 						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
 					} else {
-						if (filterEnabled && !fxEnabled) {
-							SYNTH_B.chain(FILTER, OUTPUT)
-						} else if (!filterEnabled && fxEnabled) {
+						if (PRESET.FILTER.enabled && !PRESET.FX.enabled) {
+							SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+						} else if (!PRESET.FILTER.enabled && PRESET.FX.enabled) {
 							SYNTH_B.chain(SELECTED_FX, OUTPUT)
 						} else {
 							SYNTH_B.connect(OUTPUT)
 						}
 					}
-					oscBEnabled = true
+					PRESET.OSC_B.enabled = true
 				}
 				break;
 			case "osc_c_switch":
@@ -661,92 +738,58 @@ for (let i = 0; i < controls.length; i++) {
 				if (e.target.value === 0) {
 					// turn off
 					SYNTH_C.disconnect()
-					oscCEnabled = false
+					PRESET.OSC_C.enabled = false
 				// if osc_c toggled off...
 				} else {
 					// depending on filter and fx settings, connect to the correct nodes
-					if (filterEnabled && fxEnabled) {
+					if (PRESET.FILTER.enabled && PRESET.FX.enabled) {
 						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
 					} else {
-						if (filterEnabled && !fxEnabled) {
-							SYNTH_C.chain(FILTER, OUTPUT)
-						} else if (!filterEnabled && fxEnabled) {
+						if (PRESET.FILTER.enabled && !PRESET.FX.enabled) {
+							SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+						} else if (!PRESET.FILTER.enabled && PRESET.FX.enabled) {
 							SYNTH_C.chain(SELECTED_FX, OUTPUT)
 						} else {
 							SYNTH_C.connect(OUTPUT)
 						}
 					}
-					oscCEnabled = true
+					PRESET.OSC_C.enabled = true
 				}
 				break;
 			case "filter_switch":
 				PRESET.FILTER.enabled = e.target.value
 				// if filter toggled off...
 				if (e.target.value === 0) {
-					// and fx is on...
-					if (fxEnabled) {
-						if (oscAEnabled) {
-							SYNTH_A.disconnect()
-							SYNTH_A.chain(SELECTED_FX, OUTPUT)
-						}
-						if (oscBEnabled) {
-							SYNTH_B.disconnect()
-							SYNTH_B.chain(SELECTED_FX, OUTPUT)
-						}
-						if (oscCEnabled) {
-							SYNTH_C.disconnect()
-							SYNTH_C.chain(SELECTED_FX, OUTPUT)
-						}
-					// and fx is off...
-					} else {
-						if (oscAEnabled) {
-							SYNTH_A.disconnect()
-							SYNTH_A.connect(OUTPUT)
-						}
-						if (oscBEnabled) {
-							SYNTH_B.disconnect()
-							SYNTH_B.connect(OUTPUT)
-						}
-						if (oscCEnabled) {
-							SYNTH_C.disconnect()
-							SYNTH_C.connect(OUTPUT)
-						}
+					if (PRESET.OSC_A.enabled) {
+						SYNTH_A.disconnect()
+						SYNTH_A.chain(SELECTED_FX, OUTPUT)
 					}
-					// set filterEnabled to false
-					filterEnabled = false
+					if (PRESET.OSC_B.enabled) {
+						SYNTH_B.disconnect()
+						SYNTH_B.chain(SELECTED_FX, OUTPUT)
+					}
+					if (PRESET.OSC_C.enabled) {
+						SYNTH_C.disconnect()
+						SYNTH_C.chain(SELECTED_FX, OUTPUT)
+					}
+					// set PRESET.FILTER.enabled to false
+					PRESET.FILTER.enabled = false
 				// if filter toggled on...
 				} else {
-					// and fx is on...
-					if (fxEnabled) {
-						if (oscAEnabled) {
-							SYNTH_A.disconnect()
-							SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-						}
-						if (oscBEnabled) {
-							SYNTH_B.disconnect()
-							SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-						}
-						if (oscCEnabled) {
-							SYNTH_C.disconnect()
-							SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-						}
-					// and fx is off...
-					} else {
-						if (oscAEnabled) {
-							SYNTH_A.disconnect()
-							SYNTH_A.chain(FILTER, OUTPUT)
-						}
-						if (oscBEnabled) {
-							SYNTH_B.disconnect()
-							SYNTH_B.chain(FILTER, OUTPUT)
-						}
-						if (oscCEnabled) {
-							SYNTH_C.disconnect()
-							SYNTH_C.chain(FILTER, OUTPUT)
-						}
+					if (PRESET.OSC_A.enabled) {
+						SYNTH_A.disconnect()
+						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
-					// set filterEnabled to true
-					filterEnabled = true
+					if (PRESET.OSC_B.enabled) {
+						SYNTH_B.disconnect()
+						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+					}
+					if (PRESET.OSC_C.enabled) {
+						SYNTH_C.disconnect()
+						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+					}
+					// set PRESET.FILTER.enabled to true
+					PRESET.FILTER.enabled = true
 				}
 				break;
 			case "lfo_switch":
@@ -755,12 +798,12 @@ for (let i = 0; i < controls.length; i++) {
 				if (e.target.value === 0) {
 					LFO.stop()
 					// LFO.disconnect(LFO_TARGET)
-					lfoEnabled = false
+					PRESET.LFO.enabled = false
 				// if lfo toggled on...
 				} else {
 					LFO.start()
 					// LFO.connect(LFO_TARGET)
-					lfoEnabled = true
+					PRESET.LFO.enabled = true
 				}
 				break;
 			case "fx_switch":
@@ -771,16 +814,16 @@ for (let i = 0; i < controls.length; i++) {
 					SELECTED_FX.set({
 						"wet": 0
 					})
-					// set fxEnabled to false
-					fxEnabled = false
+					// set PRESET.FX.enabled to false
+					PRESET.FX.enabled = false
 				// if fx toggled on...
 				} else {
 					// if filter is enabled...
 					SELECTED_FX.set({
-						"wet": fxMix
+						"wet": PRESET.FX.mix
 					})
-					// set fxEnabled to true
-					fxEnabled = true
+					// set PRESET.FX.enabled to true
+					PRESET.FX.enabled = true
 				}
 				break;
 			case "rec_switch":
@@ -852,6 +895,7 @@ for (let i = 0; i < controls.length; i++) {
 				break;
 			case "osc_a_shape":
 				PRESET.OSC_A.shape = shapeValues[e.target.value]
+				PRESET.OSC_A.shapeNum = e.target.value
 				SYNTH_A.set({
 					oscillator: {
 						type: PRESET.OSC_A.shape
@@ -1016,18 +1060,18 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 			case "filter_resonance":
-				if (selectedFilter === 'lowshelf' || selectedFilter === 'highshelf') {
+				if (PRESET.FILTER.type === 'lowshelf' || PRESET.FILTER.type === 'highshelf') {
 					PRESET.FILTER.gain = e.target.value
 					FILTER.set({
 						gain: e.target.value
 					})
-					filterGain = e.target.value
+					PRESET.FILTER.gain = e.target.value
 				} else {
 					PRESET.FILTER.Q = e.target.value
 					FILTER.set({
 						Q: e.target.value
 					})
-					filterResonance = e.target.value
+					PRESET.FILTER.Q = e.target.value
 				}
 				break;
 			case "filter_rolloff":
@@ -1044,13 +1088,13 @@ for (let i = 0; i < controls.length; i++) {
 				// If filter type is lowshelf or highshelf...
 				if (e.target.value === 5 || e.target.value === 6) {
 					// ...change the filter Q knob to gain knob
-					updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, filterGain.toFixed(1), "Gain")
+					updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
 				// Else if filter type is not lowshelf or highshelf...
 				} else {
 					// ...change the filter gain knob to Q knob
-					updateFilterKnob("filter_resonance", 1, 0, 100, 1, filterResonance, "Q")
+					updateFilterKnob("filter_resonance", 1, 0, 100, 1, PRESET.FILTER.Q, "Q")
 				}
-				selectedFilter = filterTypeValues[e.target.value]
+				PRESET.FILTER.type = filterTypeValues[e.target.value]
 				break;
 			// ----------- //
 			// --- LFO --- //
@@ -1261,9 +1305,9 @@ for (let i = 0; i < controls.length; i++) {
 				// console.log("readout:", fxParam4Readout)
 				// console.groupEnd()
 
-				if (fxEnabled) {
-					// set selected FX wet value to fxMix
-					SELECTED_FX.set({wet: fxMix})
+				if (PRESET.FX.enabled) {
+					// set selected FX wet value to PRESET.FX.mix
+					SELECTED_FX.set({wet: PRESET.FX.mix})
 					// log selected
 
 					// console.log("Removing previous FX: " + PREVIOUS_FX + "...")
@@ -1275,13 +1319,13 @@ for (let i = 0; i < controls.length; i++) {
 
 					// console.log("Setting FX to " + SELECTED_FX + "...")
 					// set output chain to filter -> selected FX -> master gain
-					if (oscAEnabled) {
+					if (PRESET.OSC_A.enabled) {
 						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
-					if (oscBEnabled) {
+					if (PRESET.OSC_B.enabled) {
 						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
-					if (oscCEnabled) {
+					if (PRESET.OSC_C.enabled) {
 						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
 					}
 				}
@@ -1347,7 +1391,7 @@ for (let i = 0; i < controls.length; i++) {
 						})
 						break;
 					case FX_CHEBYSHEV:
-						fxMix = e.target.value
+						PRESET.FX.mix = e.target.value
 						FX_CHEBYSHEV.set({
 							"wet": e.target.value
 						})
@@ -1383,7 +1427,7 @@ for (let i = 0; i < controls.length; i++) {
 						})
 						break;
 					case FX_FREQSHIFT:
-						fxMix = e.target.value
+						PRESET.FX.mix = e.target.value
 						FX_FREQSHIFT.set({
 							"wet": e.target.value
 						})
@@ -1396,7 +1440,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.FX.param3 = e.target.value
 				switch (SELECTED_FX) {
 					case FX_DISTORTION:
-						fxMix = e.target.value
+						PRESET.FX.mix = e.target.value
 						FX_DISTORTION.set({
 							"wet": e.target.value
 						})
@@ -1422,7 +1466,7 @@ for (let i = 0; i < controls.length; i++) {
 						})
 						break;
 					case FX_REVERB:
-						fxMix = e.target.value
+						PRESET.FX.mix = e.target.value
 						FX_REVERB.set({
 							"wet": e.target.value
 						})
@@ -1438,8 +1482,8 @@ for (let i = 0; i < controls.length; i++) {
 				break;
 			case "fx_param4":
 				PRESET.FX.param4 = e.target.value
-				fxMix = e.target.value
-				if(fxEnabled) {
+				PRESET.FX.mix = e.target.value
+				if(PRESET.FX.enabled) {
 					switch (SELECTED_FX) {
 						case FX_PHASER:
 							FX_PHASER.set({

@@ -113,11 +113,23 @@
 						<button
 							id="settings_button"
 							class="
+							dropdown_button
 							border border-gray-300 rounded-xl
 							px-2 pb-0 self-center hover:bg-gray-600
 							transition-all duration-300 ease-in-out">
 							SETTINGS
 						</button>
+						<div
+							id="settings_dropdown"
+							class="
+							dropdown_content
+							hidden absolute mt-16 w-[83px] z-10
+							bg-gray-600 border border-gray-400">
+							<a
+								id="settings_theme_button"
+								class="cursor-pointer flex p-2 hover:bg-gray-700"
+							>Theme</a>
+						</div>
 					</div>
 				</div>
 				<div class="w-[250px] flex flex-row justify-center">
@@ -125,11 +137,29 @@
 						<button
 							id="presets_button"
 							class="
+							dropdown_button
 							border border-gray-300 rounded-xl
 							px-2 pb-0 self-center hover:bg-gray-600
 							transition-all duration-300 ease-in-out">
 							PRESETS
 						</button>
+						<div>
+							<div
+								id="presets_dropdown"
+								class="
+							dropdown_content
+							hidden absolute mt-2 w-[83px] z-10
+							bg-gray-600 border border-gray-400">
+								<a
+									id="preset_save_button"
+									class="cursor-pointer flex p-2 hover:bg-gray-700"
+								>Save</a>
+								<a
+									id="preset_load_button"
+									class="cursor-pointer flex p-2 hover:bg-gray-700"
+								>Load</a>
+							</div>
+						</div>
 					</div>
 					<div class="p-1 flex flex-col justify-center">
 						<a href="https://github.com/IADT-projects/y4-project-Mangoshi" target="_blank">

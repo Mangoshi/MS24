@@ -22,13 +22,13 @@ import * as Tone from 'tone'
 // TODO: PRESETS
 //  ✔ Declare object with all default synth data
 //  ✔ When a parameter is changed, update the object
-//  - If a user clicks save, save the object to local storage / download as JSON
+//  ✔ If a user clicks save, save the object to local storage / download as JSON
 //  - If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
 //  - If a user clicks randomize, randomize the object (this will require min/max values for each parameter)
 //  NEED:
-//  - Object matching synth data structure
+//  ✔ Object matching synth data structure
 //  - Function for loading a preset & setting all parameters
-//  - Function for saving a preset & downloading as JSON
+//  ✔ Function for saving a preset & downloading as JSON
 //  - Function for randomizing a preset & setting all parameters
 //  - Functions for updating the interface based on the current preset
 
@@ -521,6 +521,8 @@ function updateFxKnob(target, enable, min, max, step, value, label) {
 let recorderLabel = document.getElementById("rec_label")
 
 // -- EVENT LISTENERS -- //
+
+// Key-press events //
 document.addEventListener("keypress", function (e) {
 	// console.log(e)
 	// disable quick-find in browser
@@ -533,6 +535,74 @@ document.addEventListener("keypress", function (e) {
 	}
 })
 
+
+// Button events (dropdowns) //
+function toggleDropdown(target) {
+	if (target.classList.contains("hidden")) {
+		target.classList.remove("hidden")
+	} else {
+		target.classList.add("hidden")
+	}
+	if (target === settingsDropdown) {
+		settingsDropdownOpen = !settingsDropdownOpen
+	}
+	if (target === presetsDropdown) {
+		presetsDropdownOpen = !presetsDropdownOpen
+	}
+}
+
+// Dropdown states
+let settingsDropdownOpen = false
+let presetsDropdownOpen = false
+
+// Button elements
+let presetsButton = document.getElementById("presets_button")
+let presetsDropdown = document.getElementById("presets_dropdown")
+let presetSaveButton = document.getElementById("preset_save_button")
+let presetLoadButton = document.getElementById("preset_load_button")
+let settingsButton = document.getElementById("settings_button")
+let settingsDropdown = document.getElementById("settings_dropdown")
+let settingsThemeButton = document.getElementById("settings_theme_button")
+let randomButton = document.getElementById("random_button")
+
+// Button functions
+settingsButton.addEventListener("click", function () {
+	toggleDropdown(settingsDropdown)
+	if(presetsDropdownOpen){
+		toggleDropdown(presetsDropdown)
+	}
+})
+presetsButton.addEventListener("click", function () {
+	toggleDropdown(presetsDropdown)
+	if(settingsDropdownOpen){
+		toggleDropdown(settingsDropdown)
+	}
+})
+randomButton.addEventListener("click", function () {
+	console.log("This button will return a randomized preset!")
+})
+settingsThemeButton.addEventListener("click", function () {
+	console.log("This button will change the theme!")
+	toggleDropdown(settingsDropdown)
+})
+
+// Menu item functions
+presetSaveButton.addEventListener("click", function() {
+	console.log(PRESET)
+	const anchor = document.createElement("a");
+	anchor.href = URL.createObjectURL(new Blob([JSON.stringify(PRESET, null, 2)], {
+		type: "text/plain"
+	}));
+	anchor.download = "preset.json";
+	anchor.click();
+	toggleDropdown(presetsDropdown)
+})
+presetLoadButton.addEventListener("click", function() {
+	console.log("This button will load a preset from disk!")
+	toggleDropdown(presetsDropdown)
+})
+
+// Control events //
 for (let i = 0; i < controls.length; i++) {
 	// add event listener to each control
 
@@ -1401,12 +1471,6 @@ for (let i = 0; i < controls.length; i++) {
 		}
 	})
 }
-
-let presetsButton = document.getElementById("presets_button")
-
-presetsButton.addEventListener("click", function() {
-	console.log(PRESET)
-})
 
 // -- KEYBOARD LOGIC -- //
 

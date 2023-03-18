@@ -265,9 +265,9 @@
 										class="control self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
-										min="0"
+										min="1"
 										max="100"
-										value="0"
+										value="1"
 										step="1"
 									></webaudio-knob>
 									<webaudio-param
@@ -298,7 +298,7 @@
 										width="30"
 									></webaudio-param>
 								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
 									<p class="font-light text-sm self-center mb-0.5">Depth</p>
 									<webaudio-knob
 										id="osc_a_fm_depth"
@@ -313,6 +313,27 @@
 									<webaudio-param
 										id="osc_a_fm_depth_readout"
 										link="osc_a_fm_depth"
+										class="self-center border border-gray-500 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+									<p class="font-light text-sm self-center mb-0.5">Shape</p>
+									<webaudio-knob
+										id="osc_a_fm_shape"
+										class="control self-center"
+										colors="#FFFFFF;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="3"
+										value="0"
+										step="1"
+										conv="['sin','tri','saw','squ'][x]"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_a_fm_shape_readout"
+										link="osc_a_fm_shape"
 										class="self-center border border-gray-500 mt-1"
 										fontSize="10"
 										width="30"
@@ -585,9 +606,9 @@
 										class="control self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
-										min="0"
+										min="1"
 										max="100"
-										value="0"
+										value="1"
 										step="1"
 									></webaudio-knob>
 									<webaudio-param
@@ -618,7 +639,7 @@
 										width="30"
 									></webaudio-param>
 								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
 									<p class="font-light text-sm self-center mb-0.5">Depth</p>
 									<webaudio-knob
 										id="osc_b_fm_depth"
@@ -633,6 +654,27 @@
 									<webaudio-param
 										id="osc_b_fm_depth_readout"
 										link="osc_b_fm_depth"
+										class="self-center border border-gray-500 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+									<p class="font-light text-sm self-center mb-0.5">Shape</p>
+									<webaudio-knob
+										id="osc_b_fm_shape"
+										class="control self-center"
+										colors="#FFFFFF;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="3"
+										value="0"
+										step="1"
+										conv="['sin','tri','saw','squ'][x]"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_fm_shape_readout"
+										link="osc_b_fm_shape"
 										class="self-center border border-gray-500 mt-1"
 										fontSize="10"
 										width="30"
@@ -861,9 +903,9 @@
 										class="control self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
-										min="0"
+										min="1"
 										max="100"
-										value="0"
+										value="1"
 										step="1"
 									></webaudio-knob>
 									<webaudio-param
@@ -874,7 +916,7 @@
 										width="30"
 									></webaudio-param>
 								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
 									<p class="font-light text-sm self-center mb-0.5">AM</p>
 									<webaudio-knob
 										id="osc_c_am"
@@ -889,6 +931,27 @@
 									<webaudio-param
 										id="osc_c_am_readout"
 										link="osc_c_am"
+										class="self-center border border-gray-500 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+									<p class="font-light text-sm self-center mb-0.5">Shape</p>
+									<webaudio-knob
+										id="osc_c_am_shape"
+										class="control self-center"
+										colors="#FFFFFF;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="3"
+										value="0"
+										step="1"
+										conv="['sin','tri','saw','squ'][x]"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_fm_shape_readout"
+										link="osc_c_am_shape"
 										class="self-center border border-gray-500 mt-1"
 										fontSize="10"
 										width="30"

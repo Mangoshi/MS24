@@ -239,11 +239,29 @@ let subOctaveValues = {
 	"2": 3,
 	"3": 4,
 }
-let shapeValues = {
+let oscillatorShapeValues = {
 	"0": "fatsine",
 	"1": "fattriangle",
 	"2": "fatsawtooth",
 	"3": "fatsquare",
+}
+let shapeValues = {
+	"0": "sine",
+	"1": "triangle",
+	"2": "sawtooth",
+	"3": "square",
+}
+let shapeReadoutValues = {
+	"0": "sine",
+	"1": "triangle",
+	"2": "sawtooth",
+	"3": "square",
+}
+let smallShapeReadoutValues = {
+	"0": "sin",
+	"1": "tri",
+	"2": "saw",
+	"3": "sqr",
 }
 let filterTypeValues = {
 	"0": "lowpass",
@@ -325,39 +343,39 @@ const RECORDER = new Tone.Recorder()
 const SYNTH_A = new Tone.PolySynth(Tone.FMSynth)
 SYNTH_A.set({
 	oscillator: {
-		type: shapeValues[PRESET.OSC_A.shape],
+		type: oscillatorShapeValues[PRESET.OSC_A.shape],
 		count: PRESET.OSC_A.count,
 		spread: PRESET.OSC_A.spread,
 	},
 	harmonicity: PRESET.OSC_A.harmonicity,
 	modulationIndex: PRESET.OSC_A.modulationIndex,
 	modulation: {
-		type: shapeValues[PRESET.OSC_A.modulationShape]
+		type: oscillatorShapeValues[PRESET.OSC_A.modulationShape]
 	}
 })
 const SYNTH_B = new Tone.PolySynth(Tone.FMSynth)
 SYNTH_B.set({
 	oscillator: {
-		type: shapeValues[PRESET.OSC_B.shape],
+		type: oscillatorShapeValues[PRESET.OSC_B.shape],
 		count: PRESET.OSC_B.count,
 		spread: PRESET.OSC_B.spread,
 	},
 	harmonicity: PRESET.OSC_B.harmonicity,
 	modulationIndex: PRESET.OSC_B.modulationIndex,
 	modulation: {
-		type: shapeValues[PRESET.OSC_B.modulationShape]
+		type: oscillatorShapeValues[PRESET.OSC_B.modulationShape]
 	}
 })
 const SYNTH_C = new Tone.PolySynth(Tone.AMSynth)
 SYNTH_C.set({
 	oscillator: {
-		type: shapeValues[PRESET.OSC_C.shape],
+		type: oscillatorShapeValues[PRESET.OSC_C.shape],
 		count: PRESET.OSC_C.count,
 		spread: PRESET.OSC_C.spread,
 	},
 	harmonicity: PRESET.OSC_C.harmonicity,
 	modulation: {
-		type: shapeValues[PRESET.OSC_C.modulationShape]
+		type: oscillatorShapeValues[PRESET.OSC_C.modulationShape]
 	}
 })
 
@@ -798,7 +816,7 @@ let fxParam4Readout = document.getElementById("fx_param4_readout")
 let fxParam4Label = document.getElementById("fx_param4_label")
 let fxParam4Group = document.getElementById("fx_param4_group")
 
-function updateFxKnob(target, enable, min, max, step, value, label) {
+function updateFxKnob(target, enable, min, max, step, value, label, conv) {
 	switch (target) {
 		case 1:
 			$('#fx_param1')[0].min = min;
@@ -836,6 +854,11 @@ function updateFxKnob(target, enable, min, max, step, value, label) {
 			$('#fx_param3')[0].enable = enable;
 			fxParam3Readout.value = value
 			fxParam3Label.innerHTML = label
+			if(conv){
+				// This is for vibrato shape!
+				$('#fx_param3')[0].conv = conv;
+				fxParam3Readout.value = shapeValues[value]
+			}
 			if (!enable) {
 				fxParam3Group.setAttribute("style", "display: none;")
 			} else {
@@ -909,7 +932,7 @@ function fxGroupUpdate(switchTarget){
 
 			updateFxKnob(1, 1, 0, 1200, 1, 0, "Frequency")
 			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
-			updateFxKnob(3, 1, 0, 4, 1, 0, "Type")
+			updateFxKnob(3, 1, 0, 3, 1, 0, "Type", "['sine','triangle','sawtooth','square'][x]")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 			break;
 		case "Delay":
@@ -1069,7 +1092,7 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_a_octave", PRESET.OSC_A.octave, PRESET.OSC_A.octave)
 			updateGUI("osc_a_semi", PRESET.OSC_A.detune, PRESET.OSC_A.detune)
 			updateGUI("osc_a_volume", PRESET.OSC_A.volume, PRESET.OSC_A.volume)
-			updateGUI("osc_a_shape", PRESET.OSC_A.shape, shapeValues[PRESET.OSC_A.shape])
+			updateGUI("osc_a_shape", PRESET.OSC_A.shape, shapeReadoutValues[PRESET.OSC_A.shape])
 			updateGUI("osc_a_attack", PRESET.OSC_A.attack, PRESET.OSC_A.attack)
 			updateGUI("osc_a_decay", PRESET.OSC_A.decay, PRESET.OSC_A.decay)
 			updateGUI("osc_a_sustain", PRESET.OSC_A.sustain, PRESET.OSC_A.sustain)
@@ -1078,13 +1101,13 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_a_spread", PRESET.OSC_A.spread, PRESET.OSC_A.spread)
 			updateGUI("osc_a_fm", PRESET.OSC_A.harmonicity, PRESET.OSC_A.harmonicity)
 			updateGUI("osc_a_fm_depth", PRESET.OSC_A.modulationIndex, PRESET.OSC_A.modulationIndex)
-			updateGUI("osc_a_fm_shape", PRESET.OSC_A.modulationShape, PRESET.OSC_A.modulationShape)
+			updateGUI("osc_a_fm_shape", PRESET.OSC_A.modulationShape, smallShapeReadoutValues[PRESET.OSC_A.modulationShape])
 			// OSC B
 			updateGUI("osc_b_switch", PRESET.OSC_B.enabled)
 			updateGUI("osc_b_octave", PRESET.OSC_B.octave, PRESET.OSC_B.octave)
 			updateGUI("osc_b_semi", PRESET.OSC_B.detune, PRESET.OSC_B.detune)
 			updateGUI("osc_b_volume", PRESET.OSC_B.volume, PRESET.OSC_B.volume)
-			updateGUI("osc_b_shape", PRESET.OSC_B.shape, shapeValues[PRESET.OSC_B.shape])
+			updateGUI("osc_b_shape", PRESET.OSC_B.shape, shapeReadoutValues[PRESET.OSC_B.shape])
 			updateGUI("osc_b_attack", PRESET.OSC_B.attack, PRESET.OSC_B.attack)
 			updateGUI("osc_b_decay", PRESET.OSC_B.decay, PRESET.OSC_B.decay)
 			updateGUI("osc_b_sustain", PRESET.OSC_B.sustain, PRESET.OSC_B.sustain)
@@ -1093,13 +1116,13 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_b_spread", PRESET.OSC_B.spread, PRESET.OSC_B.spread)
 			updateGUI("osc_b_fm", PRESET.OSC_B.harmonicity, PRESET.OSC_B.harmonicity)
 			updateGUI("osc_b_fm_depth", PRESET.OSC_B.modulationIndex, PRESET.OSC_B.modulationIndex)
-			updateGUI("osc_b_fm_shape", PRESET.OSC_B.modulationShape, PRESET.OSC_B.modulationShape)
+			updateGUI("osc_b_fm_shape", PRESET.OSC_B.modulationShape, smallShapeReadoutValues[PRESET.OSC_B.modulationShape])
 			// OSC C
 			updateGUI("osc_c_switch", PRESET.OSC_C.enabled)
 			updateGUI("osc_c_octave", PRESET.OSC_C.octave, PRESET.OSC_C.octave)
 			updateGUI("osc_c_semi", PRESET.OSC_C.detune, PRESET.OSC_C.detune)
 			updateGUI("osc_c_volume", PRESET.OSC_C.volume, PRESET.OSC_C.volume)
-			updateGUI("osc_c_shape", PRESET.OSC_C.shape, shapeValues[PRESET.OSC_C.shape])
+			updateGUI("osc_c_shape", PRESET.OSC_C.shape, shapeReadoutValues[PRESET.OSC_C.shape])
 			updateGUI("osc_c_attack", PRESET.OSC_C.attack, PRESET.OSC_C.attack)
 			updateGUI("osc_c_decay", PRESET.OSC_C.decay, PRESET.OSC_C.decay)
 			updateGUI("osc_c_sustain", PRESET.OSC_C.sustain, PRESET.OSC_C.sustain)
@@ -1107,7 +1130,7 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_c_voices", PRESET.OSC_C.count, PRESET.OSC_C.count)
 			updateGUI("osc_c_spread", PRESET.OSC_C.spread, PRESET.OSC_C.spread)
 			updateGUI("osc_c_am", PRESET.OSC_C.harmonicity, PRESET.OSC_C.harmonicity)
-			updateGUI("osc_c_am_shape", PRESET.OSC_C.modulationShape, PRESET.OSC_C.modulationShape)
+			updateGUI("osc_c_am_shape", PRESET.OSC_C.modulationShape, smallShapeReadoutValues[PRESET.OSC_C.modulationShape])
 			// FILTER
 			filterGroupUpdate(PRESET.FILTER.type)
 			updateGUI("filter_switch", PRESET.FILTER.enabled)
@@ -1124,7 +1147,7 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("lfo_grid", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
 			updateGUI("lfo_min", PRESET.LFO.min, PRESET.LFO.min)
 			updateGUI("lfo_max", PRESET.LFO.max, PRESET.LFO.max)
-			updateGUI("lfo_shape", PRESET.LFO.shape, shapeValues[PRESET.LFO.shape])
+			updateGUI("lfo_shape", PRESET.LFO.type, shapeValues[PRESET.LFO.type])
 			// FX
 			updateSelectBox("fx_selector", PRESET.FX.type)
 			fxGroupUpdate(PRESET.FX.type)
@@ -1138,14 +1161,14 @@ presetLoadButton.addEventListener("click", function() {
 			// OSC A
 			SYNTH_A.set({
 				"oscillator": {
-					"type": shapeValues[PRESET.OSC_A.shape],
+					"type": oscillatorShapeValues[PRESET.OSC_A.shape],
 					"count": PRESET.OSC_A.count,
 					"spread": PRESET.OSC_A.spread,
 				},
 				"harmonicity": PRESET.OSC_A.harmonicity,
 				"modulationIndex": PRESET.OSC_A.modulationIndex,
 				"modulation": {
-					"type": shapeValues[PRESET.OSC_A.modulationShape]
+					"type": oscillatorShapeValues[PRESET.OSC_A.modulationShape]
 				},
 				"envelope": {
 					"attack": PRESET.OSC_A.attack,
@@ -1158,14 +1181,14 @@ presetLoadButton.addEventListener("click", function() {
 			// OSC B
 			SYNTH_B.set({
 				"oscillator": {
-					"type": shapeValues[PRESET.OSC_B.shape],
+					"type": oscillatorShapeValues[PRESET.OSC_B.shape],
 					"count": PRESET.OSC_B.count,
 					"spread": PRESET.OSC_B.spread,
 				},
 				"harmonicity": PRESET.OSC_B.harmonicity,
 				"modulationIndex": PRESET.OSC_B.modulationIndex,
 				"modulation": {
-					"type": shapeValues[PRESET.OSC_B.modulationShape]
+					"type": oscillatorShapeValues[PRESET.OSC_B.modulationShape]
 				},
 				"envelope": {
 					"attack": PRESET.OSC_B.attack,
@@ -1178,13 +1201,13 @@ presetLoadButton.addEventListener("click", function() {
 			// OSC C
 			SYNTH_C.set({
 				"oscillator": {
-					"type": shapeValues[PRESET.OSC_C.shape],
+					"type": oscillatorShapeValues[PRESET.OSC_C.shape],
 					"count": PRESET.OSC_C.count,
 					"spread": PRESET.OSC_C.spread,
 				},
 				"harmonicity": PRESET.OSC_C.harmonicity,
 				"modulation": {
-					"type": shapeValues[PRESET.OSC_C.modulationShape]
+					"type": oscillatorShapeValues[PRESET.OSC_C.modulationShape]
 				},
 				"envelope": {
 					"attack": PRESET.OSC_C.attack,
@@ -1509,7 +1532,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_A.shape = e.target.value
 				SYNTH_A.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_A.shape],
+						type: oscillatorShapeValues[PRESET.OSC_A.shape],
 						count: PRESET.OSC_A.count,
 						spread: PRESET.OSC_A.spread,
 					}
@@ -1551,7 +1574,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_A.count = e.target.value
 				SYNTH_A.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_A.shape],
+						type: oscillatorShapeValues[PRESET.OSC_A.shape],
 						count: PRESET.OSC_A.count,
 						spread: PRESET.OSC_A.spread,
 					}
@@ -1561,7 +1584,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_A.spread = e.target.value
 				SYNTH_A.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_A.shape],
+						type: oscillatorShapeValues[PRESET.OSC_A.shape],
 						count: PRESET.OSC_A.count,
 						spread: PRESET.OSC_A.spread,
 					}
@@ -1583,7 +1606,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_A.modulationShape = e.target.value
 				SYNTH_A.set({
 					modulation: {
-						type: shapeValues[PRESET.OSC_A.modulationShape]
+						type: oscillatorShapeValues[PRESET.OSC_A.modulationShape]
 					}
 				})
 				break;
@@ -1606,7 +1629,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_B.shape = e.target.value
 				SYNTH_B.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_B.shape],
+						type: oscillatorShapeValues[PRESET.OSC_B.shape],
 						count: PRESET.OSC_B.count,
 						spread: PRESET.OSC_B.spread,
 					}
@@ -1648,7 +1671,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_B.count = e.target.value
 				SYNTH_B.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_B.shape],
+						type: oscillatorShapeValues[PRESET.OSC_B.shape],
 						count: PRESET.OSC_B.count,
 						spread: PRESET.OSC_B.spread,
 					}
@@ -1658,7 +1681,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_B.spread = e.target.value
 				SYNTH_B.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_B.shape],
+						type: oscillatorShapeValues[PRESET.OSC_B.shape],
 						count: PRESET.OSC_B.count,
 						spread: PRESET.OSC_B.spread,
 					}
@@ -1680,7 +1703,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_B.modulationShape = e.target.value
 				SYNTH_B.set({
 					modulation: {
-						type: shapeValues[PRESET.OSC_B.modulationShape]
+						type: oscillatorShapeValues[PRESET.OSC_B.modulationShape]
 					}
 				})
 				break;
@@ -1703,7 +1726,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_C.shape = e.target.value
 				SYNTH_C.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_C.shape],
+						type: oscillatorShapeValues[PRESET.OSC_C.shape],
 						count: PRESET.OSC_C.count,
 						spread: PRESET.OSC_C.spread,
 					}
@@ -1745,7 +1768,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_C.count = e.target.value
 				SYNTH_C.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_C.shape],
+						type: oscillatorShapeValues[PRESET.OSC_C.shape],
 						count: PRESET.OSC_C.count,
 						spread: PRESET.OSC_C.spread,
 					}
@@ -1755,7 +1778,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_C.spread = e.target.value
 				SYNTH_C.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_C.shape],
+						type: oscillatorShapeValues[PRESET.OSC_C.shape],
 						count: PRESET.OSC_C.count,
 						spread: PRESET.OSC_C.spread,
 					}
@@ -1771,7 +1794,7 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_C.modulationShape = e.target.value
 				SYNTH_C.set({
 					modulation: {
-						type: shapeValues[PRESET.OSC_C.modulationShape]
+						type: oscillatorShapeValues[PRESET.OSC_C.modulationShape]
 					}
 				})
 				break;
@@ -1864,7 +1887,7 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "lfo_shape":
-				PRESET.LFO.shape = e.target.value
+				PRESET.LFO.type = e.target.value
 				LFO.set({
 					type: shapeValues[e.target.value]
 				})

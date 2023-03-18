@@ -221,7 +221,7 @@
 				<!--********************-->
 				<!--	OSCILLATOR A	-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex mr-1">
+				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
 					<!--left-->
 					<div class="flex flex-col justify-between mr-1">
 						<div class="flex justify-between mb-1">
@@ -484,14 +484,14 @@
 							</div>
 						</div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_a_canvas" width="212" height="123"></canvas>
+							<canvas class="self-center" id="osc_a_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
 				<!--********************-->
 				<!--	  A/B FM		-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 mr-1">
+				<div class="self-center border border-gray-600 rounded-lg p-1 mx-1">
 					<div class="flex justify-center">
 						<p class="font-inika font-bold">FM</p>
 					</div>
@@ -805,7 +805,7 @@
 							</div>
 						</div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_b_canvas" width="212" height="123"></canvas>
+							<canvas class="self-center" id="osc_b_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
@@ -817,7 +817,7 @@
 				<!--********************-->
 				<!--  SUB OSCILLATOR	-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex mr-1">
+				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
 					<!--left-->
 					<div class="flex flex-col justify-between mr-1">
 						<div class="flex justify-between mb-1">
@@ -1061,15 +1061,15 @@
 							</div>
 						</div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_c_canvas" width="212" height="123"></canvas>
+							<canvas class="self-center" id="osc_c_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
 				<!--********************-->
 				<!--   FM VISUALISER 	-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 flex rounded-lg p-1 mr-1 h-[202px]">
-					<canvas class="self-center" id="fm_canvas" width="50" height="50"></canvas>
+				<div class="self-center border border-gray-600 flex rounded-lg p-1 mx-1 h-[202px]">
+					<canvas class="self-center" id="fm_canvas" width="51" height="50"></canvas>
 				</div>
 				<!--********************-->
 				<!--    MULTI FILTER    -->
@@ -1089,7 +1089,7 @@
 						</div>
 						<div class="flex">
 							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-bold self-center mb-0.5">Cutoff</p>
+								<p class="font-light self-center mb-0.5">Cutoff</p>
 								<webaudio-knob
 									id="filter_cutoff"
 									class="control self-center"
@@ -1108,7 +1108,7 @@
 								></webaudio-param>
 							</div>
 							<div id="filter_resonance_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="filter_resonance_label" class="font-bold self-center mb-0.5">Q</p>
+								<p id="filter_resonance_label" class="font-light self-center mb-0.5">Q</p>
 								<webaudio-knob
 									id="filter_resonance"
 									class="control self-center"
@@ -1127,7 +1127,7 @@
 								></webaudio-param>
 							</div>
 							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-bold self-center mb-0.5">Rolloff</p>
+								<p class="font-light self-center mb-0.5">Rolloff</p>
 								<webaudio-slider
 									id="filter_rolloff"
 									class="control self-center"
@@ -1147,7 +1147,7 @@
 								></webaudio-param>
 							</div>
 							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-bold self-center mb-0.5">Type</p>
+								<p class="font-light self-center mb-0.5">Type</p>
 								<webaudio-slider
 									id="filter_type"
 									class="control self-center"
@@ -1204,7 +1204,7 @@
 							</div>
 						</div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="filter_canvas" width="212" height="123"></canvas>
+							<canvas class="self-center" id="filter_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
@@ -1216,7 +1216,7 @@
 				<!--********************-->
 				<!--   LOW FREQ OSC 	-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex mr-1">
+				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
 					<!--left-->
 					<div class="flex flex-col justify-between mr-1">
 						<div class="flex p-1">
@@ -1227,12 +1227,12 @@
 							diameter="30"
 							value="0"
 						></webaudio-switch>
-						<label class="font-inika font-bold self-center" for="lfo_selector">
+						<label class="font-inika font-light self-center" for="lfo_selector">
 							LFO
 							&nbsp;
 							<select
 								id="lfo_selector"
-								class="control font-light bg-custom-black border border-gray-500 rounded-xl p-1 pl-3"
+								class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
 								autocomplete="off"
 							>
 								<option value="FilterFrequency" selected="selected">Filter Frequency</option>
@@ -1244,7 +1244,7 @@
 					</div>
 						<div class="flex">
 							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-bold self-center mb-0.5">Grid</p>
+								<p class="font-light self-center mb-0.5">Grid</p>
 								<webaudio-knob
 									id="lfo_grid"
 									class="control self-center"
@@ -1263,8 +1263,8 @@
 									class="self-center border border-pink-800 mt-1"
 								></webaudio-param>
 							</div>
-							<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-bold self-center mb-0.5">Min</p>
+							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+								<p class="font-light self-center mb-0.5">Min</p>
 								<webaudio-knob
 									id="lfo_min"
 									class="control self-center"
@@ -1282,8 +1282,8 @@
 									class="self-center border border-green-700 mt-1"
 								></webaudio-param>
 							</div>
-							<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-bold self-center mb-0.5">Max</p>
+							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+								<p class="font-light self-center mb-0.5">Max</p>
 								<webaudio-knob
 									id="lfo_max"
 									class="control self-center"
@@ -1301,8 +1301,8 @@
 									width="60"
 								></webaudio-param>
 							</div>
-							<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-bold self-center mb-0.5">Shape</p>
+							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
+								<p class="font-light self-center mb-0.5">Shape</p>
 								<webaudio-slider
 									id="lfo_shape"
 									class="control self-center"
@@ -1331,14 +1331,14 @@
 							</div>
 						</div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="lfo_canvas" width="212" height="123"></canvas>
+							<canvas class="self-center" id="lfo_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
 				<!--********************-->
 				<!--   VOICE CONTROLS 	-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 mr-1">
+				<div class="self-center border border-gray-600 rounded-lg p-1 mx-1">
 					<div class="flex justify-center">
 						<p class="font-inika font-bold">VOICE</p>
 					</div>
@@ -1404,7 +1404,7 @@
 								&nbsp;
 								<select
 									id="fx_selector"
-									class="control font-light bg-custom-black border border-gray-500 rounded-xl p-1 pl-3"
+									class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
 									autocomplete="off"
 								>
 									<option value="Distortion" selected="selected">Distortion</option>
@@ -1420,8 +1420,8 @@
 							</label>
 						</div>
 						<div class="flex w-[372px]">
-							<div id="fx_param1_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="fx_param1_label" class="font-bold self-center mb-0.5">Intensity</p>
+							<div id="fx_param1_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+								<p id="fx_param1_label" class="font-light self-center mb-0.5">Intensity</p>
 								<webaudio-knob
 									id="fx_param1"
 									class="control self-center"
@@ -1439,8 +1439,8 @@
 									class="self-center border border-pink-800 mt-1"
 								></webaudio-param>
 							</div>
-							<div id="fx_param2_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="fx_param2_label" class="font-bold self-center mb-0.5">Oversample</p>
+							<div id="fx_param2_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+								<p id="fx_param2_label" class="font-light self-center mb-0.5">Oversample</p>
 								<webaudio-knob
 									id="fx_param2"
 									class="control self-center"
@@ -1458,8 +1458,8 @@
 									class="self-center border border-green-700 mt-1"
 								></webaudio-param>
 							</div>
-							<div id="fx_param3_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="fx_param3_label" class="font-bold self-center mb-0.5">Mix</p>
+							<div id="fx_param3_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+								<p id="fx_param3_label" class="font-light self-center mb-0.5">Mix</p>
 								<webaudio-knob
 									id="fx_param3"
 									class="control self-center"
@@ -1477,8 +1477,8 @@
 									width="60"
 								></webaudio-param>
 							</div>
-							<div id="fx_param4_group" class="border border-gray-500 rounded-xl p-1 w-min flex flex-col w-[90px] hidden">
-								<p id="fx_param4_label" class="font-bold self-center mb-0.5">Mix</p>
+							<div id="fx_param4_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] hidden">
+								<p id="fx_param4_label" class="font-light self-center mb-0.5">Mix</p>
 								<webaudio-knob
 									id="fx_param4"
 									class="control self-center"
@@ -1502,7 +1502,7 @@
 					<div class="flex flex-col justify-center">
 						<div class="self-center flex p-1 h-[76.5px]">&nbsp;</div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="fx_canvas" width="212" height="123"></canvas>
+							<canvas class="self-center" id="fx_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>

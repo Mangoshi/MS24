@@ -34,6 +34,14 @@ import * as Tone from 'tone'
 //  - Function for randomizing a preset & setting all parameters
 //  ✔ Functions for updating the interface based on the current preset
 
+// TODO: SYNTH FEATURES
+//  ✔ Unison/Spread (Requires "fat" oscillator types)
+//  - Glide (Figure out why it's not working)
+//  ✔ FM (Requires FMSynth) (Can combine with fat oscillator types)
+//  - Partials control (Will require strange dynamic controls for each partial)
+//  - FX Buses (Will require using Tone.Channel: send generators to bus and receive on FX)
+//  - Noise Generators (Will require using Tone.Noise)
+
 // -- PRESET DATA (INITIAL) -- //
 
 let PRESET = {
@@ -50,7 +58,12 @@ let PRESET = {
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
-		release: 1
+		release: 1,
+		count: 1,
+		spread: 0,
+		harmonicity: 0,
+		modulationIndex: 0,
+		modulationShape: 0,
 	},
 	OSC_B: {
 		enabled: 1,
@@ -61,7 +74,12 @@ let PRESET = {
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
-		release: 1
+		release: 1,
+		count: 1,
+		spread: 0,
+		harmonicity: 0,
+		modulationIndex: 0,
+		modulationShape: 0,
 	},
 	OSC_C: {
 		enabled: 0,
@@ -72,7 +90,11 @@ let PRESET = {
 		attack: 0.005,
 		decay: 0.1,
 		sustain: 0.3,
-		release: 1
+		release: 1,
+		count: 1,
+		spread: 0,
+		harmonicity: 0,
+		modulationShape: 0,
 	},
 	FILTER: {
 		enabled: 1,
@@ -218,11 +240,10 @@ let subOctaveValues = {
 	"3": 4,
 }
 let shapeValues = {
-	"0": "sine",
-	"1": "triangle",
-	"2": "sawtooth",
-	"3": "square",
-	"4": "sine",
+	"0": "fatsine",
+	"1": "fattriangle",
+	"2": "fatsawtooth",
+	"3": "fatsquare",
 }
 let filterTypeValues = {
 	"0": "lowpass",
@@ -301,22 +322,42 @@ const RECORDER = new Tone.Recorder()
 
 // -- GENERATORS -- //
 
-const SYNTH_A = new Tone.PolySynth(Tone.Synth)
+const SYNTH_A = new Tone.PolySynth(Tone.FMSynth)
 SYNTH_A.set({
 	oscillator: {
-		type: shapeValues[PRESET.OSC_A.shape]
+		type: shapeValues[PRESET.OSC_A.shape],
+		count: PRESET.OSC_A.count,
+		spread: PRESET.OSC_A.spread,
+	},
+	harmonicity: PRESET.OSC_A.harmonicity,
+	modulationIndex: PRESET.OSC_A.modulationIndex,
+	modulation: {
+		type: shapeValues[PRESET.OSC_A.modulationShape]
 	}
 })
-const SYNTH_B = new Tone.PolySynth(Tone.Synth)
+const SYNTH_B = new Tone.PolySynth(Tone.FMSynth)
 SYNTH_B.set({
 	oscillator: {
-		type: shapeValues[PRESET.OSC_B.shape]
+		type: shapeValues[PRESET.OSC_B.shape],
+		count: PRESET.OSC_B.count,
+		spread: PRESET.OSC_B.spread,
+	},
+	harmonicity: PRESET.OSC_B.harmonicity,
+	modulationIndex: PRESET.OSC_B.modulationIndex,
+	modulation: {
+		type: shapeValues[PRESET.OSC_B.modulationShape]
 	}
 })
-const SYNTH_C = new Tone.PolySynth(Tone.Synth)
+const SYNTH_C = new Tone.PolySynth(Tone.AMSynth)
 SYNTH_C.set({
 	oscillator: {
-		type: shapeValues[PRESET.OSC_C.shape]
+		type: shapeValues[PRESET.OSC_C.shape],
+		count: PRESET.OSC_C.count,
+		spread: PRESET.OSC_C.spread,
+	},
+	harmonicity: PRESET.OSC_C.harmonicity,
+	modulation: {
+		type: shapeValues[PRESET.OSC_C.modulationShape]
 	}
 })
 
@@ -598,9 +639,6 @@ let LFO_TARGET = FILTER.frequency
 // -- INITIAL CONNECTIONS -- //
 
 function connectTone() {
-	console.log("OSC_A: " + PRESET.OSC_A.enabled)
-	console.log("OSC_B: " + PRESET.OSC_B.enabled)
-	console.log("OSC_C: " + PRESET.OSC_C.enabled)
 	SYNTH_A.disconnect()
 	SYNTH_B.disconnect()
 	SYNTH_C.disconnect()
@@ -1036,6 +1074,11 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_a_decay", PRESET.OSC_A.decay, PRESET.OSC_A.decay)
 			updateGUI("osc_a_sustain", PRESET.OSC_A.sustain, PRESET.OSC_A.sustain)
 			updateGUI("osc_a_release", PRESET.OSC_A.release, PRESET.OSC_A.release)
+			updateGUI("osc_a_voices", PRESET.OSC_A.count, PRESET.OSC_A.count)
+			updateGUI("osc_a_spread", PRESET.OSC_A.spread, PRESET.OSC_A.spread)
+			updateGUI("osc_a_fm", PRESET.OSC_A.harmonicity, PRESET.OSC_A.harmonicity)
+			updateGUI("osc_a_fm_depth", PRESET.OSC_A.modulationIndex, PRESET.OSC_A.modulationIndex)
+			updateGUI("osc_a_fm_shape", PRESET.OSC_A.modulationShape, PRESET.OSC_A.modulationShape)
 			// OSC B
 			updateGUI("osc_b_switch", PRESET.OSC_B.enabled)
 			updateGUI("osc_b_octave", PRESET.OSC_B.octave, PRESET.OSC_B.octave)
@@ -1046,6 +1089,11 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_b_decay", PRESET.OSC_B.decay, PRESET.OSC_B.decay)
 			updateGUI("osc_b_sustain", PRESET.OSC_B.sustain, PRESET.OSC_B.sustain)
 			updateGUI("osc_b_release", PRESET.OSC_B.release, PRESET.OSC_B.release)
+			updateGUI("osc_b_voices", PRESET.OSC_B.count, PRESET.OSC_B.count)
+			updateGUI("osc_b_spread", PRESET.OSC_B.spread, PRESET.OSC_B.spread)
+			updateGUI("osc_b_fm", PRESET.OSC_B.harmonicity, PRESET.OSC_B.harmonicity)
+			updateGUI("osc_b_fm_depth", PRESET.OSC_B.modulationIndex, PRESET.OSC_B.modulationIndex)
+			updateGUI("osc_b_fm_shape", PRESET.OSC_B.modulationShape, PRESET.OSC_B.modulationShape)
 			// OSC C
 			updateGUI("osc_c_switch", PRESET.OSC_C.enabled)
 			updateGUI("osc_c_octave", PRESET.OSC_C.octave, PRESET.OSC_C.octave)
@@ -1056,6 +1104,10 @@ presetLoadButton.addEventListener("click", function() {
 			updateGUI("osc_c_decay", PRESET.OSC_C.decay, PRESET.OSC_C.decay)
 			updateGUI("osc_c_sustain", PRESET.OSC_C.sustain, PRESET.OSC_C.sustain)
 			updateGUI("osc_c_release", PRESET.OSC_C.release, PRESET.OSC_C.release)
+			updateGUI("osc_c_voices", PRESET.OSC_C.count, PRESET.OSC_C.count)
+			updateGUI("osc_c_spread", PRESET.OSC_C.spread, PRESET.OSC_C.spread)
+			updateGUI("osc_c_am", PRESET.OSC_C.harmonicity, PRESET.OSC_C.harmonicity)
+			updateGUI("osc_c_am_shape", PRESET.OSC_C.modulationShape, PRESET.OSC_C.modulationShape)
 			// FILTER
 			filterGroupUpdate(PRESET.FILTER.type)
 			updateGUI("filter_switch", PRESET.FILTER.enabled)
@@ -1086,7 +1138,14 @@ presetLoadButton.addEventListener("click", function() {
 			// OSC A
 			SYNTH_A.set({
 				"oscillator": {
-					"type": shapeValues[PRESET.OSC_A.shape]
+					"type": shapeValues[PRESET.OSC_A.shape],
+					"count": PRESET.OSC_A.count,
+					"spread": PRESET.OSC_A.spread,
+				},
+				"harmonicity": PRESET.OSC_A.harmonicity,
+				"modulationIndex": PRESET.OSC_A.modulationIndex,
+				"modulation": {
+					"type": shapeValues[PRESET.OSC_A.modulationShape]
 				},
 				"envelope": {
 					"attack": PRESET.OSC_A.attack,
@@ -1099,7 +1158,14 @@ presetLoadButton.addEventListener("click", function() {
 			// OSC B
 			SYNTH_B.set({
 				"oscillator": {
-					"type": shapeValues[PRESET.OSC_B.shape]
+					"type": shapeValues[PRESET.OSC_B.shape],
+					"count": PRESET.OSC_B.count,
+					"spread": PRESET.OSC_B.spread,
+				},
+				"harmonicity": PRESET.OSC_B.harmonicity,
+				"modulationIndex": PRESET.OSC_B.modulationIndex,
+				"modulation": {
+					"type": shapeValues[PRESET.OSC_B.modulationShape]
 				},
 				"envelope": {
 					"attack": PRESET.OSC_B.attack,
@@ -1112,7 +1178,13 @@ presetLoadButton.addEventListener("click", function() {
 			// OSC C
 			SYNTH_C.set({
 				"oscillator": {
-					"type": shapeValues[PRESET.OSC_C.shape]
+					"type": shapeValues[PRESET.OSC_C.shape],
+					"count": PRESET.OSC_C.count,
+					"spread": PRESET.OSC_C.spread,
+				},
+				"harmonicity": PRESET.OSC_C.harmonicity,
+				"modulation": {
+					"type": shapeValues[PRESET.OSC_C.modulationShape]
 				},
 				"envelope": {
 					"attack": PRESET.OSC_C.attack,
@@ -1174,7 +1246,6 @@ presetLoadButton.addEventListener("click", function() {
 			setFXParam4(PRESET.FX.param4)
 			// CONNECTIONS
 			connectTone()
-
 		}
 		reader.readAsText(file)
 	}
@@ -1438,7 +1509,9 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_A.shape = e.target.value
 				SYNTH_A.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_A.shape]
+						type: shapeValues[PRESET.OSC_A.shape],
+						count: PRESET.OSC_A.count,
+						spread: PRESET.OSC_A.spread,
 					}
 				})
 				break;
@@ -1474,6 +1547,46 @@ for (let i = 0; i < controls.length; i++) {
 					}
 				})
 				break;
+			case "osc_a_voices":
+				PRESET.OSC_A.count = e.target.value
+				SYNTH_A.set({
+					oscillator: {
+						type: shapeValues[PRESET.OSC_A.shape],
+						count: PRESET.OSC_A.count,
+						spread: PRESET.OSC_A.spread,
+					}
+				})
+				break;
+			case "osc_a_spread":
+				PRESET.OSC_A.spread = e.target.value
+				SYNTH_A.set({
+					oscillator: {
+						type: shapeValues[PRESET.OSC_A.shape],
+						count: PRESET.OSC_A.count,
+						spread: PRESET.OSC_A.spread,
+					}
+				})
+				break;
+			case "osc_a_fm":
+				PRESET.OSC_A.harmonicity = e.target.value
+				SYNTH_A.set({
+					harmonicity: PRESET.OSC_A.harmonicity,
+				})
+				break;
+			case "osc_a_fm_depth":
+				PRESET.OSC_A.modulationIndex = e.target.value
+				SYNTH_A.set({
+					modulationIndex: PRESET.OSC_A.modulationIndex
+				})
+				break;
+			case "osc_a_fm_shape":
+				PRESET.OSC_A.modulationShape = e.target.value
+				SYNTH_A.set({
+					modulation: {
+						type: shapeValues[PRESET.OSC_A.modulationShape]
+					}
+				})
+				break;
 			// -------------------- //
 			// --- OSCILLATOR B --- //
 			// -------------------- //
@@ -1493,7 +1606,9 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_B.shape = e.target.value
 				SYNTH_B.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_B.shape]
+						type: shapeValues[PRESET.OSC_B.shape],
+						count: PRESET.OSC_B.count,
+						spread: PRESET.OSC_B.spread,
 					}
 				})
 				break;
@@ -1529,6 +1644,46 @@ for (let i = 0; i < controls.length; i++) {
 					}
 				})
 				break;
+			case "osc_b_voices":
+				PRESET.OSC_B.count = e.target.value
+				SYNTH_B.set({
+					oscillator: {
+						type: shapeValues[PRESET.OSC_B.shape],
+						count: PRESET.OSC_B.count,
+						spread: PRESET.OSC_B.spread,
+					}
+				})
+				break;
+			case "osc_b_spread":
+				PRESET.OSC_B.spread = e.target.value
+				SYNTH_B.set({
+					oscillator: {
+						type: shapeValues[PRESET.OSC_B.shape],
+						count: PRESET.OSC_B.count,
+						spread: PRESET.OSC_B.spread,
+					}
+				})
+				break;
+			case "osc_b_fm":
+				PRESET.OSC_B.harmonicity = e.target.value
+				SYNTH_B.set({
+					harmonicity: PRESET.OSC_B.harmonicity,
+				})
+				break;
+			case "osc_b_fm_depth":
+				PRESET.OSC_B.modulationIndex = e.target.value
+				SYNTH_B.set({
+					modulationIndex: PRESET.OSC_B.modulationIndex
+				})
+				break;
+			case "osc_b_fm_shape":
+				PRESET.OSC_B.modulationShape = e.target.value
+				SYNTH_B.set({
+					modulation: {
+						type: shapeValues[PRESET.OSC_B.modulationShape]
+					}
+				})
+				break;
 			// -------------------- //
 			// --- OSCILLATOR C --- //
 			// -------------------- //
@@ -1548,7 +1703,9 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.OSC_C.shape = e.target.value
 				SYNTH_C.set({
 					oscillator: {
-						type: shapeValues[PRESET.OSC_C.shape]
+						type: shapeValues[PRESET.OSC_C.shape],
+						count: PRESET.OSC_C.count,
+						spread: PRESET.OSC_C.spread,
 					}
 				})
 				break;
@@ -1581,6 +1738,40 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_C.set({
 					"envelope": {
 						release: e.target.value
+					}
+				})
+				break;
+			case "osc_c_voices":
+				PRESET.OSC_C.count = e.target.value
+				SYNTH_C.set({
+					oscillator: {
+						type: shapeValues[PRESET.OSC_C.shape],
+						count: PRESET.OSC_C.count,
+						spread: PRESET.OSC_C.spread,
+					}
+				})
+				break;
+			case "osc_c_spread":
+				PRESET.OSC_C.spread = e.target.value
+				SYNTH_C.set({
+					oscillator: {
+						type: shapeValues[PRESET.OSC_C.shape],
+						count: PRESET.OSC_C.count,
+						spread: PRESET.OSC_C.spread,
+					}
+				})
+				break;
+			case "osc_c_am":
+				PRESET.OSC_C.harmonicity = e.target.value
+				SYNTH_C.set({
+					harmonicity: PRESET.OSC_C.harmonicity
+				})
+				break;
+			case "osc_c_am_shape":
+				PRESET.OSC_C.modulationShape = e.target.value
+				SYNTH_C.set({
+					modulation: {
+						type: shapeValues[PRESET.OSC_C.modulationShape]
 					}
 				})
 				break;
@@ -1792,6 +1983,9 @@ let playingKeys = [];
 // 	console.log("Keys held!")
 // 	console.log(heldKeys.length)
 // }
+
+// TODO: Fix bug where if more than one oscillator share the same octave/detune,
+//  playing keys in rapid succession will cause weird overlaying notes
 
 keyboard.addEventListener("change", function (e) {
 	// Calculate the notes to play based on the keyboard input and synth settings

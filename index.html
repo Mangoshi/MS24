@@ -387,8 +387,8 @@
 									id="osc_a_volume"
 									class="control self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
-									min="-10"
-									max="10"
+									min="-20"
+									max="0"
 									value="0"
 									step="1"
 								></webaudio-knob>
@@ -728,8 +728,8 @@
 									id="osc_b_volume"
 									class="control self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
-									min="-10"
-									max="10"
+									min="-20"
+									max="0"
 									value="0"
 									step="1"
 								></webaudio-knob>
@@ -1005,8 +1005,8 @@
 									id="osc_c_volume"
 									class="control self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
-									min="-10"
-									max="10"
+									min="-20"
+									max="0"
 									value="0"
 									step="1"
 								></webaudio-knob>
@@ -1284,28 +1284,28 @@
 					<!--left-->
 					<div class="flex flex-col justify-between mr-1">
 						<div class="flex p-1">
-						<webaudio-switch
-							id="lfo_switch"
-							class="control self-center pr-1"
-							colors="#A9DC76;#2C292D;#D9D9D9"
-							diameter="30"
-							value="0"
-						></webaudio-switch>
-						<label class="font-inika font-light self-center" for="lfo_selector">
-							LFO
-							&nbsp;
-							<select
-								id="lfo_selector"
-								class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
-								autocomplete="off"
-							>
-								<option value="FilterFrequency" selected="selected">Filter Frequency</option>
-								<option value="OscAVol">OSC A Volume</option>
-								<option value="OscBVol">OSC B Volume</option>
-								<option value="OscCVol">OSC C Volume</option>
-							</select>
-						</label>
-					</div>
+							<webaudio-switch
+								id="lfo_switch"
+								class="control self-center pr-1"
+								colors="#A9DC76;#2C292D;#D9D9D9"
+								diameter="30"
+								value="0"
+							></webaudio-switch>
+							<label class="font-inika font-light self-center" for="lfo_selector">
+								LFO
+								&nbsp;
+								<select
+									id="lfo_selector"
+									class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
+									autocomplete="off"
+								>
+									<option value="FilterFrequency" selected="selected">Filter Frequency</option>
+									<option value="OscAVol">OSC A Volume</option>
+									<option value="OscBVol">OSC B Volume</option>
+									<option value="OscCVol">OSC C Volume</option>
+								</select>
+							</label>
+						</div>
 						<div class="flex">
 							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
 								<p class="font-light self-center mb-0.5">Grid</p>
@@ -1390,10 +1390,7 @@
 					</div>
 					<!--right-->
 					<div>
-						<div class="self-center flex rounded-lg p-1">
-							<div class="rounded-xl p-0.5 w-min flex flex-col h-[76.5px]">
-							</div>
-						</div>
+						<div class="self-center flex rounded-lg p-1 h-[98px] mb-1"></div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
 							<canvas class="self-center" id="lfo_canvas" width="212" height="122"></canvas>
 						</div>
@@ -1564,7 +1561,7 @@
 					</div>
 					<!--right-->
 					<div class="flex flex-col justify-center">
-						<div class="self-center flex p-1 h-[76.5px]">&nbsp;</div>
+						<div class="self-center flex rounded-lg p-1 h-[98px] mb-1"></div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
 							<canvas class="self-center" id="fx_canvas" width="212" height="122"></canvas>
 						</div>

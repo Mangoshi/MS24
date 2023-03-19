@@ -2146,9 +2146,14 @@ function p5_sketch(p) {
 		canvasWidth = getSize(synthContainer).width;
 		canvasHeight = getSize(synthContainer).height;
 		p.resizeCanvas(canvasWidth, canvasHeight);
+		p.rectMode(CORNERS)
 	}
 	p.draw = function () {
-		p.background('#242424');
+		// Redraw background
+		p.background('#242424')
+		// Reset stroke
+		p.strokeWeight(1)
+		// Draw oscilloscopes
 		if(PRESET.OSC_A.enabled){
 			p.drawWaveform(oscA_waveform, 220, 320, 387, 145)
 		}
@@ -2158,7 +2163,20 @@ function p5_sketch(p) {
 		if(PRESET.OSC_C.enabled){
 			p.drawWaveform(oscC_waveform, 220, 320, 387, 405)
 		}
-		p.stroke(0)
+		// Set stroke and fill for rectangles
+		p.strokeWeight(0)
+		// p.fill(0)
+		p.fill('#242424')
+		// Horizontal rectangles to enclose the oscilloscopes
+		p.rect(0, 0, canvasWidth, 242)
+		p.rect(0, 374, canvasWidth, 122)
+		p.rect(0, 627, canvasWidth, 122)
+		p.rect(0, 881, canvasWidth, 168)
+		// Vertical rectangles to enclose the oscilloscopes
+		p.rect(0, 0, 387, canvasHeight)
+		p.rect(608, 0, 455, canvasHeight)
+		p.rect(canvasWidth-10, 0, 10, canvasHeight)
+
 	}
 	p.drawWaveform = function(wave, w, h, x, y) {
 		// Adjust x/y position based on current canvas size
@@ -2186,7 +2204,10 @@ function p5_sketch(p) {
 		// Otherwise we would see the waveform "jump" horizontally to the start of the buffer
 		let end = start + buffer.length/2;
 
+		// Set stroke colour to white
 		p.stroke(255);
+
+		// Map x/y values and draw waveform
 		for (let i = start; i < end; i++){
 			let x1 = p.map(i-1, start, end, 0, w)
 			let y1 = p.map(buffer[i-1], -1, 1, 0, h)

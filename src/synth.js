@@ -4,14 +4,15 @@ import * as Tone from 'tone'
 
 // TODO:
 //  1. PRESETS
-//  2. A/B FM (Ratio & Depth)
+//  2. A/B FM (Ratio & Depth) ✔
 //  3. FILTER ENVELOPE
 //  4. LFO SWITCHING
 //  5. ARPEGGIATOR
 //  6. GLIDE CONTROLS (Portamento)
-//  7. VOICE & UNISON CONTROL
+//  7. VOICE & UNISON CONTROL ✔
 //  8. TOOLTIPS / HELP TEXT
 //  9. THEME SWITCHING
+//  10. MIDI KEYBOARD CONTROL
 
 // TODO: BUG FIXES
 //  1. LFO SWITCHING
@@ -651,10 +652,16 @@ const ARP = new Tone.Pattern(function(time, note){
 	SYNTH_C.triggerAttackRelease(note, 0.25);
 }, ["C4", "D4", "E4", "G4", "A4"]);
 
-let SELECTED_FX = FX_DISTORTION
-let LFO_TARGET = FILTER.frequency
+// -- WAVEFORMS -- //
+
+let oscA_waveform = new Tone.Waveform()
+let oscB_waveform = new Tone.Waveform()
+let oscC_waveform = new Tone.Waveform()
 
 // -- INITIAL CONNECTIONS -- //
+
+let SELECTED_FX = FX_DISTORTION
+let LFO_TARGET = FILTER.frequency
 
 function connectTone() {
 	SYNTH_A.disconnect()
@@ -748,6 +755,11 @@ function connectTone() {
 
 	// Master Record
 	OUTPUT.connect(RECORDER)
+
+	// Waveforms
+	SYNTH_A.connect(oscA_waveform)
+	SYNTH_B.connect(oscB_waveform)
+	SYNTH_C.connect(oscC_waveform)
 }
 connectTone()
 
@@ -1290,18 +1302,7 @@ for (let i = 0; i < controls.length; i++) {
 					PRESET.OSC_A.enabled = 0
 				// if osc_a toggled on...
 				} else {
-					// depending on filter and fx settings, connect to the correct nodes
-					if (PRESET.FILTER.enabled && PRESET.FX.enabled) {
-						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-					} else {
-						if (PRESET.FILTER.enabled && !PRESET.FX.enabled) {
-							SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-						} else if (!PRESET.FILTER.enabled && PRESET.FX.enabled) {
-							SYNTH_A.chain(SELECTED_FX, OUTPUT)
-						} else {
-							SYNTH_A.connect(OUTPUT)
-						}
-					}
+					connectTone()
 					PRESET.OSC_A.enabled = 1
 				}
 				break;
@@ -1314,18 +1315,7 @@ for (let i = 0; i < controls.length; i++) {
 					PRESET.OSC_B.enabled = 0
 				// if osc_b toggled on...
 				} else {
-					// depending on filter and fx settings, connect to the correct nodes
-					if (PRESET.FILTER.enabled && PRESET.FX.enabled) {
-						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-					} else {
-						if (PRESET.FILTER.enabled && !PRESET.FX.enabled) {
-							SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-						} else if (!PRESET.FILTER.enabled && PRESET.FX.enabled) {
-							SYNTH_B.chain(SELECTED_FX, OUTPUT)
-						} else {
-							SYNTH_B.connect(OUTPUT)
-						}
-					}
+					connectTone()
 					PRESET.OSC_B.enabled = 1
 				}
 				break;
@@ -1338,18 +1328,7 @@ for (let i = 0; i < controls.length; i++) {
 					PRESET.OSC_C.enabled = 0
 				// if osc_c toggled off...
 				} else {
-					// depending on filter and fx settings, connect to the correct nodes
-					if (PRESET.FILTER.enabled && PRESET.FX.enabled) {
-						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-					} else {
-						if (PRESET.FILTER.enabled && !PRESET.FX.enabled) {
-							SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-						} else if (!PRESET.FILTER.enabled && PRESET.FX.enabled) {
-							SYNTH_C.chain(SELECTED_FX, OUTPUT)
-						} else {
-							SYNTH_C.connect(OUTPUT)
-						}
-					}
+					connectTone()
 					PRESET.OSC_C.enabled = 1
 				}
 				break;
@@ -2096,3 +2075,138 @@ fmCanvasContext.beginPath();
 fmCanvasContext.arc(25, 25, 20, 0, 2 * Math.PI);
 fmCanvasContext.strokeStyle = "white";
 fmCanvasContext.stroke();
+
+// -- P5 SETUP -- //
+
+let oscA, oscB, oscC, filter, lfo, effects
+
+let synthContainer = document.getElementById("synthContainer");
+let p5_canvas = document.getElementById("p5_canvas");
+let canvasWidth, canvasHeight
+
+function getSize(element) {
+	let rect = element.getBoundingClientRect();
+	let width = rect.width;
+	let height = rect.height;
+	return { width, height };
+}
+
+let osc_a_oscilloscope = document.getElementById("osc_a_canvas_container");
+let osc_b_oscilloscope = document.getElementById("osc_b_canvas_container");
+let osc_c_oscilloscope = document.getElementById("osc_c_canvas_container");
+let oscilloscope_a_pos, oscilloscope_b_pos, oscilloscope_c_pos
+
+function getPositionXY(element) {
+	let rect = element.getBoundingClientRect();
+	let x = rect.x;
+	let y = rect.y;
+	console.log(element, x, y)
+	return { x, y };
+}
+
+window.addEventListener("keypress", function (e) {
+	// console.log(e);
+	if(e.code === "IntlBackslash"){
+		console.log("canvas offset w/h:", synthContainer.offsetWidth, synthContainer.offsetHeight)
+		console.log(p5_canvas.offsetWidth, p5_canvas.offsetHeight)
+		oscilloscope_a_pos = getPositionXY(osc_a_oscilloscope);
+		oscilloscope_b_pos = getPositionXY(osc_b_oscilloscope);
+		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
+		console.log("osc_a pos:",oscilloscope_a_pos)
+		console.log("osc_b pos:",oscilloscope_b_pos)
+		console.log("osc_c pos:",oscilloscope_c_pos)
+		canvasWidth = getSize(synthContainer).width;
+		canvasHeight = getSize(synthContainer).height;
+		console.log("canvas width:",canvasWidth)
+		console.log("canvas height:",canvasHeight)
+
+	}
+})
+
+// let width = synthContainer.offsetWidth;
+// let height = synthContainer.offsetHeight;
+
+// TODO: Figure out zoom-out issue with P5 canvas
+// TODO: Draw rectangles to enclose the oscilloscopes
+// TODO: Reduce height of oscilloscopes // reduce maximum volume control
+
+function p5_sketch(p) {
+	p.setup = function () {
+		oscilloscope_a_pos = getPositionXY(osc_a_oscilloscope);
+		oscilloscope_b_pos = getPositionXY(osc_b_oscilloscope);
+		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
+		canvasWidth = getSize(synthContainer).width;
+		canvasHeight = getSize(synthContainer).height;
+		p.createCanvas(canvasWidth, canvasHeight);
+	}
+	p.windowResized = function () {
+		oscilloscope_a_pos = getPositionXY(osc_a_oscilloscope);
+		oscilloscope_b_pos = getPositionXY(osc_b_oscilloscope);
+		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
+		canvasWidth = getSize(synthContainer).width;
+		canvasHeight = getSize(synthContainer).height;
+		p.resizeCanvas(canvasWidth, canvasHeight);
+	}
+	p.draw = function () {
+		p.background('#242424');
+		if(PRESET.OSC_A.enabled){
+			p.drawWaveform(oscA_waveform, 220, 320, 387, 145)
+		}
+		if(PRESET.OSC_B.enabled){
+			p.drawWaveform(oscB_waveform, 220, 320, 1063, 145)
+		}
+		if(PRESET.OSC_C.enabled){
+			p.drawWaveform(oscC_waveform, 220, 320, 387, 405)
+		}
+		p.stroke(0)
+	}
+	p.drawWaveform = function(wave, w, h, x, y) {
+		// Adjust x/y position based on current canvas size
+		x = x / synthContainer.offsetWidth * p.width;
+		y = y / synthContainer.offsetHeight * p.height;
+
+		// Waveform buffer
+		let buffer = wave.getValue(0);
+
+		// Initialise start variable
+		let start;
+
+		// Find the first zero crossing
+		for (let i = 1; i < buffer.length; i++){
+			// if the previous point is negative, and the current point is positive/zero
+			// then we've found the zero crossing
+			if (buffer[i-1] < 0 && buffer[i] >= 0) {
+				// Set the start to the zero crossing
+				start = i;
+				break
+			}
+		}
+
+		// Drawing a portion of the waveform, to avoid the initial transient
+		// Otherwise we would see the waveform "jump" horizontally to the start of the buffer
+		let end = start + buffer.length/2;
+
+		p.stroke(255);
+		for (let i = start; i < end; i++){
+			let x1 = p.map(i-1, start, end, 0, w)
+			let y1 = p.map(buffer[i-1], -1, 1, 0, h)
+			let x2 = p.map(i, start, end, 0, w)
+			let y2 = p.map(buffer[i], -1, 1, 0, h)
+			p.line(x1+x, y1+y, x2+x, y2+y);
+		}
+	}
+}
+
+// -- SCREEN SETUP -- //
+
+let consentContainer = document.getElementById("consentContainer");
+let consentButton = document.getElementById("contextConsentButton");
+
+consentButton.addEventListener("click", function () {
+	consentContainer.style.display = "none";
+	synthContainer.style.display = "flex";
+	if (Tone.context.state !== "running") {
+		Tone.context.resume();
+	}
+	new p5(p5_sketch, "p5_canvas");
+})

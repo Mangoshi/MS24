@@ -7,7 +7,6 @@
 	<!--Styles-->
 	<link href="/src/style.css" rel="stylesheet"/>
 	<!--Scripts-->
-	<script src="/src/main.js" type="module" defer></script>
 	<script src="/src/synth.js" type="module" defer></script>
 	<!--Libraries-->
 	<script>
@@ -21,6 +20,7 @@
 	</script>
 	<script src="https://g200kg.github.io/webaudio-controls/webaudio-controls.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js" integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<title>MS24</title>
 </head>
 <body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light text-white">
@@ -104,6 +104,7 @@
 			</div>
 		</div>
 		<div class="flex flex-col hidden w-min select-none" id="synthContainer">
+			<div id="p5_canvas" class="absolute -z-10"></div>
 			<!--********************-->
 			<!-- 	  TOP ROW 	    -->
 			<!--********************-->
@@ -504,7 +505,7 @@
 								></webaudio-param>
 							</div>
 						</div>
-						<div class="self-center border border-gray-600 flex rounded-lg p-1">
+						<div id="osc_a_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
 							<canvas class="self-center" id="osc_a_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
@@ -846,7 +847,7 @@
 								></webaudio-param>
 							</div>
 						</div>
-						<div class="self-center border border-gray-600 flex rounded-lg p-1">
+						<div id="osc_b_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
 							<canvas class="self-center" id="osc_b_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
@@ -1123,7 +1124,7 @@
 								></webaudio-param>
 							</div>
 						</div>
-						<div class="self-center border border-gray-600 flex rounded-lg p-1">
+						<div id="osc_c_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
 							<canvas class="self-center" id="osc_c_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>

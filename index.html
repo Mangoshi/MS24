@@ -203,7 +203,7 @@
 									diameter="40"
 									min="0"
 									max="2"
-									value="0.5"
+									value="1"
 									step="0.01"
 								></webaudio-knob>
 								<webaudio-param
@@ -513,55 +513,9 @@
 					</div>
 				</div>
 				<!--********************-->
-				<!--	  A/B FM		-->
+				<!--	  MIDDLE		-->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 mx-1">
-					<div class="flex justify-center">
-						<p class="font-inika font-bold">FM</p>
-					</div>
-					<div class="flex flex-col">
-						<div class="border border-gray-500 rounded-xl p-1 mb-1 w-min flex flex-col self-center justify-center">
-							<p class="self-center text-xs">Depth</p>
-							<webaudio-knob
-								id="osc_ab_fm_depth"
-								class="control self-center"
-								colors="#FF6188;#2C292D;#D9D9D9"
-								diameter="40"
-								min="0"
-								max="10"
-								step="1"
-							></webaudio-knob>
-							<webaudio-param
-								id="osc_ab_fm_depth_readout"
-								link="osc_ab_fm_depth"
-								fontSize="10"
-								height="11"
-								width="30"
-								class="self-center"
-							></webaudio-param>
-						</div>
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col self-center">
-							<p class="self-center text-xs">Rate</p>
-							<webaudio-knob
-								id="osc_ab_fm_rate"
-								class="control self-center"
-								colors="#A9DC76;#2C292D;#D9D9D9"
-								diameter="40"
-								min="0"
-								max="10"
-								step="1"
-							></webaudio-knob>
-							<webaudio-param
-								id="osc_ab_fm_rate_readout"
-								link="osc_ab_fm_rate"
-								fontSize="10"
-								height="11"
-								width="30"
-								class="self-center"
-							></webaudio-param>
-						</div>
-					</div>
-				</div>
+				<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
 				<!--********************-->
 				<!--	OSCILLATOR B	-->
 				<!--********************-->
@@ -576,7 +530,7 @@
 										class="control self-center pr-1"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
-										value="1"
+										value="0"
 									></webaudio-switch>
 									<p class="font-inika font-bold self-center">OSC B</p>
 								</div>
@@ -1160,10 +1114,10 @@
 									id="filter_cutoff"
 									class="control self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
-									min="1"
+									min="5"
 									max="10000"
-									value="1000"
-									step="9"
+									value="5000"
+									step="5"
 								></webaudio-knob>
 								<webaudio-param
 									id="filter_cutoff_readout"
@@ -1179,10 +1133,10 @@
 									id="filter_resonance"
 									class="control self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="0"
-									max="24"
+									min="1"
+									max="10"
 									value="0"
-									step="1"
+									step="0.1"
 								></webaudio-knob>
 								<webaudio-param
 									id="filter_resonance_readout"
@@ -1398,56 +1352,10 @@
 						</div>
 					</div>
 				</div>
-				<!--********************-->
-				<!--   VOICE CONTROLS 	-->
-				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 mx-1">
-					<div class="flex justify-center">
-						<p class="font-inika font-bold">VOICE</p>
-					</div>
-					<div class="flex flex-col">
-						<div class="border border-gray-500 rounded-xl p-1 mb-1 w-min flex flex-col self-center justify-center">
-							<p class="self-center text-xs">Limit</p>
-							<webaudio-knob
-								id="voice_limit"
-								class="control self-center"
-								colors="#FF6188;#2C292D;#D9D9D9"
-								diameter="40"
-								min="0"
-								max="10"
-								step="1"
-							></webaudio-knob>
-							<webaudio-param
-								id="voice_limit_readout"
-								link="voice_limit"
-								fontSize="10"
-								height="11"
-								width="30"
-								class="self-center"
-							></webaudio-param>
-						</div>
-						<div class="border border-gray-500 rounded-xl p-1 w-min flex flex-col self-center">
-							<p class="self-center text-xs">Unison</p>
-							<webaudio-knob
-								id="voice_unison"
-								class="control self-center"
-								colors="#A9DC76;#2C292D;#D9D9D9"
-								diameter="40"
-								min="1"
-								max="12"
-								step="1"
-							></webaudio-knob>
-							<webaudio-param
-								id="voice_unison_readout"
-								link="voice_unison"
-								fontSize="10"
-								height="11"
-								width="30"
-								class="self-center"
-							></webaudio-param>
-						</div>
-					</div>
-				</div>
+				<!--************-->
+				<!--   MIDDLE 	-->
+				<!--************-->
+				<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
 				<!--********************-->
 				<!--     MULTI FX       -->
 				<!--********************-->

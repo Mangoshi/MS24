@@ -48,7 +48,7 @@ import * as Tone from 'tone'
 let PRESET = {
 	NAME: "Init",
 	MASTER: {
-		gain: 0.5
+		gain: 1
 	},
 	OSC_A: {
 		enabled: 1,
@@ -67,7 +67,7 @@ let PRESET = {
 		modulationShape: 0,
 	},
 	OSC_B: {
-		enabled: 1,
+		enabled: 0,
 		octave: 1,
 		detune: 0,
 		volume: 0,
@@ -99,8 +99,8 @@ let PRESET = {
 	},
 	FILTER: {
 		enabled: 1,
-		frequency: 1000,
-		Q: 1,
+		frequency: 5000,
+		Q: 0,
 		gain: 0,
 		rolloff: 0,
 		type: 0,
@@ -643,6 +643,7 @@ function resetFX() {
 	FX_PITCHSHIFT.set({wet: 0})
 	FX_FREQSHIFT.set({wet: 0})
 }
+// TODO: Fix bug where FX params are kept when switching FX, but the GUI doesn't reflect this
 
 // -- NOTES -- //
 
@@ -663,6 +664,37 @@ let oscC_waveform = new Tone.Waveform()
 let SELECTED_FX = FX_DISTORTION
 let LFO_TARGET = FILTER.frequency
 
+function connectSynths(){
+	// If Osc A is enabled
+	if(PRESET.OSC_A.enabled){
+		// If filter is enabled and Osc A is routed to filter
+		if(PRESET.FILTER.enabled && PRESET.FILTER.osc_a){
+			// Connect Osc A to waveform->filter->FX->output
+			SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
+		} else {
+			// If not, connect Osc A to waveform->FX->output
+			SYNTH_A.chain(SELECTED_FX, OUTPUT)
+		}
+		SYNTH_A.connect(oscA_waveform)
+	}
+	if(PRESET.OSC_B.enabled){
+		if(PRESET.FILTER.enabled && PRESET.FILTER.osc_b){
+			SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
+		} else {
+			SYNTH_B.chain(SELECTED_FX, OUTPUT)
+		}
+		SYNTH_B.connect(oscB_waveform)
+	}
+	if(PRESET.OSC_C.enabled){
+		if(PRESET.FILTER.enabled && PRESET.FILTER.osc_c){
+			SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
+		} else {
+			SYNTH_C.chain(SELECTED_FX, OUTPUT)
+		}
+		SYNTH_C.connect(oscC_waveform)
+	}
+}
+
 function connectTone() {
 	SYNTH_A.disconnect()
 	SYNTH_B.disconnect()
@@ -670,78 +702,16 @@ function connectTone() {
 	FILTER.disconnect()
 	LFO.stop()
 	resetFX()
-	switch (true) {
-		case PRESET.FILTER.enabled && PRESET.FX.enabled:
-			if (PRESET.OSC_A.enabled) {
-				SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_B.enabled) {
-				SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_C.enabled) {
-				SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			SELECTED_FX.set({wet: PRESET.FX.mix})
-			break;
-		case PRESET.FILTER.enabled && !PRESET.FX.enabled:
-			if (PRESET.OSC_A.enabled) {
-				SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_B.enabled) {
-				SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_C.enabled) {
-				SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			SELECTED_FX.set({wet: 0})
-			break;
-		case !PRESET.FILTER.enabled && PRESET.FX.enabled:
-			if (PRESET.OSC_A.enabled) {
-				SYNTH_A.chain(SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_B.enabled) {
-				SYNTH_B.chain(SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_C.enabled) {
-				SYNTH_C.chain(SELECTED_FX, OUTPUT)
-			}
-			SELECTED_FX.set({wet: PRESET.FX.mix})
-			break;
-		case !PRESET.FILTER.enabled && !PRESET.FX.enabled:
-			if (PRESET.OSC_A.enabled) {
-				SYNTH_A.chain(SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_B.enabled) {
-				SYNTH_B.chain(SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_C.enabled) {
-				SYNTH_C.chain(SELECTED_FX, OUTPUT)
-			}
-			SELECTED_FX.set({wet: 0})
-			break;
-		default:
-			if (PRESET.OSC_A.enabled) {
-				SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_B.enabled) {
-				SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			if (PRESET.OSC_C.enabled) {
-				SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-			}
-			break;
-	}
 
 	// FX //
 	if(PRESET.FX.enabled) {
 		SELECTED_FX.set({
 			"wet": PRESET.FX.mix
 		})
-	} else {
-		SELECTED_FX.set({
-			"wet": 0
-		})
 	}
+
+	// Synths //
+	connectSynths()
 
 	// Master FX Chain //
 	OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
@@ -750,16 +720,10 @@ function connectTone() {
 	if(PRESET.LFO.enabled){
 		LFO.connect(LFO_TARGET).start()
 	} else {
-		// LFO.connect(LFO_TARGET).stop()
 	}
 
 	// Master Record
 	OUTPUT.connect(RECORDER)
-
-	// Waveforms
-	SYNTH_A.connect(oscA_waveform)
-	SYNTH_B.connect(oscB_waveform)
-	SYNTH_C.connect(oscC_waveform)
 }
 connectTone()
 
@@ -800,11 +764,11 @@ function filterGroupUpdate(target) {
 	// If filter type is lowshelf or highshelf...
 	if (target === 5 || target === 6) {
 		// ...change the filter Q knob to gain knob
-		updateFilterKnob("filter_resonance", 1, -24, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
+		updateFilterKnob("filter_resonance", 1, 0, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
 		// Else if filter type is not lowshelf or highshelf...
 	} else {
 		// ...change the filter gain knob to Q knob
-		updateFilterKnob("filter_resonance", 1, 0, 100, 1, PRESET.FILTER.Q, "Q")
+		updateFilterKnob("filter_resonance", 1, 1, 10, 0.1, PRESET.FILTER.Q, "Q")
 	}
 }
 
@@ -1296,149 +1260,30 @@ for (let i = 0; i < controls.length; i++) {
 		switch (e.target.id) {
 			case "osc_a_switch":
 				PRESET.OSC_A.enabled = e.target.value
-				// if osc_a toggled off...
-				if (e.target.value === 0) {
-					SYNTH_A.disconnect()
-					PRESET.OSC_A.enabled = 0
-				// if osc_a toggled on...
-				} else {
-					connectTone()
-					PRESET.OSC_A.enabled = 1
-				}
 				break;
 			case "osc_b_switch":
 				PRESET.OSC_B.enabled = e.target.value
-				// if osc_b toggled off...
-				if (e.target.value === 0) {
-					// turn off
-					SYNTH_B.disconnect()
-					PRESET.OSC_B.enabled = 0
-				// if osc_b toggled on...
-				} else {
-					connectTone()
-					PRESET.OSC_B.enabled = 1
-				}
 				break;
 			case "osc_c_switch":
 				PRESET.OSC_C.enabled = e.target.value
-				// if osc_c toggled on...
-				if (e.target.value === 0) {
-					// turn off
-					SYNTH_C.disconnect()
-					PRESET.OSC_C.enabled = 0
-				// if osc_c toggled off...
-				} else {
-					connectTone()
-					PRESET.OSC_C.enabled = 1
-				}
 				break;
 			case "filter_switch":
 				PRESET.FILTER.enabled = e.target.value
-				// if filter toggled off...
-				if (e.target.value === 0) {
-					if (PRESET.OSC_A.enabled) {
-						SYNTH_A.disconnect()
-						SYNTH_A.chain(SELECTED_FX, OUTPUT)
-					}
-					if (PRESET.OSC_B.enabled) {
-						SYNTH_B.disconnect()
-						SYNTH_B.chain(SELECTED_FX, OUTPUT)
-					}
-					if (PRESET.OSC_C.enabled) {
-						SYNTH_C.disconnect()
-						SYNTH_C.chain(SELECTED_FX, OUTPUT)
-					}
-					// set PRESET.FILTER.enabled to 0
-					PRESET.FILTER.enabled = 0
-				// if filter toggled on...
-				} else {
-					if (PRESET.OSC_A.enabled && PRESET.FILTER.osc_a) {
-						SYNTH_A.disconnect()
-						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-					}
-					if (PRESET.OSC_B.enabled && PRESET.FILTER.osc_b) {
-						SYNTH_B.disconnect()
-						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-					}
-					if (PRESET.OSC_C.enabled && PRESET.FILTER.osc_c) {
-						SYNTH_C.disconnect()
-						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-					}
-					// set PRESET.FILTER.enabled to 1
-					PRESET.FILTER.enabled = 1
-				}
 				break;
 			case "osc_a_filter_switch":
 				PRESET.FILTER.osc_a = e.target.value
-				// if osc_a filter toggled off...
-				if (e.target.value === 0 && PRESET.OSC_A.enabled) {
-					// turn off
-					SYNTH_A.disconnect()
-					SYNTH_A.chain(SELECTED_FX, OUTPUT)
-				} else if (e.target.value === 1 && PRESET.OSC_A.enabled) {
-					// turn on
-					SYNTH_A.disconnect()
-					SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-				}
 				break;
 			case "osc_b_filter_switch":
 				PRESET.FILTER.osc_b = e.target.value
-				// if osc_b filter toggled off...
-				if (e.target.value === 0 && PRESET.OSC_B.enabled) {
-					// turn off
-					SYNTH_B.disconnect()
-					SYNTH_B.chain(SELECTED_FX, OUTPUT)
-				} else if (e.target.value === 1 && PRESET.OSC_B.enabled) {
-					// turn on
-					SYNTH_B.disconnect()
-					SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-				}
 				break;
 			case "osc_c_filter_switch":
 				PRESET.FILTER.osc_c = e.target.value
-				// if osc_c filter toggled off...
-				if (e.target.value === 0 && PRESET.OSC_C.enabled) {
-					// turn off
-					SYNTH_C.disconnect()
-					SYNTH_C.chain(SELECTED_FX, OUTPUT)
-				} else if (e.target.value === 1 && PRESET.OSC_C.enabled) {
-					// turn on
-					SYNTH_C.disconnect()
-					SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-				}
 				break;
 			case "lfo_switch":
 				PRESET.LFO.enabled = e.target.value
-				// if lfo toggled off...
-				if (e.target.value === 0) {
-					LFO.stop()
-					// LFO.disconnect(LFO_TARGET)
-					PRESET.LFO.enabled = 0
-				// if lfo toggled on...
-				} else {
-					LFO.connect(LFO_TARGET).start()
-					PRESET.LFO.enabled = 1
-				}
 				break;
 			case "fx_switch":
 				PRESET.FX.enabled = e.target.value
-				// if fx toggled off...
-				if (e.target.value === 0) {
-					// if filter is enabled...
-					SELECTED_FX.set({
-						"wet": 0
-					})
-					// set PRESET.FX.enabled to 0
-					PRESET.FX.enabled = 0
-				// if fx toggled on...
-				} else {
-					// if filter is enabled...
-					SELECTED_FX.set({
-						"wet": PRESET.FX.mix
-					})
-					// set PRESET.FX.enabled to 1
-					PRESET.FX.enabled = 1
-				}
 				break;
 			case "rec_switch":
 				// if rec toggled on...
@@ -1466,6 +1311,7 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 		}
+		connectTone()
 	})
 	// using "input" instead of "change" to allow for continuous changes
 	controls[i].addEventListener("input", function (e) {
@@ -1506,6 +1352,10 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_A.set({
 					"volume": e.target.value
 				})
+				if (LFO_TARGET === SYNTH_A.volume) {
+					PRESET.LFO.max = e.target.value
+					LFO.set({"max": e.target.value})
+				}
 				break;
 			case "osc_a_shape":
 				PRESET.OSC_A.shape = e.target.value
@@ -1603,6 +1453,10 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_B.set({
 					"volume": e.target.value
 				})
+				if (LFO_TARGET === SYNTH_B.volume) {
+					PRESET.LFO.max = e.target.value
+					LFO.set({"max": e.target.value})
+				}
 				break;
 			case "osc_b_shape":
 				PRESET.OSC_B.shape = e.target.value
@@ -1700,6 +1554,10 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_C.set({
 					"volume": e.target.value
 				})
+				if (LFO_TARGET === SYNTH_C.volume) {
+					PRESET.LFO.max = e.target.value
+					LFO.set({"max": e.target.value})
+				}
 				break;
 			case "osc_c_shape":
 				PRESET.OSC_C.shape = e.target.value
@@ -1798,13 +1656,11 @@ for (let i = 0; i < controls.length; i++) {
 					FILTER.set({
 						gain: e.target.value
 					})
-					PRESET.FILTER.gain = e.target.value
 				} else {
 					PRESET.FILTER.Q = e.target.value
 					FILTER.set({
 						Q: e.target.value
 					})
-					PRESET.FILTER.Q = e.target.value
 				}
 				break;
 			case "filter_rolloff":
@@ -1825,6 +1681,8 @@ for (let i = 0; i < controls.length; i++) {
 			// ----------- //
 			case "lfo_selector":
 				switch (e.target.value) {
+					// TODO: Update knob min/max/default values when switching targets!!
+					// TODO: figure out how to disconnect LFO from previous target!
 					case "FilterFrequency":
 						PRESET.LFO.target = "FilterFrequency"
 						LFO_TARGET = FILTER.frequency
@@ -1844,7 +1702,7 @@ for (let i = 0; i < controls.length; i++) {
 					default:
 						console.log("Switch default: Nothing set for this case!")
 				}
-				// TODO: figure out how to disconnect LFO from previous target
+				connectTone()
 				// LFO.connect(LFO_TARGET)
 				break;
 			case "lfo_grid":
@@ -1875,37 +1733,15 @@ for (let i = 0; i < controls.length; i++) {
 			// --- FX --- //
 			// ---------- //
 			case "fx_selector":
-				let PREVIOUS_FX = SELECTED_FX
-
 				// reset all fx wet values to 0 (off)
 				resetFX()
 
 				// set Tone & HTML depending on which FX is selected
 				fxGroupUpdate(e.target.value)
 
+				// if FX is enabled, reconnect synths
 				if (PRESET.FX.enabled) {
-					// set selected FX wet value to PRESET.FX.mix
-					SELECTED_FX.set({wet: PRESET.FX.mix})
-					// log selected
-
-					// console.log("Removing previous FX: " + PREVIOUS_FX + "...")
-					// disconnect previous FX from output chain
-					SYNTH_A.disconnect()
-					SYNTH_B.disconnect()
-					SYNTH_C.disconnect()
-					FILTER.disconnect()
-
-					// console.log("Setting FX to " + SELECTED_FX + "...")
-					// set output chain to filter -> selected FX -> master gain
-					if (PRESET.OSC_A.enabled) {
-						SYNTH_A.chain(FILTER, SELECTED_FX, OUTPUT)
-					}
-					if (PRESET.OSC_B.enabled) {
-						SYNTH_B.chain(FILTER, SELECTED_FX, OUTPUT)
-					}
-					if (PRESET.OSC_C.enabled) {
-						SYNTH_C.chain(FILTER, SELECTED_FX, OUTPUT)
-					}
+					connectSynths()
 				}
 				break;
 			case "fx_param1":
@@ -1979,15 +1815,22 @@ keyboard.addEventListener("mouseover", function () {
 
 let heldKeys = [];
 let playingKeys = [];
+let guiKeys = [];
 
-
-// while(heldKeys.length > 0) {
-// 	console.log("Keys held!")
-// 	console.log(heldKeys.length)
-// }
-
-// TODO: Fix bug where if more than one oscillator share the same octave/detune,
-//  playing keys in rapid succession will cause weird overlaying notes
+// TODO: Fix sticky keys if keys released after focusout
+keyboard.addEventListener("focusout", function (e) {
+	console.log("keyboard unfocused!", e);
+	console.log("guiKeys: " + guiKeys)
+	console.log("heldKeys: " + heldKeys)
+	console.log("playingKeys: " + playingKeys)
+	// SYNTH_A.releaseAll()
+	// SYNTH_B.releaseAll()
+	// SYNTH_C.releaseAll()
+	// guiKeys.forEach((key) => {
+	// 	console.log("releasing key: " + key)
+	// 	keyboard.setNote(0, key, 0);
+	// })
+})
 
 keyboard.addEventListener("change", function (e) {
 	// Calculate the notes to play based on the keyboard input and synth settings
@@ -1995,7 +1838,7 @@ keyboard.addEventListener("change", function (e) {
 	let note_b = getNoteFromNumber(e.note[1], PRESET.OSC_B.detune, octaveValues[PRESET.OSC_B.octave]);
 	let note_c = getNoteFromNumber(e.note[1], PRESET.OSC_C.detune, subOctaveValues[PRESET.OSC_C.octave]);
 
-	console.log(e.note)
+	// console.log(e.note)
 
 	console.log("note_a", note_a, e.note[0] ? "on" : "off");
 	console.log("note_b", note_b, e.note[0] ? "on" : "off");
@@ -2013,24 +1856,26 @@ keyboard.addEventListener("change", function (e) {
 
 	// If note on
 	if (e.note[0]) {
+		guiKeys.push(e.note[1])
+		console.log("guiKeys", guiKeys)
 		// if not already in heldKeys array, push it
-		if (!heldKeys.includes(note_a) || !heldKeys.includes(note_b) || !heldKeys.includes(note_c)) {
+		if (!heldKeys.includes(note_a+"_OSC_A") || !heldKeys.includes(note_b+"_OSC_B") || !heldKeys.includes(note_c+"_OSC_C")) {
 			// LFO.stop()
-			heldKeys.push(note_a);
-			heldKeys.push(note_b);
-			heldKeys.push(note_c);
+			heldKeys.push(note_a+"_OSC_A");
+			heldKeys.push(note_b+"_OSC_B");
+			heldKeys.push(note_c+"_OSC_C");
 			// Trigger the attack for the new notes and add them to the playingKeys array
 
 			SYNTH_A.triggerAttack(note_a);
-			playingKeys.push(note_a);
+			playingKeys.push(note_a+"_OSC_A");
 			console.log("OSC_A Frequency:", SYNTH_A.toFrequency(note_a))
 
 			SYNTH_B.triggerAttack(note_b);
-			playingKeys.push(note_b);
+			playingKeys.push(note_b+"_OSC_B");
 			console.log("OSC_B Frequency:", SYNTH_B.toFrequency(note_b))
 
 			SYNTH_C.triggerAttack(note_c);
-			playingKeys.push(note_c);
+			playingKeys.push(note_c+"_OSC_C");
 			console.log("OSC_C Frequency:", SYNTH_C.toFrequency(note_c))
 
 			console.log("playingKeys:", playingKeys)
@@ -2039,29 +1884,31 @@ keyboard.addEventListener("change", function (e) {
 		}
 		// If note off
 	} else {
+		guiKeys = guiKeys.filter(item => item !== e.note[1])
+		console.log("guiKeys", guiKeys)
 		// remove the note from the heldKeys array
-		heldKeys = heldKeys.filter(item => item !== note_a && item !== note_b && item !== note_c);
+		heldKeys = heldKeys.filter(item => item !== note_a+"_OSC_A" && item !== note_b+"_OSC_B" && item !== note_c+"_OSC_C");
 		// Trigger the release for the playing notes and remove them from the playingKeys array
-		if (playingKeys.includes(note_a)) {
+		if (playingKeys.includes(note_a+"_OSC_A")) {
 			SYNTH_A.triggerRelease(note_a);
-			playingKeys = playingKeys.filter(item => item !== note_a);
+			playingKeys = playingKeys.filter(item => item !== note_a+"_OSC_A");
 		}
-		if (playingKeys.includes(note_b)) {
+		if (playingKeys.includes(note_b+"_OSC_B")) {
 			SYNTH_B.triggerRelease(note_b);
-			playingKeys = playingKeys.filter(item => item !== note_b);
+			playingKeys = playingKeys.filter(item => item !== note_b+"_OSC_B");
 		}
-		if (playingKeys.includes(note_c)) {
+		if (playingKeys.includes(note_c+"_OSC_C")) {
 			SYNTH_C.triggerRelease(note_c);
-			playingKeys = playingKeys.filter(item => item !== note_c);
+			playingKeys = playingKeys.filter(item => item !== note_c+"_OSC_C");
 		}
 		console.log("playingKeys:", playingKeys)
 		console.log("heldKeys:", heldKeys)
 		if (playingKeys.length === 0) {
-			console.log("empty!");
 			// Stop all playing notes when no keys are held down
 			SYNTH_A.releaseAll();
 			SYNTH_B.releaseAll();
 			SYNTH_C.releaseAll();
+			console.log("released all!");
 		}
 		// LFO.stop()
 	}
@@ -2146,7 +1993,7 @@ function p5_sketch(p) {
 		canvasWidth = getSize(synthContainer).width;
 		canvasHeight = getSize(synthContainer).height;
 		p.resizeCanvas(canvasWidth, canvasHeight);
-		p.rectMode(CORNERS)
+		p.rectMode("CORNERS")
 	}
 	p.draw = function () {
 		// Redraw background

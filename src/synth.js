@@ -46,7 +46,12 @@ import * as Tone from 'tone'
 // -- PRESET DATA (INITIAL) -- //
 
 let PRESET = {
-	NAME: "Init",
+	METADATA: {
+		name: "Init",
+		type: "Default",
+		author: "MangoSynth",
+		rating: 0,
+	},
 	MASTER: {
 		gain: 1
 	},
@@ -396,7 +401,7 @@ const FILTER = new Tone.Filter(
 
 let LFO_TARGET_VALUE = PRESET.FILTER.frequency
 
-const LFO = new Tone.LFO(lfoGridValues[PRESET.LFO.grid], 0, LFO_TARGET_VALUE).start()
+const LFO = new Tone.LFO(lfoGridValues[PRESET.LFO.grid], PRESET.LFO.min, LFO_TARGET_VALUE).start()
 
 // -- FX -- //
 
@@ -969,7 +974,28 @@ document.addEventListener("keypress", function (e) {
 	}
 })
 
-// Button events (dropdowns) //
+// Top-row elements //
+let synthBody = document.getElementById("synth_body")
+let presetsContainer = document.getElementById("presets_container")
+let presetsButton = document.getElementById("presets_button")
+let presetDiskLoadButton = document.getElementById("preset_disk_load_button")
+let presetSaveButton = document.getElementById("preset_save_button")
+let presetDownloadButton = document.getElementById("preset_download_button")
+let presetNameInput = document.getElementById("preset_name_input")
+let presetTypeInput = document.getElementById("preset_type_input")
+let presetAuthorInput = document.getElementById("preset_author_input")
+let presetRatingInput = document.getElementById("preset_rating_input")
+let fileInput = document.getElementById("preset_file_input")
+let settingsButton = document.getElementById("settings_button")
+let settingsDropdown = document.getElementById("settings_dropdown")
+let settingsThemeButton = document.getElementById("settings_theme_button")
+let randomButton = document.getElementById("random_preset_button")
+
+// Dropdown states
+let settingsDropdownOpen = 0
+let presetsPageOpen = 0
+
+// Functions for top-row buttons
 function toggleDropdown(target) {
 	if (target.classList.contains("hidden")) {
 		target.classList.remove("hidden")
@@ -979,36 +1005,24 @@ function toggleDropdown(target) {
 	if (target === settingsDropdown) {
 		settingsDropdownOpen = !settingsDropdownOpen
 	}
-	if (target === presetsDropdown) {
-		presetsDropdownOpen = !presetsDropdownOpen
+}
+function togglePresetsPage() {
+	if (presetsPageOpen) {
+		synthBody.classList.remove("hidden")
+		presetsContainer.classList.add("hidden")
+	} else {
+		synthBody.classList.add("hidden")
+		presetsContainer.classList.remove("hidden")
 	}
+	presetsPageOpen = !presetsPageOpen
 }
 
-// Dropdown states
-let settingsDropdownOpen = 0
-let presetsDropdownOpen = 0
-
-// Button elements
-let presetsButton = document.getElementById("presets_button")
-let presetsDropdown = document.getElementById("presets_dropdown")
-let presetSaveButton = document.getElementById("preset_save_button")
-let presetNameInput = document.getElementById("preset_name_input")
-let presetLoadButton = document.getElementById("preset_load_button")
-let fileInput = document.getElementById("file_input")
-let settingsButton = document.getElementById("settings_button")
-let settingsDropdown = document.getElementById("settings_dropdown")
-let settingsThemeButton = document.getElementById("settings_theme_button")
-let randomButton = document.getElementById("random_button")
-
-// Button functions
+// Event listeners for top-row buttons
 settingsButton.addEventListener("click", function () {
 	toggleDropdown(settingsDropdown)
-	if(presetsDropdownOpen){
-		toggleDropdown(presetsDropdown)
-	}
 })
 presetsButton.addEventListener("click", function () {
-	toggleDropdown(presetsDropdown)
+	togglePresetsPage()
 	if(settingsDropdownOpen){
 		toggleDropdown(settingsDropdown)
 	}
@@ -1016,22 +1030,380 @@ presetsButton.addEventListener("click", function () {
 randomButton.addEventListener("click", function () {
 	console.log("This button will return a randomized preset!")
 })
+
+// Event listeners for settings dropdown
 settingsThemeButton.addEventListener("click", function () {
 	console.log("This button will change the theme!")
 	toggleDropdown(settingsDropdown)
 })
-
-// Menu item functions
+// Event listeners for presets page
 presetSaveButton.addEventListener("click", function() {
-	console.log(PRESET)
-	const anchor = document.createElement("a");
-	anchor.href = URL.createObjectURL(new Blob([JSON.stringify(PRESET, null, 2)], {
-		type: "text/plain"
-	}));
-	anchor.download = "preset.ms24preset";
-	anchor.click();
-	toggleDropdown(presetsDropdown)
+	savePreset(PRESET)
 })
+presetDownloadButton.addEventListener("click", function() {
+	downloadPreset(PRESET)
+})
+
+// Event listeners for preset metadata input fields
+presetNameInput.addEventListener("input", function () {
+	PRESET.METADATA.name = presetNameInput.value
+})
+presetTypeInput.addEventListener("input", function () {
+	PRESET.METADATA.type = presetTypeInput.value
+})
+presetAuthorInput.addEventListener("input", function () {
+	PRESET.METADATA.author = presetAuthorInput.value
+})
+presetRatingInput.addEventListener("input", function () {
+	PRESET.METADATA.rating = presetRatingInput.value
+})
+
+// Function which checks how many preset-x items are in localStorage and returns the next available number
+function getNextPresetNumber() {
+	let i = 0
+	while (localStorage.getItem("preset-" + i) !== null) {
+		i++
+	}
+	return i
+}
+function savePreset(PRESET) {
+	if (PRESET.METADATA.name === "") {
+		alert("Please enter a name for your preset!")
+	} else {
+		console.log("Preset saved:", PRESET.METADATA.name)
+		// Save to localStorage as preset-x (x being +1 of the last preset)
+		localStorage.setItem("preset-" + getNextPresetNumber(), JSON.stringify(PRESET))
+		// Set input fields
+		presetNameInput.value = PRESET.METADATA.name
+		presetTypeInput.value = PRESET.METADATA.type
+		presetAuthorInput.value = PRESET.METADATA.author
+		presetRatingInput.value = PRESET.METADATA.rating
+		// Close presets page
+		// togglePresetsPage()
+		populatePresetsTable()
+	}
+}
+function downloadPreset(PRESET){
+	console.log(PRESET)
+	if(PRESET.METADATA.name === "") {
+		alert("Please enter a name for your preset!")
+	} else {
+		const anchor = document.createElement("a");
+		anchor.href = URL.createObjectURL(new Blob([JSON.stringify(PRESET, null, 2)], {
+			type: "text/plain"
+		}));
+		anchor.download = `${PRESET.METADATA.name}.ms24preset`;
+		anchor.click();
+	}
+}
+function loadPreset(preset) {
+	// Set PRESET object
+	PRESET = preset
+	console.log("Preset loaded:", preset.METADATA.name)
+	// Close presets page if open
+	if(presetsPageOpen) {
+		togglePresetsPage()
+	}
+	// Set input fields
+	presetNameInput.value = preset.METADATA.name
+	presetTypeInput.value = preset.METADATA.type
+	presetAuthorInput.value = preset.METADATA.author
+	presetRatingInput.value = preset.METADATA.rating
+	// Update GUI //
+	// MASTER
+	updateGUI("master_gain", preset.MASTER.gain, preset.MASTER.gain)
+	// OSC A
+	updateGUI("osc_a_switch", preset.OSC_A.enabled)
+	updateGUI("osc_a_octave", preset.OSC_A.octave, preset.OSC_A.octave)
+	updateGUI("osc_a_semi", preset.OSC_A.detune, preset.OSC_A.detune)
+	updateGUI("osc_a_volume", preset.OSC_A.volume, preset.OSC_A.volume)
+	updateGUI("osc_a_shape", preset.OSC_A.shape, shapeReadoutValues[preset.OSC_A.shape])
+	updateGUI("osc_a_attack", preset.OSC_A.attack, preset.OSC_A.attack)
+	updateGUI("osc_a_decay", preset.OSC_A.decay, preset.OSC_A.decay)
+	updateGUI("osc_a_sustain", preset.OSC_A.sustain, preset.OSC_A.sustain)
+	updateGUI("osc_a_release", preset.OSC_A.release, preset.OSC_A.release)
+	updateGUI("osc_a_voices", preset.OSC_A.count, preset.OSC_A.count)
+	updateGUI("osc_a_spread", preset.OSC_A.spread, preset.OSC_A.spread)
+	updateGUI("osc_a_fm", preset.OSC_A.harmonicity, preset.OSC_A.harmonicity)
+	updateGUI("osc_a_fm_depth", preset.OSC_A.modulationIndex, preset.OSC_A.modulationIndex)
+	updateGUI("osc_a_fm_shape", preset.OSC_A.modulationShape, smallShapeReadoutValues[preset.OSC_A.modulationShape])
+	// OSC B
+	updateGUI("osc_b_switch", preset.OSC_B.enabled)
+	updateGUI("osc_b_octave", preset.OSC_B.octave, preset.OSC_B.octave)
+	updateGUI("osc_b_semi", preset.OSC_B.detune, preset.OSC_B.detune)
+	updateGUI("osc_b_volume", preset.OSC_B.volume, preset.OSC_B.volume)
+	updateGUI("osc_b_shape", preset.OSC_B.shape, shapeReadoutValues[preset.OSC_B.shape])
+	updateGUI("osc_b_attack", preset.OSC_B.attack, preset.OSC_B.attack)
+	updateGUI("osc_b_decay", preset.OSC_B.decay, preset.OSC_B.decay)
+	updateGUI("osc_b_sustain", preset.OSC_B.sustain, preset.OSC_B.sustain)
+	updateGUI("osc_b_release", preset.OSC_B.release, preset.OSC_B.release)
+	updateGUI("osc_b_voices", preset.OSC_B.count, preset.OSC_B.count)
+	updateGUI("osc_b_spread", preset.OSC_B.spread, preset.OSC_B.spread)
+	updateGUI("osc_b_fm", preset.OSC_B.harmonicity, preset.OSC_B.harmonicity)
+	updateGUI("osc_b_fm_depth", preset.OSC_B.modulationIndex, preset.OSC_B.modulationIndex)
+	updateGUI("osc_b_fm_shape", preset.OSC_B.modulationShape, smallShapeReadoutValues[preset.OSC_B.modulationShape])
+	// OSC C
+	updateGUI("osc_c_switch", preset.OSC_C.enabled)
+	updateGUI("osc_c_octave", preset.OSC_C.octave, preset.OSC_C.octave)
+	updateGUI("osc_c_semi", preset.OSC_C.detune, preset.OSC_C.detune)
+	updateGUI("osc_c_volume", preset.OSC_C.volume, preset.OSC_C.volume)
+	updateGUI("osc_c_shape", preset.OSC_C.shape, shapeReadoutValues[preset.OSC_C.shape])
+	updateGUI("osc_c_attack", preset.OSC_C.attack, preset.OSC_C.attack)
+	updateGUI("osc_c_decay", preset.OSC_C.decay, preset.OSC_C.decay)
+	updateGUI("osc_c_sustain", preset.OSC_C.sustain, preset.OSC_C.sustain)
+	updateGUI("osc_c_release", preset.OSC_C.release, preset.OSC_C.release)
+	updateGUI("osc_c_voices", preset.OSC_C.count, preset.OSC_C.count)
+	updateGUI("osc_c_spread", preset.OSC_C.spread, preset.OSC_C.spread)
+	updateGUI("osc_c_am", preset.OSC_C.harmonicity, preset.OSC_C.harmonicity)
+	updateGUI("osc_c_am_shape", preset.OSC_C.modulationShape, smallShapeReadoutValues[preset.OSC_C.modulationShape])
+	// FILTER
+	filterGroupUpdate(preset.FILTER.type)
+	updateGUI("filter_switch", preset.FILTER.enabled)
+	updateGUI("filter_cutoff", preset.FILTER.frequency, preset.FILTER.frequency)
+	updateGUI("filter_resonance", preset.FILTER.Q, preset.FILTER.Q)
+	updateGUI("filter_rolloff", preset.FILTER.rolloff, filterRolloffValues[preset.FILTER.rolloff])
+	updateGUI("filter_type", preset.FILTER.type, filterTypeReadoutValues[preset.FILTER.type])
+	updateGUI("osc_a_filter_switch", preset.FILTER.osc_a)
+	updateGUI("osc_b_filter_switch", preset.FILTER.osc_b)
+	updateGUI("osc_c_filter_switch", preset.FILTER.osc_c)
+	// LFO
+	updateSelectBox("lfo_selector", preset.LFO.target)
+	updateGUI("lfo_switch", preset.LFO.enabled)
+	updateGUI("lfo_grid", preset.LFO.grid, lfoGridReadoutValues[preset.LFO.grid])
+	updateGUI("lfo_min", preset.LFO.min, preset.LFO.min)
+	updateGUI("lfo_max", preset.LFO.max, preset.LFO.max)
+	updateGUI("lfo_shape", preset.LFO.type, shapeValues[preset.LFO.type])
+	// FX
+	updateSelectBox("fx_selector", preset.FX.type)
+	fxGroupUpdate(preset.FX.type)
+	updateGUI("fx_switch", preset.FX.enabled)
+	updateGUI("fx_param1", preset.FX.param1, preset.FX.param1)
+	updateGUI("fx_param2", preset.FX.param2, preset.FX.param2)
+	updateGUI("fx_param3", preset.FX.param3, preset.FX.param3)
+	updateGUI("fx_param4", preset.FX.param4, preset.FX.param4)
+
+	// Update Tone.js //
+	// OSC A
+	SYNTH_A.set({
+		"oscillator": {
+			"type": oscillatorShapeValues[preset.OSC_A.shape],
+			"count": preset.OSC_A.count,
+			"spread": preset.OSC_A.spread,
+		},
+		"harmonicity": preset.OSC_A.harmonicity,
+		"modulationIndex": preset.OSC_A.modulationIndex,
+		"modulation": {
+			"type": oscillatorShapeValues[preset.OSC_A.modulationShape]
+		},
+		"envelope": {
+			"attack": preset.OSC_A.attack,
+			"decay": preset.OSC_A.decay,
+			"sustain": preset.OSC_A.sustain,
+			"release": preset.OSC_A.release
+		},
+		"volume": preset.OSC_A.volume
+	})
+	// OSC B
+	SYNTH_B.set({
+		"oscillator": {
+			"type": oscillatorShapeValues[preset.OSC_B.shape],
+			"count": preset.OSC_B.count,
+			"spread": preset.OSC_B.spread,
+		},
+		"harmonicity": preset.OSC_B.harmonicity,
+		"modulationIndex": preset.OSC_B.modulationIndex,
+		"modulation": {
+			"type": oscillatorShapeValues[preset.OSC_B.modulationShape]
+		},
+		"envelope": {
+			"attack": preset.OSC_B.attack,
+			"decay": preset.OSC_B.decay,
+			"sustain": preset.OSC_B.sustain,
+			"release": preset.OSC_B.release
+		},
+		"volume": preset.OSC_B.volume
+	})
+	// OSC C
+	SYNTH_C.set({
+		"oscillator": {
+			"type": oscillatorShapeValues[preset.OSC_C.shape],
+			"count": preset.OSC_C.count,
+			"spread": preset.OSC_C.spread,
+		},
+		"harmonicity": preset.OSC_C.harmonicity,
+		"modulation": {
+			"type": oscillatorShapeValues[preset.OSC_C.modulationShape]
+		},
+		"envelope": {
+			"attack": preset.OSC_C.attack,
+			"decay": preset.OSC_C.decay,
+			"sustain": preset.OSC_C.sustain,
+			"release": preset.OSC_C.release
+		},
+		"volume": preset.OSC_C.volume
+	})
+	// FILTER
+	FILTER.set({
+		"type": filterTypeValues[preset.FILTER.type],
+		"frequency": preset.FILTER.frequency,
+		"Q": preset.FILTER.Q,
+		"gain": preset.FILTER.gain,
+		"rolloff": filterRolloffValues[preset.FILTER.rolloff]
+	})
+	// LFO
+	if (preset.LFO.enabled) {
+		switch (preset.LFO.target) {
+			case "FilterFrequency":
+				LFO_TARGET = FILTER.frequency
+				LFO.connect(FILTER.frequency)
+				break
+			case "OscAVol":
+				LFO_TARGET = SYNTH_A.volume
+				LFO.connect(SYNTH_A.volume)
+				break
+			case "OscBVol":
+				LFO_TARGET = SYNTH_B.volume
+				LFO.connect(SYNTH_B.volume)
+				break
+			case "OscCVol":
+				LFO_TARGET = SYNTH_C.volume
+				LFO.connect(SYNTH_C.volume)
+				break
+		}
+	}
+	LFO.set({
+		"frequency": lfoGridValues[preset.LFO.grid],
+		"min": preset.LFO.min,
+		"max": preset.LFO.max,
+		"type": shapeValues[preset.LFO.type]
+	})
+	// FX
+	SELECTED_FX = fxSelectValues[preset.FX.type]
+	if (preset.FX.enabled) {
+		SELECTED_FX.set({
+			"wet": preset.FX.mix
+		})
+	} else {
+		SELECTED_FX.set({
+			"wet": 0
+		})
+	}
+	setFXParam1(preset.FX.param1)
+	setFXParam2(preset.FX.param2)
+	setFXParam3(preset.FX.param3)
+	setFXParam4(preset.FX.param4)
+	// CONNECTIONS
+	connectTone()
+}
+
+// Function which loads every .ms24preset file in presets folder
+// These have to be hardcoded in, because you can't read files from a folder client-side
+function loadDefaultPresets(){
+	let presetFiles = [
+		"init.ms24preset",
+		"fm1.ms24preset",
+		"fm2.ms24preset",
+		"fm3.ms24preset",
+		"fm4.ms24preset",
+		"fm5.ms24preset",
+		"darkfm.ms24preset",
+		"aliendrone.ms24preset",
+		"angrydrone.ms24preset",
+		"buddhabass.ms24preset",
+	]
+
+	for(let i = 0; i < presetFiles.length; i++){
+		let presetFile = presetFiles[i]
+		let presetFileRequest = new XMLHttpRequest()
+		presetFileRequest.open("GET", "presets/" + presetFile, false)
+		presetFileRequest.send(null)
+		let preset = JSON.parse(presetFileRequest.responseText)
+		localStorage.setItem("preset-" + (i), JSON.stringify(preset))
+	}
+}
+
+
+// Function which checks to see if there are any presets saved in localStorage (named "preset-1", "preset-2", etc.)
+// If not, load default presets from presets folder (JSON files)
+function checkForPresets(){
+	let presets = []
+	for(let i = 0; i < localStorage.length; i++){
+		let key = localStorage.key(i)
+		if(key.includes("preset-")){
+			let preset = JSON.parse(localStorage.getItem(key))
+			presets.push(preset)
+		}
+	}
+	if(presets.length === 0){
+		loadDefaultPresets()
+	}
+}
+checkForPresets()
+
+// Function which populates presets table with presets from localStorage
+// Presets are saved as "preset-1", "preset-2", etc.
+// Each preset contains name, type, author, rating metadata, and the actual preset data
+function populatePresetsTable(){
+	let presetsTableBody = document.getElementById("presets_table_body")
+	let presetsTableBodyHTML = ""
+	for(let i = 0; i < localStorage.length; i++) {
+		if (localStorage.key(i).includes("preset-")) {
+			let preset = JSON.parse(localStorage.getItem(localStorage.key(i)))
+			if(preset.METADATA.type === ""){
+				preset.METADATA.type = "?"
+			}
+			if(preset.METADATA.author === ""){
+				preset.METADATA.author = "?"
+			}
+			if(preset.METADATA.rating === ""){
+				preset.METADATA.rating = "?"
+			}
+			presetsTableBodyHTML += `
+	        <tr class="text-left">
+	            <td>${preset.METADATA.name}</td>
+	            <td>${preset.METADATA.type}</td>
+	            <td>${preset.METADATA.author}</td>
+	            <td>${preset.METADATA.rating}</td>
+	            <td class="text-right">
+	                <button class="preset_load_button bg-gray-700 text-gray-300 rounded-lg p-1" id="${localStorage.key(i)}-load-button">
+	                Load
+	                </button>
+	            </td>
+	            <td class="text-right">
+	                <button class="preset_delete_button bg-gray-700 text-gray-300 rounded-lg p-1" id="${localStorage.key(i)}-delete-button">
+	                Delete
+	                </button>
+	            </td>
+	        </tr>
+        	`
+		}
+
+	}
+	presetsTableBody.innerHTML = presetsTableBodyHTML
+	let presetLoadButtons = document.getElementsByClassName("preset_load_button")
+	let presetDeleteButtons = document.getElementsByClassName("preset_delete_button")
+
+	for(let i = 0; i < presetLoadButtons.length; i++){
+		presetLoadButtons[i].addEventListener("click", function(e){
+			// from "preset-x-load-button", return "preset-x"
+			let presetKey = e.target.id.split("-")[0] + "-" + e.target.id.split("-")[1]
+			console.log(presetKey)
+			let preset = JSON.parse(localStorage.getItem(presetKey))
+			loadPreset(preset)
+		})
+	}
+	for(let i = 0; i < presetDeleteButtons.length; i++){
+		presetDeleteButtons[i].addEventListener("click", function(e){
+			// from "preset-x-load-button", return "preset-x"
+			let presetKey = e.target.id.split("-")[0] + "-" + e.target.id.split("-")[1]
+			console.log(presetKey)
+			localStorage.removeItem(presetKey)
+			populatePresetsTable()
+		})
+	}
+}
+populatePresetsTable()
+
 function updateGUI(target, value, readout){
 	let jQtarget = "#"+target
 	$(jQtarget)[0].value = value;
@@ -1044,7 +1416,7 @@ function updateSelectBox(target, value){
 	let selectBox = document.getElementById(target)
 	selectBox.value = value
 }
-presetLoadButton.addEventListener("click", function() {
+presetDiskLoadButton.addEventListener("click", function() {
 	console.log("This button will load a preset from disk!")
 	fileInput.click();
 	fileInput.onchange = function(e) {
@@ -1059,196 +1431,11 @@ presetLoadButton.addEventListener("click", function() {
 			console.log(e)
 			console.log("Preset before:", PRESET)
 			PRESET = JSON.parse(e.target.result)
-			console.log("Preset after:", PRESET)
-			// Update GUI //
-			// MASTER
-			updateGUI("master_gain", PRESET.MASTER.gain, PRESET.MASTER.gain)
-			// OSC A
-			updateGUI("osc_a_switch", PRESET.OSC_A.enabled)
-			updateGUI("osc_a_octave", PRESET.OSC_A.octave, PRESET.OSC_A.octave)
-			updateGUI("osc_a_semi", PRESET.OSC_A.detune, PRESET.OSC_A.detune)
-			updateGUI("osc_a_volume", PRESET.OSC_A.volume, PRESET.OSC_A.volume)
-			updateGUI("osc_a_shape", PRESET.OSC_A.shape, shapeReadoutValues[PRESET.OSC_A.shape])
-			updateGUI("osc_a_attack", PRESET.OSC_A.attack, PRESET.OSC_A.attack)
-			updateGUI("osc_a_decay", PRESET.OSC_A.decay, PRESET.OSC_A.decay)
-			updateGUI("osc_a_sustain", PRESET.OSC_A.sustain, PRESET.OSC_A.sustain)
-			updateGUI("osc_a_release", PRESET.OSC_A.release, PRESET.OSC_A.release)
-			updateGUI("osc_a_voices", PRESET.OSC_A.count, PRESET.OSC_A.count)
-			updateGUI("osc_a_spread", PRESET.OSC_A.spread, PRESET.OSC_A.spread)
-			updateGUI("osc_a_fm", PRESET.OSC_A.harmonicity, PRESET.OSC_A.harmonicity)
-			updateGUI("osc_a_fm_depth", PRESET.OSC_A.modulationIndex, PRESET.OSC_A.modulationIndex)
-			updateGUI("osc_a_fm_shape", PRESET.OSC_A.modulationShape, smallShapeReadoutValues[PRESET.OSC_A.modulationShape])
-			// OSC B
-			updateGUI("osc_b_switch", PRESET.OSC_B.enabled)
-			updateGUI("osc_b_octave", PRESET.OSC_B.octave, PRESET.OSC_B.octave)
-			updateGUI("osc_b_semi", PRESET.OSC_B.detune, PRESET.OSC_B.detune)
-			updateGUI("osc_b_volume", PRESET.OSC_B.volume, PRESET.OSC_B.volume)
-			updateGUI("osc_b_shape", PRESET.OSC_B.shape, shapeReadoutValues[PRESET.OSC_B.shape])
-			updateGUI("osc_b_attack", PRESET.OSC_B.attack, PRESET.OSC_B.attack)
-			updateGUI("osc_b_decay", PRESET.OSC_B.decay, PRESET.OSC_B.decay)
-			updateGUI("osc_b_sustain", PRESET.OSC_B.sustain, PRESET.OSC_B.sustain)
-			updateGUI("osc_b_release", PRESET.OSC_B.release, PRESET.OSC_B.release)
-			updateGUI("osc_b_voices", PRESET.OSC_B.count, PRESET.OSC_B.count)
-			updateGUI("osc_b_spread", PRESET.OSC_B.spread, PRESET.OSC_B.spread)
-			updateGUI("osc_b_fm", PRESET.OSC_B.harmonicity, PRESET.OSC_B.harmonicity)
-			updateGUI("osc_b_fm_depth", PRESET.OSC_B.modulationIndex, PRESET.OSC_B.modulationIndex)
-			updateGUI("osc_b_fm_shape", PRESET.OSC_B.modulationShape, smallShapeReadoutValues[PRESET.OSC_B.modulationShape])
-			// OSC C
-			updateGUI("osc_c_switch", PRESET.OSC_C.enabled)
-			updateGUI("osc_c_octave", PRESET.OSC_C.octave, PRESET.OSC_C.octave)
-			updateGUI("osc_c_semi", PRESET.OSC_C.detune, PRESET.OSC_C.detune)
-			updateGUI("osc_c_volume", PRESET.OSC_C.volume, PRESET.OSC_C.volume)
-			updateGUI("osc_c_shape", PRESET.OSC_C.shape, shapeReadoutValues[PRESET.OSC_C.shape])
-			updateGUI("osc_c_attack", PRESET.OSC_C.attack, PRESET.OSC_C.attack)
-			updateGUI("osc_c_decay", PRESET.OSC_C.decay, PRESET.OSC_C.decay)
-			updateGUI("osc_c_sustain", PRESET.OSC_C.sustain, PRESET.OSC_C.sustain)
-			updateGUI("osc_c_release", PRESET.OSC_C.release, PRESET.OSC_C.release)
-			updateGUI("osc_c_voices", PRESET.OSC_C.count, PRESET.OSC_C.count)
-			updateGUI("osc_c_spread", PRESET.OSC_C.spread, PRESET.OSC_C.spread)
-			updateGUI("osc_c_am", PRESET.OSC_C.harmonicity, PRESET.OSC_C.harmonicity)
-			updateGUI("osc_c_am_shape", PRESET.OSC_C.modulationShape, smallShapeReadoutValues[PRESET.OSC_C.modulationShape])
-			// FILTER
-			filterGroupUpdate(PRESET.FILTER.type)
-			updateGUI("filter_switch", PRESET.FILTER.enabled)
-			updateGUI("filter_cutoff", PRESET.FILTER.frequency, PRESET.FILTER.frequency)
-			updateGUI("filter_resonance", PRESET.FILTER.Q, PRESET.FILTER.Q)
-			updateGUI("filter_rolloff", PRESET.FILTER.rolloff, filterRolloffValues[PRESET.FILTER.rolloff])
-			updateGUI("filter_type", PRESET.FILTER.type, filterTypeReadoutValues[PRESET.FILTER.type])
-			updateGUI("osc_a_filter_switch", PRESET.FILTER.osc_a)
-			updateGUI("osc_b_filter_switch", PRESET.FILTER.osc_b)
-			updateGUI("osc_c_filter_switch", PRESET.FILTER.osc_c)
-			// LFO
-			updateSelectBox("lfo_selector", PRESET.LFO.target)
-			updateGUI("lfo_switch", PRESET.LFO.enabled)
-			updateGUI("lfo_grid", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
-			updateGUI("lfo_min", PRESET.LFO.min, PRESET.LFO.min)
-			updateGUI("lfo_max", PRESET.LFO.max, PRESET.LFO.max)
-			updateGUI("lfo_shape", PRESET.LFO.type, shapeValues[PRESET.LFO.type])
-			// FX
-			updateSelectBox("fx_selector", PRESET.FX.type)
-			fxGroupUpdate(PRESET.FX.type)
-			updateGUI("fx_switch", PRESET.FX.enabled)
-			updateGUI("fx_param1", PRESET.FX.param1, PRESET.FX.param1)
-			updateGUI("fx_param2", PRESET.FX.param2, PRESET.FX.param2)
-			updateGUI("fx_param3", PRESET.FX.param3, PRESET.FX.param3)
-			updateGUI("fx_param4", PRESET.FX.param4, PRESET.FX.param4)
-
-			// Update Tone.js //
-			// OSC A
-			SYNTH_A.set({
-				"oscillator": {
-					"type": oscillatorShapeValues[PRESET.OSC_A.shape],
-					"count": PRESET.OSC_A.count,
-					"spread": PRESET.OSC_A.spread,
-				},
-				"harmonicity": PRESET.OSC_A.harmonicity,
-				"modulationIndex": PRESET.OSC_A.modulationIndex,
-				"modulation": {
-					"type": oscillatorShapeValues[PRESET.OSC_A.modulationShape]
-				},
-				"envelope": {
-					"attack": PRESET.OSC_A.attack,
-					"decay": PRESET.OSC_A.decay,
-					"sustain": PRESET.OSC_A.sustain,
-					"release": PRESET.OSC_A.release
-				},
-				"volume": PRESET.OSC_A.volume
-			})
-			// OSC B
-			SYNTH_B.set({
-				"oscillator": {
-					"type": oscillatorShapeValues[PRESET.OSC_B.shape],
-					"count": PRESET.OSC_B.count,
-					"spread": PRESET.OSC_B.spread,
-				},
-				"harmonicity": PRESET.OSC_B.harmonicity,
-				"modulationIndex": PRESET.OSC_B.modulationIndex,
-				"modulation": {
-					"type": oscillatorShapeValues[PRESET.OSC_B.modulationShape]
-				},
-				"envelope": {
-					"attack": PRESET.OSC_B.attack,
-					"decay": PRESET.OSC_B.decay,
-					"sustain": PRESET.OSC_B.sustain,
-					"release": PRESET.OSC_B.release
-				},
-				"volume": PRESET.OSC_B.volume
-			})
-			// OSC C
-			SYNTH_C.set({
-				"oscillator": {
-					"type": oscillatorShapeValues[PRESET.OSC_C.shape],
-					"count": PRESET.OSC_C.count,
-					"spread": PRESET.OSC_C.spread,
-				},
-				"harmonicity": PRESET.OSC_C.harmonicity,
-				"modulation": {
-					"type": oscillatorShapeValues[PRESET.OSC_C.modulationShape]
-				},
-				"envelope": {
-					"attack": PRESET.OSC_C.attack,
-					"decay": PRESET.OSC_C.decay,
-					"sustain": PRESET.OSC_C.sustain,
-					"release": PRESET.OSC_C.release
-				},
-				"volume": PRESET.OSC_C.volume
-			})
-			// FILTER
-			FILTER.set({
-				"type": filterTypeValues[PRESET.FILTER.type],
-				"frequency": PRESET.FILTER.frequency,
-				"Q": PRESET.FILTER.Q,
-				"gain": PRESET.FILTER.gain,
-				"rolloff": filterRolloffValues[PRESET.FILTER.rolloff]
-			})
-			// LFO
-			if(PRESET.LFO.enabled) {
-				switch (PRESET.LFO.target) {
-					case "FilterFrequency":
-						LFO_TARGET = FILTER.frequency
-						LFO.connect(FILTER.frequency)
-						break
-					case "OscAVol":
-						LFO_TARGET = SYNTH_A.volume
-						LFO.connect(SYNTH_A.volume)
-						break
-					case "OscBVol":
-						LFO_TARGET = SYNTH_B.volume
-						LFO.connect(SYNTH_B.volume)
-						break
-					case "OscCVol":
-						LFO_TARGET = SYNTH_C.volume
-						LFO.connect(SYNTH_C.volume)
-						break
-				}
-			}
-			LFO.set({
-				"frequency": lfoGridValues[PRESET.LFO.grid],
-				"min": PRESET.LFO.min,
-				"max": PRESET.LFO.max,
-				"type": shapeValues[PRESET.LFO.type]
-			})
-			// FX
-			SELECTED_FX = fxSelectValues[PRESET.FX.type]
-			if(PRESET.FX.enabled) {
-				SELECTED_FX.set({
-					"wet": PRESET.FX.mix
-				})
-			} else {
-				SELECTED_FX.set({
-					"wet": 0
-				})
-			}
-			setFXParam1(PRESET.FX.param1)
-			setFXParam2(PRESET.FX.param2)
-			setFXParam3(PRESET.FX.param3)
-			setFXParam4(PRESET.FX.param4)
-			// CONNECTIONS
-			connectTone()
+			savePreset(PRESET)
+			loadPreset(PRESET)
 		}
 		reader.readAsText(file)
 	}
-	toggleDropdown(presetsDropdown)
 })
 
 // Control events //
@@ -1927,7 +2114,7 @@ fmCanvasContext.stroke();
 
 let oscA, oscB, oscC, filter, lfo, effects
 
-let synthContainer = document.getElementById("synthContainer");
+let synthContainer = document.getElementById("synth_container");
 let p5_canvas = document.getElementById("p5_canvas");
 let canvasWidth, canvasHeight
 
@@ -2067,8 +2254,8 @@ function p5_sketch(p) {
 
 // -- SCREEN SETUP -- //
 
-let consentContainer = document.getElementById("consentContainer");
-let consentButton = document.getElementById("contextConsentButton");
+let consentContainer = document.getElementById("consent_container");
+let consentButton = document.getElementById("context_consent_button");
 
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";

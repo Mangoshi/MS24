@@ -28,7 +28,7 @@
 <body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light text-white">
 <div class="pt-16 pb-10 sm:pt-10">
 	<main class="flex justify-center">
-		<div id="consentContainer">
+		<div id="consent_container">
 			<div class="flex flex-col select-none">
 				<hr class="w-full mt-5 mb-4"/>
 				<a
@@ -47,7 +47,7 @@
 					To use this site, you must first allow the browser to use the Web Audio API.
 				</p>
 				<button
-					id="contextConsentButton"
+					id="context_consent_button"
 					class="bg-green-600 text-white rounded-lg px-4
 					py-2 mt-4 hover:bg-green-500 transition-all
 					duration-300 ease-in-out self-center text-xl">
@@ -105,7 +105,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-col hidden w-min select-none" id="synthContainer">
+		<div class="flex flex-col hidden w-min select-none" id="synth_container">
 			<div id="p5_canvas" class="absolute -z-10"></div>
 			<!--********************-->
 			<!-- 	  TOP ROW 	    -->
@@ -116,7 +116,7 @@
 						<button
 							id="settings_button"
 							class="
-							dropdown_button
+							dropdownButton
 							border border-gray-300 rounded-xl
 							px-2 pb-0 self-center hover:bg-gray-600
 							transition-all duration-300 ease-in-out">
@@ -140,34 +140,12 @@
 						<button
 							id="presets_button"
 							class="
-							dropdown_button w-[75px]
+							w-[75px]
 							border border-gray-300 rounded-xl
 							px-2 pb-0 self-center hover:bg-gray-600
 							transition-all duration-300 ease-in-out">
 							PRESETS
 						</button>
-						<div>
-							<div
-								id="presets_dropdown"
-								class="
-								dropdown_content
-								hidden absolute mt-2 w-[83px] z-10
-								bg-gray-600 border border-gray-400">
-								<a
-									id="preset_save_button"
-									class="cursor-pointer flex p-2 hover:bg-gray-700"
-								>Save</a>
-								<div>
-									<label for="preset_name_input" class="hidden">Preset Name:</label>
-									<input id="preset_name_input" class="hidden" type='text' />
-								</div>
-								<a
-									id="preset_load_button"
-									class="cursor-pointer flex p-2 hover:bg-gray-700"
-								>Load</a>
-								<input id="file_input" class="hidden" type='file' />
-							</div>
-						</div>
 					</div>
 					<div class="flex flex-col justify-center">
 						<a href="https://github.com/IADT-projects/y4-project-Mangoshi" target="_blank">
@@ -182,7 +160,7 @@
 					</div>
 					<div class="flex flex-col justify-center">
 						<button
-							id="random_button"
+							id="random_preset_button"
 							class="w-[75px]
 							border border-gray-300 rounded-xl
 							px-2 pb-0 self-center hover:bg-gray-600
@@ -217,1291 +195,1351 @@
 					</div>
 				</div>
 			</div>
-			<!--********************-->
-			<!--	  ROW ONE 	    -->
-			<!--********************-->
-			<div class="flex border border-gray-700 p-1">
+			<div id="synth_body">
 				<!--********************-->
-				<!--	OSCILLATOR A	-->
+				<!--	  ROW ONE 	    -->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
-					<!--left-->
-					<div class="flex flex-col justify-between mr-1">
-						<div class="flex justify-between mb-1">
-							<div class="flex flex-col">
-								<div class="flex p-1">
-									<webaudio-switch
-										id="osc_a_switch"
-										class="control self-center pr-1"
-										colors="#A9DC76;#2C292D;#D9D9D9"
-										diameter="30"
-										value="1"
-									></webaudio-switch>
-									<p class="font-inika font-bold self-center">OSC A</p>
+				<div class="flex border border-gray-700 p-1">
+					<!--********************-->
+					<!--	OSCILLATOR A	-->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+						<!--left-->
+						<div class="flex flex-col justify-between mr-1">
+							<div class="flex justify-between mb-1">
+								<div class="flex flex-col">
+									<div class="flex p-1">
+										<webaudio-switch
+											id="osc_a_switch"
+											class="control self-center pr-1"
+											colors="#A9DC76;#2C292D;#D9D9D9"
+											diameter="30"
+											value="1"
+										></webaudio-switch>
+										<p class="font-inika font-bold self-center">OSC A</p>
+									</div>
+								</div>
+								<div class="self-center border border-gray-600 flex rounded-lg p-1">
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Voices</p>
+										<webaudio-knob
+											id="osc_a_voices"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="1"
+											max="24"
+											value="1"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_a_voices_readout"
+											link="osc_a_voices"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Spread</p>
+										<webaudio-knob
+											id="osc_a_spread"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="1"
+											max="100"
+											value="1"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_a_spread_readout"
+											link="osc_a_spread"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">FM</p>
+										<webaudio-knob
+											id="osc_a_fm"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="50"
+											value="0"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_a_fm_readout"
+											link="osc_a_fm"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Depth</p>
+										<webaudio-knob
+											id="osc_a_fm_depth"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="50"
+											value="0"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_a_fm_depth_readout"
+											link="osc_a_fm_depth"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Shape</p>
+										<webaudio-knob
+											id="osc_a_fm_shape"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="3"
+											value="0"
+											step="1"
+											conv="['sin','tri','saw','sqr'][x]"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_a_fm_shape_readout"
+											link="osc_a_fm_shape"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
 								</div>
 							</div>
-							<div class="self-center border border-gray-600 flex rounded-lg p-1">
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Voices</p>
+							<div class="flex">
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Octave</p>
 									<webaudio-knob
-										id="osc_a_voices"
+										id="osc_a_octave"
 										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="1"
-										max="24"
-										value="1"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_a_voices_readout"
-										link="osc_a_voices"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Spread</p>
-									<webaudio-knob
-										id="osc_a_spread"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="1"
-										max="100"
-										value="1"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_a_spread_readout"
-										link="osc_a_spread"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">FM</p>
-									<webaudio-knob
-										id="osc_a_fm"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="0"
-										max="50"
+										colors="#FF6188;#2C292D;#D9D9D9"
+										min="-3"
+										max="3"
 										value="0"
 										step="1"
 									></webaudio-knob>
 									<webaudio-param
-										id="osc_a_fm_readout"
-										link="osc_a_fm"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
+										id="osc_a_octave_readout"
+										link="osc_a_octave"
+										fontSize="14"
+										width="60"
+										class="self-center border border-pink-800 mt-1"
 									></webaudio-param>
 								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Depth</p>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Detune</p>
 									<webaudio-knob
-										id="osc_a_fm_depth"
+										id="osc_a_semi"
 										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="0"
-										max="50"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										min="-12"
+										max="12"
 										value="0"
 										step="1"
 									></webaudio-knob>
 									<webaudio-param
-										id="osc_a_fm_depth_readout"
-										link="osc_a_fm_depth"
-										class="self-center border border-gray-500 mt-1"
+										id="osc_a_semi_readout"
+										link="osc_a_semi"
+										fontSize="14"
+										width="60"
+										class="self-center border border-green-700 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Volume</p>
+									<webaudio-knob
+										id="osc_a_volume"
+										class="control self-center"
+										colors="#FFD866;#2C292D;#D9D9D9"
+										min="-20"
+										max="0"
+										value="0"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_a_volume_readout"
+										link="osc_a_volume"
+										class="self-center border border-yellow-600 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Shape</p>
+									<webaudio-slider
+										id="osc_a_shape"
+										class="control self-center"
+										colors="#78DCE8;#2C292D;#D9D9D9"
+										min="0"
+										max="3"
+										direction="vert"
+										conv="['sine','triangle','sawtooth','square'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="osc_a_shape_readout"
+										link="osc_a_shape"
+										class="self-center border border-cyan-700 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+							</div>
+						</div>
+						<!--right-->
+						<div class="flex flex-col">
+							<div class="self-center border border-gray-600 flex rounded-lg p-1 mb-1">
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">ATK</p>
+									<webaudio-knob
+										id="osc_a_attack"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="2"
+										value="0.005"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_a_attack_readout"
+										link="osc_a_attack"
+										class="self-center border border-violet-900 mt-1"
 										fontSize="10"
 										width="30"
 									></webaudio-param>
 								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Shape</p>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">DEC</p>
 									<webaudio-knob
-										id="osc_a_fm_shape"
+										id="osc_a_decay"
 										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
+										min="0"
+										max="2"
+										value="0.1"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_a_decay_readout"
+										link="osc_a_decay"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">SUS</p>
+									<webaudio-knob
+										id="osc_a_sustain"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="1"
+										value="0.3"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_a_sustain_readout"
+										link="osc_a_sustain"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px]">
+									<p class="font-light text-sm self-center mb-0.5">REL</p>
+									<webaudio-knob
+										id="osc_a_release"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="5"
+										value="1"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_a_release_readout"
+										link="osc_a_release"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+							</div>
+							<div id="osc_a_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
+								<canvas class="self-center" id="osc_a_canvas" width="212" height="122"></canvas>
+							</div>
+						</div>
+					</div>
+					<!--********************-->
+					<!--	  MIDDLE		-->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
+					<!--********************-->
+					<!--	OSCILLATOR B	-->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+						<!--left-->
+						<div class="flex flex-col justify-between mr-1">
+							<div class="flex justify-between mb-1">
+								<div class="flex flex-col">
+									<div class="flex p-1">
+										<webaudio-switch
+											id="osc_b_switch"
+											class="control self-center pr-1"
+											colors="#A9DC76;#2C292D;#D9D9D9"
+											diameter="30"
+											value="0"
+										></webaudio-switch>
+										<p class="font-inika font-bold self-center">OSC B</p>
+									</div>
+								</div>
+								<div class="self-center border border-gray-600 flex rounded-lg p-1">
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Voices</p>
+										<webaudio-knob
+											id="osc_b_voices"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="1"
+											max="24"
+											value="1"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_b_voices_readout"
+											link="osc_b_voices"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Spread</p>
+										<webaudio-knob
+											id="osc_b_spread"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="1"
+											max="100"
+											value="1"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_b_spread_readout"
+											link="osc_b_spread"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">FM</p>
+										<webaudio-knob
+											id="osc_b_fm"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="50"
+											value="0"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_b_fm_readout"
+											link="osc_b_fm"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Depth</p>
+										<webaudio-knob
+											id="osc_b_fm_depth"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="50"
+											value="0"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_b_fm_depth_readout"
+											link="osc_b_fm_depth"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Shape</p>
+										<webaudio-knob
+											id="osc_b_fm_shape"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="3"
+											value="0"
+											step="1"
+											conv="['sin','tri','saw','sqr'][x]"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_b_fm_shape_readout"
+											link="osc_b_fm_shape"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+								</div>
+							</div>
+							<div class="flex">
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Octave</p>
+									<webaudio-knob
+										id="osc_b_octave"
+										class="control self-center"
+										colors="#FF6188;#2C292D;#D9D9D9"
+										min="-3"
+										max="3"
+										value="1"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_octave_readout"
+										link="osc_b_octave"
+										fontSize="14"
+										width="60"
+										class="self-center border border-pink-800 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Detune</p>
+									<webaudio-knob
+										id="osc_b_semi"
+										class="control self-center"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										min="-12"
+										max="12"
+										value="0"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_semi_readout"
+										link="osc_b_semi"
+										fontSize="14"
+										width="60"
+										class="self-center border border-green-700 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Volume</p>
+									<webaudio-knob
+										id="osc_b_volume"
+										class="control self-center"
+										colors="#FFD866;#2C292D;#D9D9D9"
+										min="-20"
+										max="0"
+										value="0"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_volume_readout"
+										link="osc_b_volume"
+										class="self-center border border-yellow-600 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Shape</p>
+									<webaudio-slider
+										id="osc_b_shape"
+										class="control self-center"
+										colors="#78DCE8;#2C292D;#D9D9D9"
+										min="0"
+										max="3"
+										value="1"
+										direction="vert"
+										conv="['sine','triangle','sawtooth','square'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="osc_b_shape_readout"
+										link="osc_b_shape"
+										class="self-center border border-cyan-700 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+							</div>
+						</div>
+						<!--right-->
+						<div class="flex flex-col">
+							<div class="self-center border border-gray-600 flex rounded-lg p-1 mb-1">
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">ATK</p>
+									<webaudio-knob
+										id="osc_b_attack"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="2"
+										value="0.005"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_attack_readout"
+										link="osc_b_attack"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">DEC</p>
+									<webaudio-knob
+										id="osc_b_decay"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="2"
+										value="0.1"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_decay_readout"
+										link="osc_b_decay"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">SUS</p>
+									<webaudio-knob
+										id="osc_b_sustain"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="1"
+										value="0.3"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_sustain_readout"
+										link="osc_b_sustain"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px]">
+									<p class="font-light text-sm self-center mb-0.5">REL</p>
+									<webaudio-knob
+										id="osc_b_release"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="5"
+										value="1"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_b_release_readout"
+										link="osc_b_release"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+							</div>
+							<div id="osc_b_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
+								<canvas class="self-center" id="osc_b_canvas" width="212" height="122"></canvas>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--********************-->
+				<!--	  ROW TWO 	    -->
+				<!--********************-->
+				<div class="flex border border-gray-700 p-1">
+					<!--********************-->
+					<!--  SUB OSCILLATOR	-->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+						<!--left-->
+						<div class="flex flex-col justify-between mr-1">
+							<div class="flex justify-between mb-1">
+								<div class="flex flex-col">
+									<div class="flex p-1">
+										<webaudio-switch
+											id="osc_c_switch"
+											class="control self-center pr-1"
+											colors="#A9DC76;#2C292D;#D9D9D9"
+											diameter="30"
+											value="0"
+										></webaudio-switch>
+										<p class="font-inika font-bold self-center">SUB OSC</p>
+									</div>
+								</div>
+								<div class="self-center border border-gray-600 flex rounded-lg p-1">
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Voices</p>
+										<webaudio-knob
+											id="osc_c_voices"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="1"
+											max="24"
+											value="1"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_c_voices_readout"
+											link="osc_c_voices"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Spread</p>
+										<webaudio-knob
+											id="osc_c_spread"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="1"
+											max="100"
+											value="1"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_c_spread_readout"
+											link="osc_c_spread"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">AM</p>
+										<webaudio-knob
+											id="osc_c_am"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="50"
+											value="0"
+											step="1"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_c_am_readout"
+											link="osc_c_am"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
+										<p class="font-light text-sm self-center mb-0.5">Shape</p>
+										<webaudio-knob
+											id="osc_c_am_shape"
+											class="control self-center"
+											colors="#FFFFFF;#2C292D;#D9D9D9"
+											diameter="30"
+											min="0"
+											max="3"
+											value="0"
+											step="1"
+											conv="['sin','tri','saw','sqr'][x]"
+										></webaudio-knob>
+										<webaudio-param
+											id="osc_c_am_shape_readout"
+											link="osc_c_am_shape"
+											class="self-center border border-gray-500 mt-1"
+											fontSize="10"
+											width="30"
+										></webaudio-param>
+									</div>
+								</div>
+							</div>
+							<div class="flex">
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Octave</p>
+									<webaudio-knob
+										id="osc_c_octave"
+										class="control self-center"
+										colors="#FF6188;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
 										value="0"
 										step="1"
-										conv="['sin','tri','saw','sqr'][x]"
 									></webaudio-knob>
 									<webaudio-param
-										id="osc_a_fm_shape_readout"
-										link="osc_a_fm_shape"
-										class="self-center border border-gray-500 mt-1"
+										id="osc_c_octave_readout"
+										link="osc_c_octave"
+										fontSize="14"
+										width="60"
+										class="self-center border border-pink-800 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Detune</p>
+									<webaudio-knob
+										id="osc_c_semi"
+										class="control self-center"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										min="-12"
+										max="12"
+										value="0"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_semi_readout"
+										link="osc_c_semi"
+										fontSize="14"
+										width="60"
+										class="self-center border border-green-700 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Volume</p>
+									<webaudio-knob
+										id="osc_c_volume"
+										class="control self-center"
+										colors="#FFD866;#2C292D;#D9D9D9"
+										min="-20"
+										max="0"
+										value="0"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_volume_readout"
+										link="osc_c_volume"
+										class="self-center border border-yellow-600 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Shape</p>
+									<webaudio-slider
+										id="osc_c_shape"
+										class="control self-center"
+										colors="#78DCE8;#2C292D;#D9D9D9"
+										min="0"
+										max="3"
+										value="2"
+										direction="vert"
+										conv="['sine','triangle','sawtooth','square'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="osc_c_shape_readout"
+										link="osc_c_shape"
+										class="self-center border border-cyan-700 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+							</div>
+						</div>
+						<!--right-->
+						<div class="flex flex-col">
+							<div class="self-center border border-gray-600 flex rounded-lg p-1 mb-1">
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">ATK</p>
+									<webaudio-knob
+										id="osc_c_attack"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="2"
+										value="0.005"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_attack_readout"
+										link="osc_c_attack"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">DEC</p>
+									<webaudio-knob
+										id="osc_c_decay"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="2"
+										value="0.1"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_decay_readout"
+										link="osc_c_decay"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
+									<p class="font-light text-sm self-center mb-0.5">SUS</p>
+									<webaudio-knob
+										id="osc_c_sustain"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="1"
+										value="0.3"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_sustain_readout"
+										link="osc_c_sustain"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="10"
+										width="30"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px]">
+									<p class="font-light text-sm self-center mb-0.5">REL</p>
+									<webaudio-knob
+										id="osc_c_release"
+										class="control self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										diameter="30"
+										min="0"
+										max="5"
+										value="1"
+										step="0.001"
+									></webaudio-knob>
+									<webaudio-param
+										id="osc_c_release_readout"
+										link="osc_c_release"
+										class="self-center border border-violet-900 mt-1"
 										fontSize="10"
 										width="30"
 									></webaudio-param>
 								</div>
 							</div>
-						</div>
-						<div class="flex">
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Octave</p>
-								<webaudio-knob
-									id="osc_a_octave"
-									class="control self-center"
-									colors="#FF6188;#2C292D;#D9D9D9"
-									min="-3"
-									max="3"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_octave_readout"
-									link="osc_a_octave"
-									fontSize="14"
-									width="60"
-									class="self-center border border-pink-800 mt-1"
-								></webaudio-param>
+							<div id="osc_c_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
+								<canvas class="self-center" id="osc_c_canvas" width="212" height="122"></canvas>
 							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Detune</p>
-								<webaudio-knob
-									id="osc_a_semi"
-									class="control self-center"
+						</div>
+					</div>
+					<!--********************-->
+					<!--   FM VISUALISER 	-->
+					<!--********************-->
+					<div class="self-center border border-gray-600 flex rounded-lg p-1 mx-1 h-[202px]">
+						<canvas class="self-center" id="fm_canvas" width="51" height="50"></canvas>
+					</div>
+					<!--********************-->
+					<!--    MULTI FILTER    -->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+						<!--left-->
+						<div class="flex flex-col justify-between mr-1">
+							<div class="flex p-1">
+								<webaudio-switch
+									id="filter_switch"
+									class="control self-center pr-1"
 									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="-12"
-									max="12"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_semi_readout"
-									link="osc_a_semi"
-									fontSize="14"
-									width="60"
-									class="self-center border border-green-700 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Volume</p>
-								<webaudio-knob
-									id="osc_a_volume"
-									class="control self-center"
-									colors="#FFD866;#2C292D;#D9D9D9"
-									min="-20"
-									max="0"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_volume_readout"
-									link="osc_a_volume"
-									class="self-center border border-yellow-600 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-light self-center mb-0.5">Shape</p>
-								<webaudio-slider
-									id="osc_a_shape"
-									class="control self-center"
-									colors="#78DCE8;#2C292D;#D9D9D9"
-									min="0"
-									max="3"
-									direction="vert"
-									conv="['sine','triangle','sawtooth','square'][x]"
-								></webaudio-slider>
-								<webaudio-param
-									id="osc_a_shape_readout"
-									link="osc_a_shape"
-									class="self-center border border-cyan-700 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-						</div>
-					</div>
-					<!--right-->
-					<div class="flex flex-col">
-						<div class="self-center border border-gray-600 flex rounded-lg p-1 mb-1">
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">ATK</p>
-								<webaudio-knob
-									id="osc_a_attack"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
-									min="0"
-									max="2"
-									value="0.005"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_attack_readout"
-									link="osc_a_attack"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">DEC</p>
-								<webaudio-knob
-									id="osc_a_decay"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="2"
-									value="0.1"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_decay_readout"
-									link="osc_a_decay"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">SUS</p>
-								<webaudio-knob
-									id="osc_a_sustain"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="1"
-									value="0.3"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_sustain_readout"
-									link="osc_a_sustain"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px]">
-								<p class="font-light text-sm self-center mb-0.5">REL</p>
-								<webaudio-knob
-									id="osc_a_release"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="5"
 									value="1"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_a_release_readout"
-									link="osc_a_release"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
+								></webaudio-switch>
+								<p class="font-inika font-bold self-center">FILTER</p>
+							</div>
+							<div class="flex">
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Cutoff</p>
+									<webaudio-knob
+										id="filter_cutoff"
+										class="control self-center"
+										colors="#FF6188;#2C292D;#D9D9D9"
+										min="5"
+										max="10000"
+										value="5000"
+										step="5"
+									></webaudio-knob>
+									<webaudio-param
+										id="filter_cutoff_readout"
+										link="filter_cutoff"
+										fontSize="14"
+										width="60"
+										class="self-center border border-pink-800 mt-1"
+									></webaudio-param>
+								</div>
+								<div id="filter_resonance_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p id="filter_resonance_label" class="font-light self-center mb-0.5">Q</p>
+									<webaudio-knob
+										id="filter_resonance"
+										class="control self-center"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										min="1"
+										max="10"
+										value="0"
+										step="0.1"
+									></webaudio-knob>
+									<webaudio-param
+										id="filter_resonance_readout"
+										link="filter_resonance"
+										fontSize="14"
+										width="60"
+										class="self-center border border-green-700 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Rolloff</p>
+									<webaudio-slider
+										id="filter_rolloff"
+										class="control self-center"
+										colors="#FFD866;#2C292D;#D9D9D9"
+										min="0"
+										max="3"
+										step="1"
+										direction="vert"
+										conv="['-12','-24','-48','-96'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="filter_rolloff_readout"
+										link="filter_rolloff"
+										class="self-center border border-yellow-600 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Type</p>
+									<webaudio-slider
+										id="filter_type"
+										class="control self-center"
+										colors="#78DCE8;#2C292D;#D9D9D9"
+										min="0"
+										max="6"
+										step="1"
+										value="0"
+										direction="vert"
+										conv="['LPF','HPF','BPF','APF','Notch','LSF','HSF'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="filter_type_readout"
+										link="filter_type"
+										class="self-center border border-cyan-700 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
 							</div>
 						</div>
-						<div id="osc_a_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_a_canvas" width="212" height="122"></canvas>
-						</div>
-					</div>
-				</div>
-				<!--********************-->
-				<!--	  MIDDLE		-->
-				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
-				<!--********************-->
-				<!--	OSCILLATOR B	-->
-				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
-					<!--left-->
-					<div class="flex flex-col justify-between mr-1">
-						<div class="flex justify-between mb-1">
-							<div class="flex flex-col">
-								<div class="flex p-1">
+						<!--right-->
+						<div class="flex flex-col justify-center">
+							<div class="self-center border border-gray-600 flex rounded-lg p-1 h-[100px]">
+								<div class="border border-gray-500 rounded-xl p-0.5 w-min flex flex-col justify-center">
+									<p class="font-light text-sm self-center">A</p>
 									<webaudio-switch
-										id="osc_b_switch"
-										class="control self-center pr-1"
+										id="osc_a_filter_switch"
+										class="control self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
-										value="0"
+										value="1"
 									></webaudio-switch>
-									<p class="font-inika font-bold self-center">OSC B</p>
+								</div>
+								<div class="border border-gray-500 rounded-xl p-0.5 w-min flex flex-col justify-center">
+									<p class="font-light text-sm self-center">B</p>
+									<webaudio-switch
+										id="osc_b_filter_switch"
+										class="control self-center"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										diameter="30"
+										value="1"
+									></webaudio-switch>
+								</div>
+								<div class="border border-gray-500 rounded-xl p-0.5 w-min flex flex-col justify-center">
+									<p class="font-light text-sm self-center">C</p>
+									<webaudio-switch
+										id="osc_c_filter_switch"
+										class="control self-center"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										diameter="30"
+										value="1"
+									></webaudio-switch>
 								</div>
 							</div>
 							<div class="self-center border border-gray-600 flex rounded-lg p-1">
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Voices</p>
-									<webaudio-knob
-										id="osc_b_voices"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="1"
-										max="24"
-										value="1"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_b_voices_readout"
-										link="osc_b_voices"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Spread</p>
-									<webaudio-knob
-										id="osc_b_spread"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="1"
-										max="100"
-										value="1"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_b_spread_readout"
-										link="osc_b_spread"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">FM</p>
-									<webaudio-knob
-										id="osc_b_fm"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="0"
-										max="50"
-										value="0"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_b_fm_readout"
-										link="osc_b_fm"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Depth</p>
-									<webaudio-knob
-										id="osc_b_fm_depth"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="0"
-										max="50"
-										value="0"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_b_fm_depth_readout"
-										link="osc_b_fm_depth"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Shape</p>
-									<webaudio-knob
-										id="osc_b_fm_shape"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="0"
-										max="3"
-										value="0"
-										step="1"
-										conv="['sin','tri','saw','sqr'][x]"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_b_fm_shape_readout"
-										link="osc_b_fm_shape"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
+								<canvas class="self-center" id="filter_canvas" width="212" height="122"></canvas>
 							</div>
-						</div>
-						<div class="flex">
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Octave</p>
-								<webaudio-knob
-									id="osc_b_octave"
-									class="control self-center"
-									colors="#FF6188;#2C292D;#D9D9D9"
-									min="-3"
-									max="3"
-									value="1"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_octave_readout"
-									link="osc_b_octave"
-									fontSize="14"
-									width="60"
-									class="self-center border border-pink-800 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Detune</p>
-								<webaudio-knob
-									id="osc_b_semi"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="-12"
-									max="12"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_semi_readout"
-									link="osc_b_semi"
-									fontSize="14"
-									width="60"
-									class="self-center border border-green-700 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Volume</p>
-								<webaudio-knob
-									id="osc_b_volume"
-									class="control self-center"
-									colors="#FFD866;#2C292D;#D9D9D9"
-									min="-20"
-									max="0"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_volume_readout"
-									link="osc_b_volume"
-									class="self-center border border-yellow-600 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-light self-center mb-0.5">Shape</p>
-								<webaudio-slider
-									id="osc_b_shape"
-									class="control self-center"
-									colors="#78DCE8;#2C292D;#D9D9D9"
-									min="0"
-									max="3"
-									value="1"
-									direction="vert"
-									conv="['sine','triangle','sawtooth','square'][x]"
-								></webaudio-slider>
-								<webaudio-param
-									id="osc_b_shape_readout"
-									link="osc_b_shape"
-									class="self-center border border-cyan-700 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-						</div>
-					</div>
-					<!--right-->
-					<div class="flex flex-col">
-						<div class="self-center border border-gray-600 flex rounded-lg p-1 mb-1">
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">ATK</p>
-								<webaudio-knob
-									id="osc_b_attack"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="2"
-									value="0.005"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_attack_readout"
-									link="osc_b_attack"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">DEC</p>
-								<webaudio-knob
-									id="osc_b_decay"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="2"
-									value="0.1"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_decay_readout"
-									link="osc_b_decay"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">SUS</p>
-								<webaudio-knob
-									id="osc_b_sustain"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="1"
-									value="0.3"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_sustain_readout"
-									link="osc_b_sustain"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px]">
-								<p class="font-light text-sm self-center mb-0.5">REL</p>
-								<webaudio-knob
-									id="osc_b_release"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="5"
-									value="1"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_b_release_readout"
-									link="osc_b_release"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-						</div>
-						<div id="osc_b_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_b_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
-			</div>
-			<!--********************-->
-			<!--	  ROW TWO 	    -->
-			<!--********************-->
-			<div class="flex border border-gray-700 p-1">
 				<!--********************-->
-				<!--  SUB OSCILLATOR	-->
+				<!--	 ROW THREE 	    -->
 				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
-					<!--left-->
-					<div class="flex flex-col justify-between mr-1">
-						<div class="flex justify-between mb-1">
-							<div class="flex flex-col">
-								<div class="flex p-1">
-									<webaudio-switch
-										id="osc_c_switch"
-										class="control self-center pr-1"
+				<div class="flex border border-gray-700 p-1">
+					<!--********************-->
+					<!--   LOW FREQ OSC 	-->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+						<!--left-->
+						<div class="flex flex-col justify-between mr-1">
+							<div class="flex p-1">
+								<webaudio-switch
+									id="lfo_switch"
+									class="control self-center pr-1"
+									colors="#A9DC76;#2C292D;#D9D9D9"
+									diameter="30"
+									value="0"
+								></webaudio-switch>
+								<label class="font-inika font-light self-center" for="lfo_selector">
+									LFO
+									&nbsp;
+									<select
+										id="lfo_selector"
+										class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
+										autocomplete="off"
+									>
+										<option value="FilterFrequency" selected="selected">Filter Frequency</option>
+										<option value="OscAVol">OSC A Volume</option>
+										<option value="OscBVol">OSC B Volume</option>
+										<option value="OscCVol">OSC C Volume</option>
+									</select>
+								</label>
+							</div>
+							<div class="flex">
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Grid</p>
+									<webaudio-knob
+										id="lfo_grid"
+										class="control self-center"
+										colors="#FF6188;#2C292D;#D9D9D9"
+										min="0"
+										max="9"
+										value="5"
+										step="1"
+										conv="['8/1','4/1','2/1','1/1','1/2','1/4','1/8','1/16','1/32','1/64'][x]"
+									></webaudio-knob>
+									<webaudio-param
+										id="lfo_grid_readout"
+										link="lfo_grid"
+										fontSize="14"
+										width="60"
+										class="self-center border border-pink-800 mt-1"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Min</p>
+									<webaudio-knob
+										id="lfo_min"
+										class="control self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
-										diameter="30"
-										value="0"
-									></webaudio-switch>
-									<p class="font-inika font-bold self-center">SUB OSC</p>
-								</div>
-							</div>
-							<div class="self-center border border-gray-600 flex rounded-lg p-1">
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Voices</p>
-									<webaudio-knob
-										id="osc_c_voices"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="1"
-										max="24"
-										value="1"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_c_voices_readout"
-										link="osc_c_voices"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Spread</p>
-									<webaudio-knob
-										id="osc_c_spread"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
-										min="1"
-										max="100"
-										value="1"
-										step="1"
-									></webaudio-knob>
-									<webaudio-param
-										id="osc_c_spread_readout"
-										link="osc_c_spread"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
-									></webaudio-param>
-								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">AM</p>
-									<webaudio-knob
-										id="osc_c_am"
-										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
 										min="0"
-										max="50"
+										max="10000"
 										value="0"
 										step="1"
 									></webaudio-knob>
 									<webaudio-param
-										id="osc_c_am_readout"
-										link="osc_c_am"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
+										id="lfo_min_readout"
+										link="lfo_min"
+										fontSize="14"
+										width="60"
+										class="self-center border border-green-700 mt-1"
 									></webaudio-param>
 								</div>
-								<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end w-[50px]">
-									<p class="font-light text-sm self-center mb-0.5">Shape</p>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p class="font-light self-center mb-0.5">Max</p>
 									<webaudio-knob
-										id="osc_c_am_shape"
+										id="lfo_max"
 										class="control self-center"
-										colors="#FFFFFF;#2C292D;#D9D9D9"
-										diameter="30"
+										colors="#FFD866;#2C292D;#D9D9D9"
+										min="0"
+										max="10000"
+										value="1000"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="lfo_max_readout"
+										link="lfo_max"
+										class="self-center border border-yellow-600 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+								<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Shape</p>
+									<webaudio-slider
+										id="lfo_shape"
+										class="control self-center"
+										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
-										value="0"
 										step="1"
-										conv="['sin','tri','saw','sqr'][x]"
-									></webaudio-knob>
+										value="0"
+										direction="vert"
+										conv="['sine','triangle','sawtooth','square'][x]"
+									></webaudio-slider>
 									<webaudio-param
-										id="osc_c_am_shape_readout"
-										link="osc_c_am_shape"
-										class="self-center border border-gray-500 mt-1"
-										fontSize="10"
-										width="30"
+										id="lfo_shape_readout"
+										link="lfo_shape"
+										class="self-center border border-cyan-700 mt-1"
+										fontSize="14"
+										width="60"
 									></webaudio-param>
 								</div>
 							</div>
 						</div>
-						<div class="flex">
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Octave</p>
-								<webaudio-knob
-									id="osc_c_octave"
-									class="control self-center"
-									colors="#FF6188;#2C292D;#D9D9D9"
-									min="0"
-									max="3"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_octave_readout"
-									link="osc_c_octave"
-									fontSize="14"
-									width="60"
-									class="self-center border border-pink-800 mt-1"
-								></webaudio-param>
+						<!--right-->
+						<div>
+							<div class="self-center flex rounded-lg p-1 h-[98px] mb-1"></div>
+							<div class="self-center border border-gray-600 flex rounded-lg p-1">
+								<canvas class="self-center" id="lfo_canvas" width="212" height="122"></canvas>
 							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Detune</p>
-								<webaudio-knob
-									id="osc_c_semi"
-									class="control self-center"
+						</div>
+					</div>
+					<!--************-->
+					<!--   MIDDLE 	-->
+					<!--************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
+					<!--********************-->
+					<!--     MULTI FX       -->
+					<!--********************-->
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+						<!--left-->
+						<div class="flex flex-col justify-between mr-1">
+							<div class="flex p-1">
+								<webaudio-switch
+									id="fx_switch"
+									class="control self-center pr-1"
 									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="-12"
-									max="12"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_semi_readout"
-									link="osc_c_semi"
-									fontSize="14"
-									width="60"
-									class="self-center border border-green-700 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Volume</p>
-								<webaudio-knob
-									id="osc_c_volume"
-									class="control self-center"
-									colors="#FFD866;#2C292D;#D9D9D9"
-									min="-20"
-									max="0"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_volume_readout"
-									link="osc_c_volume"
-									class="self-center border border-yellow-600 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-light self-center mb-0.5">Shape</p>
-								<webaudio-slider
-									id="osc_c_shape"
-									class="control self-center"
-									colors="#78DCE8;#2C292D;#D9D9D9"
-									min="0"
-									max="3"
-									value="2"
-									direction="vert"
-									conv="['sine','triangle','sawtooth','square'][x]"
-								></webaudio-slider>
-								<webaudio-param
-									id="osc_c_shape_readout"
-									link="osc_c_shape"
-									class="self-center border border-cyan-700 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-						</div>
-					</div>
-					<!--right-->
-					<div class="flex flex-col">
-						<div class="self-center border border-gray-600 flex rounded-lg p-1 mb-1">
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">ATK</p>
-								<webaudio-knob
-									id="osc_c_attack"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
-									min="0"
-									max="2"
-									value="0.005"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_attack_readout"
-									link="osc_c_attack"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">DEC</p>
-								<webaudio-knob
-									id="osc_c_decay"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="2"
-									value="0.1"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_decay_readout"
-									link="osc_c_decay"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px] mr-1">
-								<p class="font-light text-sm self-center mb-0.5">SUS</p>
-								<webaudio-knob
-									id="osc_c_sustain"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="1"
-									value="0.3"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_sustain_readout"
-									link="osc_c_sustain"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col w-[50px]">
-								<p class="font-light text-sm self-center mb-0.5">REL</p>
-								<webaudio-knob
-									id="osc_c_release"
-									class="control self-center"
-									colors="#AB9DF2;#2C292D;#D9D9D9"
-									diameter="30"
-									min="0"
-									max="5"
 									value="1"
-									step="0.001"
-								></webaudio-knob>
-								<webaudio-param
-									id="osc_c_release_readout"
-									link="osc_c_release"
-									class="self-center border border-violet-900 mt-1"
-									fontSize="10"
-									width="30"
-								></webaudio-param>
+								></webaudio-switch>
+								<label class="font-inika font-bold self-center" for="fx_selector">
+									FX
+									&nbsp;
+									<select
+										id="fx_selector"
+										class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
+										autocomplete="off"
+									>
+										<option value="Distortion" selected="selected">Distortion</option>
+										<option value="Chebyshev">Chebyshev Distortion</option>
+										<option value="Phaser">Phaser</option>
+										<option value="Tremolo">Tremolo</option>
+										<option value="Vibrato">Vibrato</option>
+										<option value="Delay">Delay</option>
+										<option value="Reverb">Reverb</option>
+										<option value="PitchShift">Pitch Shift</option>
+										<option value="FreqShift">Freq Shift</option>
+									</select>
+								</label>
+							</div>
+							<div class="flex w-[372px]">
+								<div id="fx_param1_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p id="fx_param1_label" class="font-light self-center mb-0.5">Intensity</p>
+									<webaudio-knob
+										id="fx_param1"
+										class="control self-center"
+										colors="#FF6188;#2C292D;#D9D9D9"
+										min="0"
+										max="20"
+										value="0"
+										step="0.1"
+									></webaudio-knob>
+									<webaudio-param
+										id="fx_param1_readout"
+										link="fx_param1"
+										fontSize="14"
+										width="60"
+										class="self-center border border-pink-800 mt-1"
+									></webaudio-param>
+								</div>
+								<div id="fx_param2_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p id="fx_param2_label" class="font-light self-center mb-0.5">Oversample</p>
+									<webaudio-knob
+										id="fx_param2"
+										class="control self-center"
+										colors="#A9DC76;#2C292D;#D9D9D9"
+										min="0"
+										max="2"
+										value="0"
+										step="1"
+									></webaudio-knob>
+									<webaudio-param
+										id="fx_param2_readout"
+										link="fx_param2"
+										fontSize="14"
+										width="60"
+										class="self-center border border-green-700 mt-1"
+									></webaudio-param>
+								</div>
+								<div id="fx_param3_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
+									<p id="fx_param3_label" class="font-light self-center mb-0.5">Mix</p>
+									<webaudio-knob
+										id="fx_param3"
+										class="control self-center"
+										colors="#FFD866;#2C292D;#D9D9D9"
+										min="0"
+										max="1"
+										step=".01"
+										value="0.5"
+									></webaudio-knob>
+									<webaudio-param
+										id="fx_param3_readout"
+										link="fx_param3"
+										class="self-center border border-yellow-600 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+								<div id="fx_param4_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] hidden">
+									<p id="fx_param4_label" class="font-light self-center mb-0.5">Mix</p>
+									<webaudio-knob
+										id="fx_param4"
+										class="control self-center"
+										colors="#78DCE8;#2C292D;#D9D9D9"
+										min="0"
+										max="1"
+										step=".01"
+										value="0.5"
+									></webaudio-knob>
+									<webaudio-param
+										id="fx_param4_readout"
+										link="fx_param4"
+										class="self-center border border-cyan-700 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
 							</div>
 						</div>
-						<div id="osc_c_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_c_canvas" width="212" height="122"></canvas>
+						<!--right-->
+						<div class="flex flex-col justify-center">
+							<div class="self-center flex rounded-lg p-1 h-[98px] mb-1"></div>
+							<div class="self-center border border-gray-600 flex rounded-lg p-1">
+								<canvas class="self-center" id="fx_canvas" width="212" height="122"></canvas>
+							</div>
 						</div>
 					</div>
 				</div>
 				<!--********************-->
-				<!--   FM VISUALISER 	-->
+				<!-- 	  KEYBOARD 	    -->
 				<!--********************-->
-				<div class="self-center border border-gray-600 flex rounded-lg p-1 mx-1 h-[202px]">
-					<canvas class="self-center" id="fm_canvas" width="51" height="50"></canvas>
-				</div>
-				<!--********************-->
-				<!--    MULTI FILTER    -->
-				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
-					<!--left-->
-					<div class="flex flex-col justify-between mr-1">
-						<div class="flex p-1">
+				<div class="flex justify-center border border-gray-700 p-1">
+					<div class="w-full">&nbsp;</div>
+					<div class="border border-gray-500 rounded-xl self-center p-2">
+						<webaudio-keyboard
+							id="keyboard"
+							keys="49"
+							class="self-center"
+						></webaudio-keyboard>
+					</div>
+					<div class="w-full flex flex-col">
+						<div class="h-full self-end flex items-end">
+							<p id="rec_label" class="mr-1">Record</p>
 							<webaudio-switch
-								id="filter_switch"
-								class="control self-center pr-1"
-								colors="#A9DC76;#2C292D;#D9D9D9"
-								diameter="30"
-								value="1"
-							></webaudio-switch>
-							<p class="font-inika font-bold self-center">FILTER</p>
-						</div>
-						<div class="flex">
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Cutoff</p>
-								<webaudio-knob
-									id="filter_cutoff"
-									class="control self-center"
-									colors="#FF6188;#2C292D;#D9D9D9"
-									min="5"
-									max="10000"
-									value="5000"
-									step="5"
-								></webaudio-knob>
-								<webaudio-param
-									id="filter_cutoff_readout"
-									link="filter_cutoff"
-									fontSize="14"
-									width="60"
-									class="self-center border border-pink-800 mt-1"
-								></webaudio-param>
-							</div>
-							<div id="filter_resonance_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="filter_resonance_label" class="font-light self-center mb-0.5">Q</p>
-								<webaudio-knob
-									id="filter_resonance"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="1"
-									max="10"
-									value="0"
-									step="0.1"
-								></webaudio-knob>
-								<webaudio-param
-									id="filter_resonance_readout"
-									link="filter_resonance"
-									fontSize="14"
-									width="60"
-									class="self-center border border-green-700 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Rolloff</p>
-								<webaudio-slider
-									id="filter_rolloff"
-									class="control self-center"
-									colors="#FFD866;#2C292D;#D9D9D9"
-									min="0"
-									max="3"
-									step="1"
-									direction="vert"
-									conv="['-12','-24','-48','-96'][x]"
-								></webaudio-slider>
-								<webaudio-param
-									id="filter_rolloff_readout"
-									link="filter_rolloff"
-									class="self-center border border-yellow-600 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-light self-center mb-0.5">Type</p>
-								<webaudio-slider
-									id="filter_type"
-									class="control self-center"
-									colors="#78DCE8;#2C292D;#D9D9D9"
-									min="0"
-									max="6"
-									step="1"
-									value="0"
-									direction="vert"
-									conv="['LPF','HPF','BPF','APF','Notch','LSF','HSF'][x]"
-								></webaudio-slider>
-								<webaudio-param
-									id="filter_type_readout"
-									link="filter_type"
-									class="self-center border border-cyan-700 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-						</div>
-					</div>
-					<!--right-->
-					<div class="flex flex-col justify-center">
-						<div class="self-center border border-gray-600 flex rounded-lg p-1 h-[100px]">
-							<div class="border border-gray-500 rounded-xl p-0.5 w-min flex flex-col justify-center">
-								<p class="font-light text-sm self-center">A</p>
-								<webaudio-switch
-									id="osc_a_filter_switch"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									diameter="30"
-									value="1"
-								></webaudio-switch>
-							</div>
-							<div class="border border-gray-500 rounded-xl p-0.5 w-min flex flex-col justify-center">
-								<p class="font-light text-sm self-center">B</p>
-								<webaudio-switch
-									id="osc_b_filter_switch"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									diameter="30"
-									value="1"
-								></webaudio-switch>
-							</div>
-							<div class="border border-gray-500 rounded-xl p-0.5 w-min flex flex-col justify-center">
-								<p class="font-light text-sm self-center">C</p>
-								<webaudio-switch
-									id="osc_c_filter_switch"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									diameter="30"
-									value="1"
-								></webaudio-switch>
-							</div>
-						</div>
-						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="filter_canvas" width="212" height="122"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!--********************-->
-			<!--	 ROW THREE 	    -->
-			<!--********************-->
-			<div class="flex border border-gray-700 p-1">
-				<!--********************-->
-				<!--   LOW FREQ OSC 	-->
-				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
-					<!--left-->
-					<div class="flex flex-col justify-between mr-1">
-						<div class="flex p-1">
-							<webaudio-switch
-								id="lfo_switch"
-								class="control self-center pr-1"
-								colors="#A9DC76;#2C292D;#D9D9D9"
+								id="rec_switch"
+								class="control"
+								colors="#FF6188;#2C292D;#D9D9D9"
 								diameter="30"
 								value="0"
 							></webaudio-switch>
-							<label class="font-inika font-light self-center" for="lfo_selector">
-								LFO
-								&nbsp;
-								<select
-									id="lfo_selector"
-									class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
-									autocomplete="off"
-								>
-									<option value="FilterFrequency" selected="selected">Filter Frequency</option>
-									<option value="OscAVol">OSC A Volume</option>
-									<option value="OscBVol">OSC B Volume</option>
-									<option value="OscCVol">OSC C Volume</option>
-								</select>
-							</label>
-						</div>
-						<div class="flex">
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Grid</p>
-								<webaudio-knob
-									id="lfo_grid"
-									class="control self-center"
-									colors="#FF6188;#2C292D;#D9D9D9"
-									min="0"
-									max="9"
-									value="5"
-									step="1"
-									conv="['8/1','4/1','2/1','1/1','1/2','1/4','1/8','1/16','1/32','1/64'][x]"
-								></webaudio-knob>
-								<webaudio-param
-									id="lfo_grid_readout"
-									link="lfo_grid"
-									fontSize="14"
-									width="60"
-									class="self-center border border-pink-800 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Min</p>
-								<webaudio-knob
-									id="lfo_min"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="0"
-									max="10000"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="lfo_min_readout"
-									link="lfo_min"
-									fontSize="14"
-									width="60"
-									class="self-center border border-green-700 mt-1"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Max</p>
-								<webaudio-knob
-									id="lfo_max"
-									class="control self-center"
-									colors="#FFD866;#2C292D;#D9D9D9"
-									min="0"
-									max="10000"
-									value="1000"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="lfo_max_readout"
-									link="lfo_max"
-									class="self-center border border-yellow-600 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-							<div class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px]">
-								<p class="font-light self-center mb-0.5">Shape</p>
-								<webaudio-slider
-									id="lfo_shape"
-									class="control self-center"
-									colors="#78DCE8;#2C292D;#D9D9D9"
-									min="0"
-									max="3"
-									step="1"
-									value="0"
-									direction="vert"
-									conv="['sine','triangle','sawtooth','square'][x]"
-								></webaudio-slider>
-								<webaudio-param
-									id="lfo_shape_readout"
-									link="lfo_shape"
-									class="self-center border border-cyan-700 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-						</div>
-					</div>
-					<!--right-->
-					<div>
-						<div class="self-center flex rounded-lg p-1 h-[98px] mb-1"></div>
-						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="lfo_canvas" width="212" height="122"></canvas>
-						</div>
-					</div>
-				</div>
-				<!--************-->
-				<!--   MIDDLE 	-->
-				<!--************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
-				<!--********************-->
-				<!--     MULTI FX       -->
-				<!--********************-->
-				<div class="self-center border border-gray-600 rounded-lg p-1 flex">
-					<!--left-->
-					<div class="flex flex-col justify-between mr-1">
-						<div class="flex p-1">
-							<webaudio-switch
-								id="fx_switch"
-								class="control self-center pr-1"
-								colors="#A9DC76;#2C292D;#D9D9D9"
-								diameter="30"
-								value="1"
-							></webaudio-switch>
-							<label class="font-inika font-bold self-center" for="fx_selector">
-								FX
-								&nbsp;
-								<select
-									id="fx_selector"
-									class="control font-light bg-custom-black border border-gray-600 rounded-xl p-1 pl-3"
-									autocomplete="off"
-								>
-									<option value="Distortion" selected="selected">Distortion</option>
-									<option value="Chebyshev">Chebyshev Distortion</option>
-									<option value="Phaser">Phaser</option>
-									<option value="Tremolo">Tremolo</option>
-									<option value="Vibrato">Vibrato</option>
-									<option value="Delay">Delay</option>
-									<option value="Reverb">Reverb</option>
-									<option value="PitchShift">Pitch Shift</option>
-									<option value="FreqShift">Freq Shift</option>
-								</select>
-							</label>
-						</div>
-						<div class="flex w-[372px]">
-							<div id="fx_param1_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="fx_param1_label" class="font-light self-center mb-0.5">Intensity</p>
-								<webaudio-knob
-									id="fx_param1"
-									class="control self-center"
-									colors="#FF6188;#2C292D;#D9D9D9"
-									min="0"
-									max="20"
-									value="0"
-									step="0.1"
-								></webaudio-knob>
-								<webaudio-param
-									id="fx_param1_readout"
-									link="fx_param1"
-									fontSize="14"
-									width="60"
-									class="self-center border border-pink-800 mt-1"
-								></webaudio-param>
-							</div>
-							<div id="fx_param2_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="fx_param2_label" class="font-light self-center mb-0.5">Oversample</p>
-								<webaudio-knob
-									id="fx_param2"
-									class="control self-center"
-									colors="#A9DC76;#2C292D;#D9D9D9"
-									min="0"
-									max="2"
-									value="0"
-									step="1"
-								></webaudio-knob>
-								<webaudio-param
-									id="fx_param2_readout"
-									link="fx_param2"
-									fontSize="14"
-									width="60"
-									class="self-center border border-green-700 mt-1"
-								></webaudio-param>
-							</div>
-							<div id="fx_param3_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] mr-1">
-								<p id="fx_param3_label" class="font-light self-center mb-0.5">Mix</p>
-								<webaudio-knob
-									id="fx_param3"
-									class="control self-center"
-									colors="#FFD866;#2C292D;#D9D9D9"
-									min="0"
-									max="1"
-									step=".01"
-									value="0.5"
-								></webaudio-knob>
-								<webaudio-param
-									id="fx_param3_readout"
-									link="fx_param3"
-									class="self-center border border-yellow-600 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-							<div id="fx_param4_group" class="border border-gray-600 rounded-xl p-1 w-min flex flex-col w-[90px] hidden">
-								<p id="fx_param4_label" class="font-light self-center mb-0.5">Mix</p>
-								<webaudio-knob
-									id="fx_param4"
-									class="control self-center"
-									colors="#78DCE8;#2C292D;#D9D9D9"
-									min="0"
-									max="1"
-									step=".01"
-									value="0.5"
-								></webaudio-knob>
-								<webaudio-param
-									id="fx_param4_readout"
-									link="fx_param4"
-									class="self-center border border-cyan-700 mt-1"
-									fontSize="14"
-									width="60"
-								></webaudio-param>
-							</div>
-						</div>
-					</div>
-					<!--right-->
-					<div class="flex flex-col justify-center">
-						<div class="self-center flex rounded-lg p-1 h-[98px] mb-1"></div>
-						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="fx_canvas" width="212" height="122"></canvas>
 						</div>
 					</div>
 				</div>
 			</div>
-			<!--********************-->
-			<!-- 	  KEYBOARD 	    -->
-			<!--********************-->
-			<div class="flex justify-center border border-gray-700 p-1">
-				<div class="w-full">&nbsp;</div>
-				<div class="border border-gray-500 rounded-xl self-center p-2">
-					<webaudio-keyboard
-						id="keyboard"
-						keys="49"
-						class="self-center"
-					></webaudio-keyboard>
+			<div id="presets_container" class="hidden">
+				<div class="mt-2 flex justify-end">
+					<a
+						id="preset_disk_load_button"
+						class="cursor-pointer flex p-2 bg-gray-700 rounded-lg"
+					>Load from disk</a>
+					<input id="preset_file_input" class="hidden" type='file' />
 				</div>
-				<div class="w-full flex flex-col">
-					<div class="h-full self-end flex items-end">
-						<p id="rec_label" class="mr-1">Record</p>
-						<webaudio-switch
-							id="rec_switch"
-							class="control"
-							colors="#FF6188;#2C292D;#D9D9D9"
-							diameter="30"
-							value="0"
-						></webaudio-switch>
-					</div>
-				</div>
+				<!--Presets table: name/type/author/rating/load-->
+				<table id="presets_table" class="table-auto w-full">
+					<thead>
+						<tr class="text-left">
+							<th>Name</th>
+							<th>Type</th>
+							<th>Author</th>
+							<th>Rating</th>
+							<th class="text-right"></th>
+						</tr>
+					</thead>
+					<tbody id="preset_save_body">
+						<tr id="preset_save_row">
+							<td><label for="preset_name_input"></label><input id="preset_name_input" class="bg-gray-700 text-gray-300 rounded-lg p-1" type="text" placeholder="Preset name" value="Init"></td>
+							<td><label for="preset_type_input"></label><input id="preset_type_input" class="bg-gray-700 text-gray-300 rounded-lg p-1" type="text" placeholder="Preset type" value="Default"></td>
+							<td><label for="preset_author_input"></label><input id="preset_author_input" class="bg-gray-700 text-gray-300 rounded-lg p-1" type="text" placeholder="Preset author" value="MangoSynth"></td>
+							<td><label for="preset_rating_input"></label><input id="preset_rating_input" class="bg-gray-700 text-gray-300 rounded-lg p-1" type="text" placeholder="Preset rating" value="0"></td>
+							<td class="text-right">
+								<button id="preset_save_button" class="bg-gray-700 text-gray-300 rounded-lg p-1">Save</button>
+							</td>
+							<td class="text-right">
+								<button id="preset_download_button" class="bg-gray-700 text-gray-300 rounded-lg p-1">Download</button>
+							</td>
+						</tr>
+					</tbody>
+					<tbody id="presets_table_body">
+						<tr>
+							<td>Placeholder name!</td>
+							<td>Placeholder type!</td>
+							<td>Placeholder author!</td>
+							<td>Placeholder rating!</td>
+							<td class="text-right"><button class="bg-gray-700 text-gray-300 rounded-lg p-1">Load Preset</button></td>
+						</tr>
+						<tr class="bg-black">
+							<td>Placeholder name!</td>
+							<td>Placeholder type!</td>
+							<td>Placeholder author!</td>
+							<td>Placeholder rating!</td>
+							<td class="text-right"><button class="bg-gray-700 text-gray-300 rounded-lg p-1">Load Preset</button></td>
+						</tr>
+						<tr>
+							<td>Placeholder name!</td>
+							<td>Placeholder type!</td>
+							<td>Placeholder author!</td>
+							<td>Placeholder rating!</td>
+							<td class="text-right"><button class="bg-gray-700 text-gray-300 rounded-lg p-1">Load Preset</button></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</main>

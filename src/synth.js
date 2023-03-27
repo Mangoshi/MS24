@@ -1,4 +1,8 @@
 import * as Tone from 'tone'
+import { MediaRecorder, register } from "extendable-media-recorder";
+import { connect } from 'extendable-media-recorder-wav-encoder'
+
+await register(await connect());
 
 // -- TONE.JS SETUP -- //
 
@@ -338,7 +342,25 @@ const MASTER_LIMITER = new Tone.Limiter(-10)
 
 // -- RECORD -- //
 
-const RECORDER = new Tone.Recorder()
+// import * as flacFactory from 'libflacjs';
+// const Flac = flacFactory();
+// import { Encoder } from 'libflacjs/lib/encoder';
+// let flacData
+// const encodingMode = 'interleaved'
+// const encoder = new Encoder(Flac, {
+// 	sampleRate: 44100,
+// 	channels: 2,
+// 	bitsPerSample: 16,
+// 	compression: 7,
+// 	verify: true,
+// 	isOgg: false,
+// });
+
+// const RECORDER = new Tone.Recorder()
+const AUDIO_EL = document.querySelector('audio')
+const REC_DEST = Tone.context.createMediaStreamDestination()
+const REC = new MediaRecorder(REC_DEST.stream, { mimeType: 'audio/wav' });
+let CHUNKS = [];
 // TODO: lossless exporting ???
 // https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
 // https://github.com/mmig/libflac.js
@@ -724,11 +746,10 @@ function connectTone() {
 	// Modulation //
 	if(PRESET.LFO.enabled){
 		LFO.connect(LFO_TARGET).start()
-	} else {
 	}
 
 	// Master Record
-	OUTPUT.connect(RECORDER)
+	OUTPUT.connect(REC_DEST)
 }
 connectTone()
 
@@ -1476,27 +1497,55 @@ for (let i = 0; i < controls.length; i++) {
 				// if rec toggled on...
 				if (e.target.value === 1) {
 					// start recording
-					await RECORDER.start()
+					// await RECORDER.start()
+					CHUNKS = []
+					REC.start()
+					console.log("Starting recorder...")
 					// set label to "recording..."
 					recorderLabel.innerHTML = "Recording..."
 				// if rec toggled off...
 				} else {
 					// stop recording & assign to variable
-					const recording = RECORDER.stop()
-					// create download link
-					const url = URL.createObjectURL(await recording)
-					// create anchor element
-					const anchor = document.createElement("a")
-					// set file name & format
-					anchor.download = "recording.ogg"
-					// set anchor href to url
-					anchor.href = url
-					// click anchor (download)
-					anchor.click()
-					// return label to default
-					recorderLabel.innerHTML = "Record"
+					// const recording = RECORDER.stop()
+					console.log("Stopping recorder...")
+					REC.stop()
 				}
 				break;
+		}
+		let recordingURL
+		REC.ondataavailable = e => {
+			console.log("DATA AVAILABLE!", e.data)
+			CHUNKS.push(e.data)
+			// flacData = new Int32Array(e.data)
+			// encoder.encode(flacData);
+			// encoder.encode()
+		}
+		REC.onstop = e => {
+			// const encData = encoder.getSamples()
+			// const metadata = encoder.metadata
+			// encoder.destroy()
+			//
+			// const exportFlacFile = require('libflacjs/lib/utils').exportFlacFile;
+			// const flacBlob = exportFlacFile(encData, metadata, /* if encode in OGG container: */ false);
+			// console.log("flacBlob:", flacBlob)
+			console.log("e:", e)
+			// create blob from chunks
+			let blob = new Blob(CHUNKS, { 'type' : 'audio/wav' })
+			// create download link
+			AUDIO_EL.src = URL.createObjectURL(blob)
+			recordingURL = URL.createObjectURL(blob)
+			console.log("blob:", blob)
+			console.log("url:", recordingURL)
+			// create anchor element
+			const anchor = document.createElement("a")
+			// set file name & format
+			anchor.download = "recording.wav"
+			// set anchor href to url
+			anchor.href = recordingURL
+			// click anchor (download)
+			anchor.click()
+			// return label to default
+			recorderLabel.innerHTML = "Record"
 		}
 		connectTone()
 	})

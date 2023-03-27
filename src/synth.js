@@ -1,8 +1,16 @@
 import * as Tone from 'tone'
 import { MediaRecorder, register } from "extendable-media-recorder";
 import { connect } from 'extendable-media-recorder-wav-encoder'
+import BrowserDetector from 'browser-dtector';
 
-await register(await connect());
+const browserInfo = new BrowserDetector(window.navigator.userAgent);
+const browserName = browserInfo.getBrowserInfo().name;
+
+console.log("Browser:", browserName)
+
+await register(await connect())
+	.then(() => {console.log("MediaRecorder WAV encoder registered")})
+	.catch((err) => {console.error(err)})
 
 // -- TONE.JS SETUP -- //
 
@@ -343,9 +351,15 @@ const MASTER_LIMITER = new Tone.Limiter(-10)
 // -- RECORD -- //
 
 const REC_DEST = Tone.context.createMediaStreamDestination()
-const REC = new MediaRecorder(REC_DEST.stream, { mimeType: 'audio/wav' });
+let REC
+if(browserName !== "Mozilla Firefox") {
+	REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/wav'});
+} else {
+	REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/webm;codecs=opus'});
+}
 let CHUNKS = [];
 let recorderLabel = document.getElementById("rec_label")
+console.log("WAV supported?", MediaRecorder.isTypeSupported('audio/wav'))
 
 // -- GENERATORS -- //
 
@@ -1440,6 +1454,27 @@ document.addEventListener("keypress", function (e) {
 	}
 })
 
+async function startRecording() {
+	if(browserName !== "Mozilla Firefox") {
+		REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/wav'});
+	} else {
+		REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/webm;codecs=opus'});
+	}
+	// clear chunks
+	CHUNKS = []
+	// start recording
+	await REC.start()
+	// set label to "recording..."
+	recorderLabel.innerHTML = "Recording..."
+}
+
+async function stopRecording() {
+	// stop recording
+	await REC.stop()
+	// return label to default
+	recorderLabel.innerHTML = "Record"
+}
+
 // Control events //
 for (let i = 0; i < controls.length; i++) {
 	// -- TOGGLE CONTROLS -- //
@@ -1477,20 +1512,20 @@ for (let i = 0; i < controls.length; i++) {
 			case "rec_switch":
 				// if rec toggled on...
 				if (e.target.value === 1) {
-					// clear chunks
-					CHUNKS = []
-					// start recording
-					REC.start()
-					// log to console
-					console.log("Starting recorder...")
-					// set label to "recording..."
-					recorderLabel.innerHTML = "Recording..."
+					await startRecording().then(() => {
+						// log to console
+						console.log("Recording started!")
+					}).catch(err => {
+						console.error(err)
+					})
 				// if rec toggled off...
 				} else {
-					// log to console
-					console.log("Stopping recorder...")
-					// stop recording
-					REC.stop()
+					await stopRecording().then(() => {
+						// log to console
+						console.log("Recording stopped!")
+					}).catch(err => {
+						console.error(err)
+					})
 				}
 				break;
 		}
@@ -1519,8 +1554,6 @@ for (let i = 0; i < controls.length; i++) {
 			anchor.href = recordingURL
 			// click anchor (download)
 			anchor.click()
-			// return label to default
-			recorderLabel.innerHTML = "Record"
 		}
 		// once toggle logic is complete,
 		// re-connect the synth based on the updated settings

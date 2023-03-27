@@ -342,29 +342,10 @@ const MASTER_LIMITER = new Tone.Limiter(-10)
 
 // -- RECORD -- //
 
-// import * as flacFactory from 'libflacjs';
-// const Flac = flacFactory();
-// import { Encoder } from 'libflacjs/lib/encoder';
-// let flacData
-// const encodingMode = 'interleaved'
-// const encoder = new Encoder(Flac, {
-// 	sampleRate: 44100,
-// 	channels: 2,
-// 	bitsPerSample: 16,
-// 	compression: 7,
-// 	verify: true,
-// 	isOgg: false,
-// });
-
-// const RECORDER = new Tone.Recorder()
-const AUDIO_EL = document.querySelector('audio')
 const REC_DEST = Tone.context.createMediaStreamDestination()
 const REC = new MediaRecorder(REC_DEST.stream, { mimeType: 'audio/wav' });
 let CHUNKS = [];
-// TODO: lossless exporting ???
-// https://stackoverflow.com/questions/47331364/record-as-ogg-using-mediarecorder-in-chrome/57837816#57837816
-// https://github.com/mmig/libflac.js
-// https://youtu.be/VHCv3waFkRo
+let recorderLabel = document.getElementById("rec_label")
 
 // -- GENERATORS -- //
 
@@ -407,9 +388,9 @@ SYNTH_C.set({
 	}
 })
 
-SYNTH_A.debug = true
-SYNTH_B.debug = true
-SYNTH_C.debug = true
+// SYNTH_A.debug = true
+// SYNTH_B.debug = true
+// SYNTH_C.debug = true
 
 // -- FILTER -- //
 
@@ -978,22 +959,7 @@ function fxGroupUpdate(switchTarget){
 	}
 }
 
-let recorderLabel = document.getElementById("rec_label")
-
-// -- EVENT LISTENERS -- //
-
-// Key-press events //
-document.addEventListener("keypress", function (e) {
-	// console.log(e)
-	// disable quick-find in browser
-	if (e.key === "/") {
-		e.preventDefault()
-	}
-	// disable quick-find (links only) in browser
-	if (e.key === "'") {
-		e.preventDefault()
-	}
-})
+// -- TOP ROW STUFF -- //
 
 // Top-row elements //
 let synthBody = document.getElementById("synth_body")
@@ -1459,11 +1425,26 @@ presetDiskLoadButton.addEventListener("click", function() {
 	}
 })
 
+// -- MAIN EVENT LISTENERS -- //
+
+// Key-press events //
+document.addEventListener("keypress", function (e) {
+	// console.log(e)
+	// disable quick-find in browser
+	if (e.key === "/") {
+		e.preventDefault()
+	}
+	// disable quick-find (links only) in browser
+	if (e.key === "'") {
+		e.preventDefault()
+	}
+})
+
 // Control events //
 for (let i = 0; i < controls.length; i++) {
-	// add event listener to each control
-
+	// -- TOGGLE CONTROLS -- //
 	controls[i].addEventListener("change", async function (e) {
+		// log the control and its value
 		console.log(e.target.id, e.target.value)
 		switch (e.target.id) {
 			case "osc_a_switch":
@@ -1496,49 +1477,43 @@ for (let i = 0; i < controls.length; i++) {
 			case "rec_switch":
 				// if rec toggled on...
 				if (e.target.value === 1) {
-					// start recording
-					// await RECORDER.start()
+					// clear chunks
 					CHUNKS = []
+					// start recording
 					REC.start()
+					// log to console
 					console.log("Starting recorder...")
 					// set label to "recording..."
 					recorderLabel.innerHTML = "Recording..."
 				// if rec toggled off...
 				} else {
-					// stop recording & assign to variable
-					// const recording = RECORDER.stop()
+					// log to console
 					console.log("Stopping recorder...")
+					// stop recording
 					REC.stop()
 				}
 				break;
 		}
+		// initialise URL variable
 		let recordingURL
+		// once data is available to the recorder...
 		REC.ondataavailable = e => {
+			// log to console
 			console.log("DATA AVAILABLE!", e.data)
+			// push data to chunks array
 			CHUNKS.push(e.data)
-			// flacData = new Int32Array(e.data)
-			// encoder.encode(flacData);
-			// encoder.encode()
 		}
+		// once the recorder is stopped...
 		REC.onstop = e => {
-			// const encData = encoder.getSamples()
-			// const metadata = encoder.metadata
-			// encoder.destroy()
-			//
-			// const exportFlacFile = require('libflacjs/lib/utils').exportFlacFile;
-			// const flacBlob = exportFlacFile(encData, metadata, /* if encode in OGG container: */ false);
-			// console.log("flacBlob:", flacBlob)
+			// log to console
 			console.log("e:", e)
-			// create blob from chunks
+			// create a blob from the chunks array
 			let blob = new Blob(CHUNKS, { 'type' : 'audio/wav' })
-			// create download link
-			AUDIO_EL.src = URL.createObjectURL(blob)
+			// create object URL from blob
 			recordingURL = URL.createObjectURL(blob)
-			console.log("blob:", blob)
-			console.log("url:", recordingURL)
 			// create anchor element
 			const anchor = document.createElement("a")
-			// set file name & format
+			// set file name & format (wav)
 			anchor.download = "recording.wav"
 			// set anchor href to url
 			anchor.href = recordingURL
@@ -1547,9 +1522,13 @@ for (let i = 0; i < controls.length; i++) {
 			// return label to default
 			recorderLabel.innerHTML = "Record"
 		}
+		// once toggle logic is complete,
+		// re-connect the synth based on the updated settings
 		connectTone()
 	})
+	// -- CONTINUOUS CONTROL EVENTS (Knobs & Sliders) -- //
 	// using "input" instead of "change" to allow for continuous changes
+	// with "change", the value only updates when the control is released
 	controls[i].addEventListener("input", function (e) {
 		console.log(e.target.id, e.target.value);
 		switch (e.target.id) {

@@ -24,8 +24,6 @@
   "dependencies": {
     "extendable-media-recorder": "^7.1.9",
     "extendable-media-recorder-wav-encoder": "^7.0.85",
-    "libflacjs": "^5.4.0",
-    "libs": "^0.1.2",
     "tone": "^14.7.77"
   }
 }

@@ -164,11 +164,6 @@ dashify@^2.0.0:
   resolved "https://registry.npmjs.org/dashify/-/dashify-2.0.0.tgz"
   integrity sha512-hpA5C/YrPjucXypHPPc0oJ1l9Hf6wWbiOL7Ik42cxnsUOhWiCB/fylKbKqqJalW9FgkNQCw16YO8uW9Hs0Iy1A==
 
-dateformat@1.0.2-1.2.3:
-  version "1.0.2-1.2.3"
-  resolved "https://registry.npmjs.org/dateformat/-/dateformat-1.0.2-1.2.3.tgz"
-  integrity sha512-AXvW8g7tO4ilk5HgOWeDmPi/ZPaCnMJ+9Cg1I3p19w6mcvAAXBuuGEXAxybC+Djj1PSZUiHUcyoYu7WneCX8gQ==
-
 defined@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmjs.org/defined/-/defined-1.0.1.tgz"
@@ -384,18 +379,6 @@ is-number@^7.0.0:
   version "7.0.0"
   resolved "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz"
   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
-
-libflacjs@^5.4.0:
-  version "5.4.0"
-  resolved "https://registry.npmjs.org/libflacjs/-/libflacjs-5.4.0.tgz"
-  integrity sha512-O/MRbhnRiEXAT4K5q3YWUnyEhg7EJ7+2LNyRmOdxApWLdowi9QVGQqKGYHQg6Wx5l4qp6V7f62Utb1z/ESWqPw==
-
-libs@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/libs/-/libs-0.1.2.tgz"
-  integrity sha512-Ta4F048KEHj1duFoiK7BCmysrOgGhWe3Z2VdioaUT3zn4eGmk5qnwmxxDY6B+tvRUXHs5wxUwk0dceVp6i6oTg==
-  dependencies:
-    dateformat "1.0.2-1.2.3"
 
 lilconfig@^2.0.5, lilconfig@^2.0.6:
   version "2.0.6"

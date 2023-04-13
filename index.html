@@ -25,9 +25,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js" integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<title>MS24</title>
 </head>
-<body class="min-h-screen antialiased bg-black font-inconsolata font-light text-white">
-<div id="body_container">
-	<main class="flex justify-center">
+<body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light text-white">
+	<main id="body_container" class="flex justify-center">
 		<div id="consent_container" class="bg-custom-black">
 			<div class="flex flex-col select-none mx-10">
 				<hr class="w-full mt-5 mb-4"/>
@@ -57,7 +56,7 @@
 				<p class="text-2xl self-center">Attention!</p>
 				<hr class="w-full mt-1 mb-5"/>
 				<div>
-					<div class="border border-gray-400 bg-black w-[800px] p-2 mb-2">
+					<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2">
 						<i>Recommended browsers: Chrome, Brave, Opera, Vivaldi, Edge</i>
 						<br/>
 						<i>Other browsers don't use the V8 engine, which can lead to lower performance.</i>
@@ -77,7 +76,7 @@
 					</ul>
 				</div>
 				<div>
-					<div class="border border-gray-400 bg-black w-[800px] p-2 mb-2">
+					<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2">
 						<i>Note: Changing octave/detune while holding a key will cause it to stick down! This is a bug.</i>
 						<br/>
 						<i>To fix, either switch back to the octave/detune value you were on and press the same key...</i>
@@ -109,7 +108,7 @@
 					</ul>
 				</div>
 				<div>
-					<div class="border border-gray-400 bg-black w-[800px] p-2 mb-2">
+					<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2">
 						<i>Note: LFO select is currently broken, but FX select works!</i>
 					</div>
 				</div>
@@ -1557,6 +1556,5 @@
 			</div>
 		</div>
 	</main>
-</div>
 </body>
 </html>

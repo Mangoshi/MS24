@@ -1027,7 +1027,7 @@ settingsThemeButton.addEventListener("click", function () {
 	console.log("Changing theme!")
 	if(currentTheme==="light"){
 		currentTheme = "dark"
-		updatePageColours("#000", "#242424", "#fff")
+		updatePageColours("#111", "#242424", "#fff", "dark")
 		// #FFFFFF;#2C292D;#D9D9D9
 		updateControlColours("masterControl", "#FFFFFF", "#2C292D", "#D9D9D9")
 		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
@@ -1039,7 +1039,7 @@ settingsThemeButton.addEventListener("click", function () {
 		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
 	} else {
 		currentTheme = "light"
-		updatePageColours("#555", "#999", "#000")
+		updatePageColours("#555", "#999", "#000", "light")
 		updateControlColours("masterControl", "#FFFFFF", "#000", "#FFFFFF")
 		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
 		updateControlColours("subControl", "#000", "#FFFFFF", "#FFFFFF")
@@ -1474,17 +1474,29 @@ function updateControlColours(targetClass, indicator, background, highlight){
 		$(this)[0].colors = `${indicator};${background};${highlight}`
 	})
 }
+let infoBlocks = document.getElementsByClassName("info_block")
 let lfoSelector = document.getElementById("lfo_selector")
 let fxSelector = document.getElementById("fx_selector")
 // update page colours
-function updatePageColours(pageBackground, synthBackground, text){
+function updatePageColours(pageBackground, synthBackground, text, theme){
 	document.body.style.backgroundColor = pageBackground
 	synthContainer.style.backgroundColor = synthBackground
 	document.body.style.color = text
 	synthBackgroundColour = synthBackground
 	synthTextColour = text
+	consentContainer.style.backgroundColor = synthBackground
+	for(let i = 0; i < infoBlocks.length; i++){
+		if(theme==="dark") {
+			infoBlocks[i].style.backgroundColor = '#000'
+		} else {
+			infoBlocks[i].style.backgroundColor = '#dadada'
+		}
+	}
 	lfoSelector.style.backgroundColor = synthBackground
 	fxSelector.style.backgroundColor = synthBackground
+	pageBackgroundColour = pageBackground
+	synthBackgroundColour = synthBackground
+	synthTextColour = text
 }
 
 // -- MAIN EVENT LISTENERS -- //
@@ -2385,9 +2397,8 @@ let bodyContainer = document.getElementById("body_container");
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
 	synthContainer.style.display = "flex";
-	bodyContainer.classList.add("pt-16");
-	bodyContainer.classList.add("pb-10");
-	bodyContainer.classList.add("sm:pt-10");
+	bodyContainer.style.paddingTop = "2rem";
+	document.body.style.backgroundColor = pageBackgroundColour;
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();
 	}
@@ -2403,9 +2414,8 @@ let homeButton = document.getElementById("home_button");
 homeButton.addEventListener("click", function () {
 	consentContainer.style.display = "flex";
 	synthContainer.style.display = "none";
-	bodyContainer.classList.remove("pt-16");
-	bodyContainer.classList.remove("pb-10");
-	bodyContainer.classList.remove("sm:pt-10");
+	bodyContainer.style.paddingTop = "0rem";
+	document.body.style.backgroundColor = synthBackgroundColour;
 	p5_canvas.classList.add("hidden");
 	if(settingsDropdownOpen){
 		toggleDropdown(settingsDropdown)

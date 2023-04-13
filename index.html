@@ -5,7 +5,7 @@
 	<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
 	<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 	<!--Favicon-->
-	<link rel="icon" type="image/x-icon" href="/src/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/img/favicon.ico">
 	<!--Styles-->
 	<link href="/src/style.css" rel="stylesheet"/>
 	<!--Scripts-->
@@ -25,18 +25,18 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js" integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<title>MS24</title>
 </head>
-<body class="min-h-screen antialiased bg-custom-black font-inconsolata font-light text-white">
-<div class="pt-16 pb-10 sm:pt-10">
+<body class="min-h-screen antialiased bg-black font-inconsolata font-light text-white">
+<div id="body_container">
 	<main class="flex justify-center">
-		<div id="consent_container">
-			<div class="flex flex-col select-none">
+		<div id="consent_container" class="bg-custom-black">
+			<div class="flex flex-col select-none mx-10">
 				<hr class="w-full mt-5 mb-4"/>
 				<a
 					href="https://github.com/IADT-projects/y4-project-Mangoshi"
 					target="_blank"
 					class="self-center hover:scale-110 transition-all duration-500 ease-in-out"
 				>
-					<img src="src/logo.png" alt="logo" class="pointer-events-none w-full h-full"/>
+					<img src="img/logo.png" alt="logo" class="pointer-events-none w-full h-full"/>
 				</a>
 				<hr class="w-full mt-3 mb-5"/>
 				<p class="text-lg text-center">
@@ -115,8 +115,8 @@
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-col hidden w-min select-none" id="synth_container">
-			<div id="p5_canvas" class="absolute -z-10"></div>
+		<div class="flex-col hidden w-min select-none bg-custom-black z-20 border border-orange-300 rounded-xl p-2" id="synth_container">
+			<div id="p5_canvas" class="self-center absolute -z-10"></div>
 			<!--********************-->
 			<!-- 	  TOP ROW 	    -->
 			<!--********************-->
@@ -139,9 +139,13 @@
 							hidden absolute mt-8 w-[83px] z-10
 							bg-gray-600 border border-gray-400">
 							<a
+								id="home_button"
+								class="cursor-pointer flex p-2 hover:bg-gray-700"
+							>Welcome</a>
+							<a
 								id="settings_theme_button"
 								class="cursor-pointer flex p-2 hover:bg-gray-700"
-							>Theme</a>
+							>Toggle Theme</a>
 						</div>
 					</div>
 				</div>
@@ -160,7 +164,7 @@
 					<div class="flex flex-col justify-center">
 						<a href="https://github.com/IADT-projects/y4-project-Mangoshi" target="_blank">
 							<img
-								src="src/logo.png"
+								src="img/logo.png"
 								alt="logo"
 								class="hover:scale-125 transition-all duration-500 ease-in-out"
 								height="75"
@@ -186,7 +190,7 @@
 								<p id="master_gain_label" class="text-center">Master</p>
 								<webaudio-knob
 									id="master_gain"
-									class="control self-center"
+									class="control masterControl self-center"
 									colors="#FFFFFF;#2C292D;#D9D9D9"
 									diameter="40"
 									min="0"
@@ -221,7 +225,7 @@
 									<div class="flex p-1">
 										<webaudio-switch
 											id="osc_a_switch"
-											class="control self-center pr-1"
+											class="control toggleControl self-center pr-1"
 											colors="#A9DC76;#2C292D;#D9D9D9"
 											diameter="30"
 											value="1"
@@ -234,7 +238,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Voices</p>
 										<webaudio-knob
 											id="osc_a_voices"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="1"
@@ -254,7 +258,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Spread</p>
 										<webaudio-knob
 											id="osc_a_spread"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="1"
@@ -274,7 +278,7 @@
 										<p class="font-light text-sm self-center mb-0.5">FM</p>
 										<webaudio-knob
 											id="osc_a_fm"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -294,7 +298,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Depth</p>
 										<webaudio-knob
 											id="osc_a_fm_depth"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -314,7 +318,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Shape</p>
 										<webaudio-knob
 											id="osc_a_fm_shape"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -338,7 +342,7 @@
 									<p class="font-light self-center mb-0.5">Octave</p>
 									<webaudio-knob
 										id="osc_a_octave"
-										class="control self-center"
+										class="control mainControl1 self-center"
 										colors="#FF6188;#2C292D;#D9D9D9"
 										min="-3"
 										max="3"
@@ -357,7 +361,7 @@
 									<p class="font-light self-center mb-0.5">Detune</p>
 									<webaudio-knob
 										id="osc_a_semi"
-										class="control self-center"
+										class="control mainControl2 self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										min="-12"
 										max="12"
@@ -376,7 +380,7 @@
 									<p class="font-light self-center mb-0.5">Volume</p>
 									<webaudio-knob
 										id="osc_a_volume"
-										class="control self-center"
+										class="control mainControl3 self-center"
 										colors="#FFD866;#2C292D;#D9D9D9"
 										min="-20"
 										max="0"
@@ -395,7 +399,7 @@
 									<p class="font-light self-center mb-0.5">Shape</p>
 									<webaudio-slider
 										id="osc_a_shape"
-										class="control self-center"
+										class="control mainControl4 self-center"
 										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
@@ -419,7 +423,7 @@
 									<p class="font-light text-sm self-center mb-0.5">ATK</p>
 									<webaudio-knob
 										id="osc_a_attack"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -439,7 +443,7 @@
 									<p class="font-light text-sm self-center mb-0.5">DEC</p>
 									<webaudio-knob
 										id="osc_a_decay"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -459,7 +463,7 @@
 									<p class="font-light text-sm self-center mb-0.5">SUS</p>
 									<webaudio-knob
 										id="osc_a_sustain"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -479,7 +483,7 @@
 									<p class="font-light text-sm self-center mb-0.5">REL</p>
 									<webaudio-knob
 										id="osc_a_release"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -516,7 +520,7 @@
 									<div class="flex p-1">
 										<webaudio-switch
 											id="osc_b_switch"
-											class="control self-center pr-1"
+											class="control toggleControl self-center pr-1"
 											colors="#A9DC76;#2C292D;#D9D9D9"
 											diameter="30"
 											value="0"
@@ -529,7 +533,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Voices</p>
 										<webaudio-knob
 											id="osc_b_voices"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="1"
@@ -549,7 +553,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Spread</p>
 										<webaudio-knob
 											id="osc_b_spread"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="1"
@@ -569,7 +573,7 @@
 										<p class="font-light text-sm self-center mb-0.5">FM</p>
 										<webaudio-knob
 											id="osc_b_fm"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -589,7 +593,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Depth</p>
 										<webaudio-knob
 											id="osc_b_fm_depth"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -609,7 +613,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Shape</p>
 										<webaudio-knob
 											id="osc_b_fm_shape"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -633,7 +637,7 @@
 									<p class="font-light self-center mb-0.5">Octave</p>
 									<webaudio-knob
 										id="osc_b_octave"
-										class="control self-center"
+										class="control mainControl1 self-center"
 										colors="#FF6188;#2C292D;#D9D9D9"
 										min="-3"
 										max="3"
@@ -652,7 +656,7 @@
 									<p class="font-light self-center mb-0.5">Detune</p>
 									<webaudio-knob
 										id="osc_b_semi"
-										class="control self-center"
+										class="control mainControl2 self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										min="-12"
 										max="12"
@@ -671,7 +675,7 @@
 									<p class="font-light self-center mb-0.5">Volume</p>
 									<webaudio-knob
 										id="osc_b_volume"
-										class="control self-center"
+										class="control mainControl3 self-center"
 										colors="#FFD866;#2C292D;#D9D9D9"
 										min="-20"
 										max="0"
@@ -690,7 +694,7 @@
 									<p class="font-light self-center mb-0.5">Shape</p>
 									<webaudio-slider
 										id="osc_b_shape"
-										class="control self-center"
+										class="control mainControl4 self-center"
 										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
@@ -715,7 +719,7 @@
 									<p class="font-light text-sm self-center mb-0.5">ATK</p>
 									<webaudio-knob
 										id="osc_b_attack"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -735,7 +739,7 @@
 									<p class="font-light text-sm self-center mb-0.5">DEC</p>
 									<webaudio-knob
 										id="osc_b_decay"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -755,7 +759,7 @@
 									<p class="font-light text-sm self-center mb-0.5">SUS</p>
 									<webaudio-knob
 										id="osc_b_sustain"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -775,7 +779,7 @@
 									<p class="font-light text-sm self-center mb-0.5">REL</p>
 									<webaudio-knob
 										id="osc_b_release"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -813,7 +817,7 @@
 									<div class="flex p-1">
 										<webaudio-switch
 											id="osc_c_switch"
-											class="control self-center pr-1"
+											class="control toggleControl self-center pr-1"
 											colors="#A9DC76;#2C292D;#D9D9D9"
 											diameter="30"
 											value="0"
@@ -826,7 +830,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Voices</p>
 										<webaudio-knob
 											id="osc_c_voices"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="1"
@@ -846,7 +850,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Spread</p>
 										<webaudio-knob
 											id="osc_c_spread"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="1"
@@ -866,7 +870,7 @@
 										<p class="font-light text-sm self-center mb-0.5">AM</p>
 										<webaudio-knob
 											id="osc_c_am"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -886,7 +890,7 @@
 										<p class="font-light text-sm self-center mb-0.5">Shape</p>
 										<webaudio-knob
 											id="osc_c_am_shape"
-											class="control self-center"
+											class="control subControl self-center"
 											colors="#FFFFFF;#2C292D;#D9D9D9"
 											diameter="30"
 											min="0"
@@ -910,7 +914,7 @@
 									<p class="font-light self-center mb-0.5">Octave</p>
 									<webaudio-knob
 										id="osc_c_octave"
-										class="control self-center"
+										class="control mainControl1 self-center"
 										colors="#FF6188;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
@@ -929,7 +933,7 @@
 									<p class="font-light self-center mb-0.5">Detune</p>
 									<webaudio-knob
 										id="osc_c_semi"
-										class="control self-center"
+										class="control mainControl2 self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										min="-12"
 										max="12"
@@ -948,7 +952,7 @@
 									<p class="font-light self-center mb-0.5">Volume</p>
 									<webaudio-knob
 										id="osc_c_volume"
-										class="control self-center"
+										class="control mainControl3 self-center"
 										colors="#FFD866;#2C292D;#D9D9D9"
 										min="-20"
 										max="0"
@@ -967,7 +971,7 @@
 									<p class="font-light self-center mb-0.5">Shape</p>
 									<webaudio-slider
 										id="osc_c_shape"
-										class="control self-center"
+										class="control mainControl4 self-center"
 										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
@@ -992,7 +996,7 @@
 									<p class="font-light text-sm self-center mb-0.5">ATK</p>
 									<webaudio-knob
 										id="osc_c_attack"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -1012,7 +1016,7 @@
 									<p class="font-light text-sm self-center mb-0.5">DEC</p>
 									<webaudio-knob
 										id="osc_c_decay"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -1032,7 +1036,7 @@
 									<p class="font-light text-sm self-center mb-0.5">SUS</p>
 									<webaudio-knob
 										id="osc_c_sustain"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -1052,7 +1056,7 @@
 									<p class="font-light text-sm self-center mb-0.5">REL</p>
 									<webaudio-knob
 										id="osc_c_release"
-										class="control self-center"
+										class="control adsrControl self-center"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -1089,7 +1093,7 @@
 							<div class="flex p-1">
 								<webaudio-switch
 									id="filter_switch"
-									class="control self-center pr-1"
+									class="control toggleControl self-center pr-1"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="1"
@@ -1101,7 +1105,7 @@
 									<p class="font-light self-center mb-0.5">Cutoff</p>
 									<webaudio-knob
 										id="filter_cutoff"
-										class="control self-center"
+										class="control mainControl1 self-center"
 										colors="#FF6188;#2C292D;#D9D9D9"
 										min="5"
 										max="10000"
@@ -1120,7 +1124,7 @@
 									<p id="filter_resonance_label" class="font-light self-center mb-0.5">Q</p>
 									<webaudio-knob
 										id="filter_resonance"
-										class="control self-center"
+										class="control mainControl2 self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										min="1"
 										max="10"
@@ -1139,7 +1143,7 @@
 									<p class="font-light self-center mb-0.5">Rolloff</p>
 									<webaudio-slider
 										id="filter_rolloff"
-										class="control self-center"
+										class="control mainControl3 self-center"
 										colors="#FFD866;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
@@ -1159,7 +1163,7 @@
 									<p class="font-light self-center mb-0.5">Type</p>
 									<webaudio-slider
 										id="filter_type"
-										class="control self-center"
+										class="control mainControl4 self-center"
 										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="6"
@@ -1185,7 +1189,7 @@
 									<p class="font-light text-sm self-center">A</p>
 									<webaudio-switch
 										id="osc_a_filter_switch"
-										class="control self-center"
+										class="control toggleControl self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
 										value="1"
@@ -1195,7 +1199,7 @@
 									<p class="font-light text-sm self-center">B</p>
 									<webaudio-switch
 										id="osc_b_filter_switch"
-										class="control self-center"
+										class="control toggleControl self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
 										value="1"
@@ -1205,7 +1209,7 @@
 									<p class="font-light text-sm self-center">C</p>
 									<webaudio-switch
 										id="osc_c_filter_switch"
-										class="control self-center"
+										class="control toggleControl self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
 										value="1"
@@ -1231,7 +1235,7 @@
 							<div class="flex p-1">
 								<webaudio-switch
 									id="lfo_switch"
-									class="control self-center pr-1"
+									class="control toggleControl self-center pr-1"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="0"
@@ -1256,7 +1260,7 @@
 									<p class="font-light self-center mb-0.5">Grid</p>
 									<webaudio-knob
 										id="lfo_grid"
-										class="control self-center"
+										class="control mainControl1 self-center"
 										colors="#FF6188;#2C292D;#D9D9D9"
 										min="0"
 										max="9"
@@ -1276,7 +1280,7 @@
 									<p class="font-light self-center mb-0.5">Min</p>
 									<webaudio-knob
 										id="lfo_min"
-										class="control self-center"
+										class="control mainControl2 self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										min="0"
 										max="10000"
@@ -1295,7 +1299,7 @@
 									<p class="font-light self-center mb-0.5">Max</p>
 									<webaudio-knob
 										id="lfo_max"
-										class="control self-center"
+										class="control mainControl3 self-center"
 										colors="#FFD866;#2C292D;#D9D9D9"
 										min="0"
 										max="10000"
@@ -1314,7 +1318,7 @@
 									<p class="font-light self-center mb-0.5">Shape</p>
 									<webaudio-slider
 										id="lfo_shape"
-										class="control self-center"
+										class="control mainControl4 self-center"
 										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="3"
@@ -1354,7 +1358,7 @@
 							<div class="flex p-1">
 								<webaudio-switch
 									id="fx_switch"
-									class="control self-center pr-1"
+									class="control toggleControl self-center pr-1"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="1"
@@ -1384,7 +1388,7 @@
 									<p id="fx_param1_label" class="font-light self-center mb-0.5">Intensity</p>
 									<webaudio-knob
 										id="fx_param1"
-										class="control self-center"
+										class="control mainControl1 self-center"
 										colors="#FF6188;#2C292D;#D9D9D9"
 										min="0"
 										max="20"
@@ -1403,7 +1407,7 @@
 									<p id="fx_param2_label" class="font-light self-center mb-0.5">Oversample</p>
 									<webaudio-knob
 										id="fx_param2"
-										class="control self-center"
+										class="control mainControl2 self-center"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										min="0"
 										max="2"
@@ -1422,7 +1426,7 @@
 									<p id="fx_param3_label" class="font-light self-center mb-0.5">Mix</p>
 									<webaudio-knob
 										id="fx_param3"
-										class="control self-center"
+										class="control mainControl3 self-center"
 										colors="#FFD866;#2C292D;#D9D9D9"
 										min="0"
 										max="1"
@@ -1441,7 +1445,7 @@
 									<p id="fx_param4_label" class="font-light self-center mb-0.5">Mix</p>
 									<webaudio-knob
 										id="fx_param4"
-										class="control self-center"
+										class="control mainControl4 self-center"
 										colors="#78DCE8;#2C292D;#D9D9D9"
 										min="0"
 										max="1"

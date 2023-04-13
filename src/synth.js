@@ -12,42 +12,38 @@ await register(await connect())
 	.then(() => {console.log("MediaRecorder WAV encoder registered")})
 	.catch((err) => {console.error(err)})
 
+// import resolveConfig from 'tailwindcss/resolveConfig'
+// import tailwindConfig from './tailwind.config.cjs'
+
+// const twConfig = resolveConfig(tailwindConfig)
+// console.log(twConfig)
+
+// twConfig.theme.colors['custom-black'] = "#000"
+
+let pageBackgroundColour = "#000"
+let synthBackgroundColour = "#242424"
+let synthTextColour = "#FFFFFF"
+
+let currentTheme = "dark"
+let p5_enabled = false
+
 // -- TONE.JS SETUP -- //
 
 // TODO:
-//  1. PRESETS
-//  2. A/B FM (Ratio & Depth) ✔
-//  3. FILTER ENVELOPE
-//  4. LFO SWITCHING
-//  5. ARPEGGIATOR
-//  6. GLIDE CONTROLS (Portamento)
-//  7. VOICE & UNISON CONTROL ✔
-//  8. TOOLTIPS / HELP TEXT
-//  9. THEME SWITCHING
-//  10. MIDI KEYBOARD CONTROL
+//  1. LFO SWITCHING
+//  2. ARPEGGIATOR / PHRASE RECORDER
+//  3. GLIDE CONTROLS (Portamento)
+//  4. TOOLTIPS / HELP TEXT
+//  5. THEME SWITCHING
+//  6. MIDI KEYBOARD CONTROL
+//  7. RANDOMIZE PRESET
 
 // TODO: BUG FIXES
 //  1. LFO SWITCHING
-//  2. FX GLITCHES
-//  3. REVERB LOAD
-//  4. STICKY NOTES
+//  2. REVERB LOAD
+//  3. STICKY NOTES
 
-// TODO: PRESETS
-//  ✔ Declare object with all default synth data
-//  ✔ When a parameter is changed, update the object
-//  ✔ If a user clicks save, save the object to local storage / download as JSON
-//  ✔ If a user clicks load, load the object from local storage / upload JSON (then set all parameters)
-//  - If a user clicks randomize, randomize the object (this will require min/max values for each parameter)
-//  - Split preset button out into two buttons (save & load)
-//  - Add a "Download Preset" button
-//  NEED:
-//  ✔ Object matching synth data structure
-//  ✔ Function for loading a preset & setting all parameters
-//  ✔ Function for saving a preset & downloading as JSON
-//  - Function for randomizing a preset & setting all parameters
-//  ✔ Functions for updating the interface based on the current preset
-
-// TODO: SYNTH FEATURES
+// TODO: BONUS SYNTH FEATURES
 //  ✔ Unison/Spread (Requires "fat" oscillator types)
 //  - Glide (Figure out why it's not working)
 //  ✔ FM (Requires FMSynth) (Can combine with fat oscillator types)
@@ -1003,12 +999,22 @@ function toggleDropdown(target) {
 	}
 }
 function togglePresetsPage() {
-	if (presetsPageOpen) {
-		synthBody.classList.remove("hidden")
-		presetsContainer.classList.add("hidden")
-	} else {
+	// Release all keys
+	SYNTH_A.releaseAll()
+	SYNTH_B.releaseAll()
+	SYNTH_C.releaseAll()
+	if (!presetsPageOpen) {
+		// hide synthBody and p5_canvas
 		synthBody.classList.add("hidden")
+		p5_canvas.classList.add("hidden");
+		// show presetsContainer
 		presetsContainer.classList.remove("hidden")
+	} else {
+		// show synthBody and p5_canvas
+		synthBody.classList.remove("hidden")
+		p5_canvas.classList.remove("hidden");
+		// hide presetsContainer
+		presetsContainer.classList.add("hidden")
 	}
 	presetsPageOpen = !presetsPageOpen
 }
@@ -1016,6 +1022,33 @@ function togglePresetsPage() {
 // Event listeners for top-row buttons
 settingsButton.addEventListener("click", function () {
 	toggleDropdown(settingsDropdown)
+})
+settingsThemeButton.addEventListener("click", function () {
+	console.log("Changing theme!")
+	if(currentTheme==="light"){
+		currentTheme = "dark"
+		updatePageColours("#000", "#242424", "#fff")
+		// #FFFFFF;#2C292D;#D9D9D9
+		updateControlColours("masterControl", "#FFFFFF", "#2C292D", "#D9D9D9")
+		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
+		updateControlColours("subControl", "#FFFFFF", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl1", "#FF6188", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl2", "#A9DC76", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl3", "#FFD866", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl4", "#78DCE8", "#2C292D", "#D9D9D9")
+		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
+	} else {
+		currentTheme = "light"
+		updatePageColours("#555", "#999", "#000")
+		updateControlColours("masterControl", "#FFFFFF", "#000", "#FFFFFF")
+		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
+		updateControlColours("subControl", "#000", "#FFFFFF", "#FFFFFF")
+		updateControlColours("mainControl1", "#000", "#FF6188", "#FFFFFF")
+		updateControlColours("mainControl2", "#000", "#A9DC76", "#FFFFFF")
+		updateControlColours("mainControl3", "#000", "#FFD866", "#FFFFFF")
+		updateControlColours("mainControl4", "#000", "#78DCE8", "#FFFFFF")
+		updateControlColours("adsrControl", "#000", "#AB9DF2", "#FFFFFF")
+	}
 })
 presetsButton.addEventListener("click", function () {
 	togglePresetsPage()
@@ -1433,6 +1466,26 @@ presetDiskLoadButton.addEventListener("click", function() {
 		reader.readAsText(file)
 	}
 })
+
+// update all controls colors using jQuery
+function updateControlColours(targetClass, indicator, background, highlight){
+	let jQtargetGroup = "."+targetClass
+	$(jQtargetGroup).each(function(){
+		$(this)[0].colors = `${indicator};${background};${highlight}`
+	})
+}
+let lfoSelector = document.getElementById("lfo_selector")
+let fxSelector = document.getElementById("fx_selector")
+// update page colours
+function updatePageColours(pageBackground, synthBackground, text){
+	document.body.style.backgroundColor = pageBackground
+	synthContainer.style.backgroundColor = synthBackground
+	document.body.style.color = text
+	synthBackgroundColour = synthBackground
+	synthTextColour = text
+	lfoSelector.style.backgroundColor = synthBackground
+	fxSelector.style.backgroundColor = synthBackground
+}
 
 // -- MAIN EVENT LISTENERS -- //
 
@@ -2107,6 +2160,10 @@ keyboard.addEventListener("change", function (e) {
 	//  heldKeys: changing note parameters while playing keys will cause keys to stick,
 	//    but you can let go of keys without all keys being released...
 
+	// TODO: ARPEGGIATOR
+	//  - If on, push notes to array before triggering pattern
+	//  - If off, play normally
+
 
 	// If note on
 	if (e.note[0]) {
@@ -2238,7 +2295,7 @@ function p5_sketch(p) {
 		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
 		canvasWidth = getSize(synthContainer).width;
 		canvasHeight = getSize(synthContainer).height;
-		p.createCanvas(canvasWidth, canvasHeight);
+		p.createCanvas(canvasWidth-16, canvasHeight-16);
 	}
 	p.windowResized = function () {
 		oscilloscope_a_pos = getPositionXY(osc_a_oscilloscope);
@@ -2246,28 +2303,28 @@ function p5_sketch(p) {
 		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
 		canvasWidth = getSize(synthContainer).width;
 		canvasHeight = getSize(synthContainer).height;
-		p.resizeCanvas(canvasWidth, canvasHeight);
+		p.resizeCanvas(canvasWidth-16, canvasHeight-16);
 		p.rectMode("CORNERS")
 	}
 	p.draw = function () {
 		// Redraw background
-		p.background('#242424')
+		p.background(synthBackgroundColour)
 		// Reset stroke
 		p.strokeWeight(1)
 		// Draw oscilloscopes
 		if(PRESET.OSC_A.enabled){
-			p.drawWaveform(oscA_waveform, 220, 320, 387, 145)
+			p.drawWaveform(oscA_waveform, 220, 320, 393, 145)
 		}
 		if(PRESET.OSC_B.enabled){
-			p.drawWaveform(oscB_waveform, 220, 320, 1063, 145)
+			p.drawWaveform(oscB_waveform, 220, 320, 1078, 145)
 		}
 		if(PRESET.OSC_C.enabled){
-			p.drawWaveform(oscC_waveform, 220, 320, 387, 405)
+			p.drawWaveform(oscC_waveform, 220, 320, 393, 405)
 		}
 		// Set stroke and fill for rectangles
 		p.strokeWeight(0)
 		// p.fill(0)
-		p.fill('#242424')
+		p.fill(synthBackgroundColour)
 		// Horizontal rectangles to enclose the oscilloscopes
 		p.rect(0, 0, canvasWidth, 242)
 		p.rect(0, 374, canvasWidth, 122)
@@ -2275,8 +2332,8 @@ function p5_sketch(p) {
 		p.rect(0, 881, canvasWidth, 168)
 		// Vertical rectangles to enclose the oscilloscopes
 		p.rect(0, 0, 387, canvasHeight)
-		p.rect(608, 0, 455, canvasHeight)
-		p.rect(canvasWidth-10, 0, 10, canvasHeight)
+		p.rect(609, 0, 455, canvasHeight)
+		p.rect(canvasWidth-27, 0, 15, canvasHeight)
 
 	}
 	p.drawWaveform = function(wave, w, h, x, y) {
@@ -2306,7 +2363,7 @@ function p5_sketch(p) {
 		let end = start + buffer.length/2;
 
 		// Set stroke colour to white
-		p.stroke(255);
+		p.stroke(synthTextColour);
 
 		// Map x/y values and draw waveform
 		for (let i = start; i < end; i++){
@@ -2323,12 +2380,34 @@ function p5_sketch(p) {
 
 let consentContainer = document.getElementById("consent_container");
 let consentButton = document.getElementById("context_consent_button");
+let bodyContainer = document.getElementById("body_container");
 
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
 	synthContainer.style.display = "flex";
+	bodyContainer.classList.add("pt-16");
+	bodyContainer.classList.add("pb-10");
+	bodyContainer.classList.add("sm:pt-10");
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();
 	}
-	new p5(p5_sketch, "p5_canvas");
+	if(!p5_enabled){
+		new p5(p5_sketch, "p5_canvas");
+		p5_enabled = true;
+	}
+	p5_canvas.classList.remove("hidden");
+})
+
+let homeButton = document.getElementById("home_button");
+
+homeButton.addEventListener("click", function () {
+	consentContainer.style.display = "flex";
+	synthContainer.style.display = "none";
+	bodyContainer.classList.remove("pt-16");
+	bodyContainer.classList.remove("pb-10");
+	bodyContainer.classList.remove("sm:pt-10");
+	p5_canvas.classList.add("hidden");
+	if(settingsDropdownOpen){
+		toggleDropdown(settingsDropdown)
+	}
 })

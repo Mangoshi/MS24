@@ -1,6 +1,6 @@
 import * as Tone from 'tone'
-import { MediaRecorder, register } from "extendable-media-recorder";
-import { connect } from 'extendable-media-recorder-wav-encoder'
+import {MediaRecorder, register} from "extendable-media-recorder";
+import {connect} from 'extendable-media-recorder-wav-encoder'
 import BrowserDetector from 'browser-dtector';
 
 const browserInfo = new BrowserDetector(window.navigator.userAgent);
@@ -351,12 +351,7 @@ const MASTER_LIMITER = new Tone.Limiter(-10)
 // -- RECORD -- //
 
 const REC_DEST = Tone.context.createMediaStreamDestination()
-let REC
-if(browserName !== "Mozilla Firefox") {
-	REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/wav'});
-} else {
-	REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/webm;codecs=opus'});
-}
+let REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/wav'});
 let CHUNKS = [];
 let recorderLabel = document.getElementById("rec_label")
 console.log("WAV supported?", MediaRecorder.isTypeSupported('audio/wav'))
@@ -1455,24 +1450,35 @@ document.addEventListener("keypress", function (e) {
 })
 
 async function startRecording() {
-	if(browserName !== "Mozilla Firefox") {
-		REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/wav'});
+	// log state of MediaRecorder
+	console.log("MediaRecorder state (pre-start):", REC.state)
+	if(REC.state === "inactive"){
+		// clear chunks
+		CHUNKS = []
+		// start recording
+		await REC.start()
+		// log state of MediaRecorder
+		console.log("MediaRecorder state (post-start):", REC.state)
+		// set label to "recording..."
+		recorderLabel.innerHTML = "Recording..."
 	} else {
-		REC = new MediaRecorder(REC_DEST.stream, {mimeType: 'audio/webm;codecs=opus'});
+		console.log("MediaRecorder is not inactive!")
 	}
-	// clear chunks
-	CHUNKS = []
-	// start recording
-	await REC.start()
-	// set label to "recording..."
-	recorderLabel.innerHTML = "Recording..."
 }
 
 async function stopRecording() {
-	// stop recording
-	await REC.stop()
-	// return label to default
-	recorderLabel.innerHTML = "Record"
+	// log state of MediaRecorder
+	console.log("MediaRecorder state (pre-stop):", REC.state)
+	if (REC.state === "recording") {
+		// stop recording
+		await REC.stop()
+		// log state of MediaRecorder
+		console.log("MediaRecorder state (post-stop):", REC.state)
+		// return label to default
+		recorderLabel.innerHTML = "Record"
+	} else {
+		console.log("MediaRecorder is not recording!")
+	}
 }
 
 // Control events //

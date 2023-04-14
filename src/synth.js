@@ -28,16 +28,22 @@ class MIDIAccess {
 
 	initialize(access) {
 		const devices = access.inputs.values();
-		for (let device of devices) this.initializeDevice(device);
+		let index = 0
+		for (let device of devices){
+			index++
+			console.log('Device', index)
+			this.initializeDevice(device);
+		}
 	}
 
 	initializeDevice(device) {
 		device.onmidimessage = this.onMessage.bind(this);
+		console.log(`Name: ${device.name}\nState: ${device.state}\nType: ${device.type}`)
 	}
 
 	onMessage(message) {
-		let [_, input, value] = message.data;
-		this.onDeviceInput({ input, value });
+		let [command, note, velocity] = message.data;
+		this.onDeviceInput({ command, note, velocity });
 	}
 
 	_requestAccess() {
@@ -59,8 +65,74 @@ midi.start().then(() => {
 	console.error(err)
 })
 
-function onDeviceInput({input, value}) {
-	console.log('onDeviceInput', input, value)
+function onDeviceInput({command, note, velocity}) {
+	console.log('onDeviceInput', {command, note, velocity})
+
+	switch(command) {
+		case 144:
+			// Note On
+			if (velocity > 0) {
+				// Note On
+				handleNote("on", note, velocity)
+			} else {
+				// Note Off
+				handleNote("off", note)
+			}
+			break;
+		case 128:
+			// Note Off
+			handleNote("off", note)
+			break;
+	}
+}
+
+function midiToFreq(note) {
+	return Math.pow(2, (note - 69) / 12) * 440
+}
+
+function frequencyOffset(octave, semitone) {
+	return Math.pow(2, (octave + semitone / 12))
+}
+
+let playingFrequencies = []
+let synthPlaying = false
+
+function handleNote(state, note, velocity) {
+	console.log('handleNote', state, note, velocity)
+	// let velocityScalar = velocity / 127
+	// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
+	let originalFrequency = midiToFreq(note)
+	playingFrequencies.push(originalFrequency)
+	let freqA = originalFrequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune)
+	let freqB = originalFrequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune)
+	let freqC = originalFrequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune)
+	if (state === 'on') {
+		if(PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled){
+			synthPlaying = true
+		}
+		if(PRESET.OSC_A.enabled){
+			SYNTH_A.triggerAttack(freqA)
+			console.log("OSC A attack", freqA)
+		}
+		if(PRESET.OSC_B.enabled){
+			SYNTH_B.triggerAttack(freqB)
+			console.log("OSC B attack", freqB)
+		}
+		if(PRESET.OSC_C.enabled){
+			SYNTH_C.triggerAttack(freqC)
+			console.log("OSC C attack", freqC)
+		}
+	} else {
+		SYNTH_A.triggerRelease(freqA)
+		console.log("OSC A release", freqA)
+		SYNTH_B.triggerRelease(freqB)
+		console.log("OSC B release", freqB)
+		SYNTH_C.triggerRelease(freqC)
+		console.log("OSC C release", freqC)
+		synthPlaying = false
+		playingFrequencies = playingFrequencies.filter(f => f !== originalFrequency)
+	}
+	console.log("playingFrequencies", playingFrequencies)
 }
 
 // import resolveConfig from 'tailwindcss/resolveConfig'
@@ -1700,10 +1772,28 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR A --- //
 			// -------------------- //
 			case "osc_a_octave":
-				PRESET.OSC_A.octave = e.target.value
-				// SYNTH_A.releaseAll()
-				// SYNTH_B.releaseAll()
-				// SYNTH_C.releaseAll()
+				// TODO
+				// If currently playing
+				// Use current key + octave + semitone to release
+				// Then trigger new key with new octave
+				// ...
+				if(synthPlaying){
+					// Release each voice
+					for(let frequency of playingFrequencies) {
+						console.log("releasing:", frequency)
+						SYNTH_A.triggerRelease(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
+					}
+					PRESET.OSC_A.octave = e.target.value
+					// Trigger new voices
+					for(let frequency of playingFrequencies) {
+						console.log("triggering:", frequency)
+						SYNTH_A.triggerAttack(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
+					}
+				} else {
+					PRESET.OSC_A.octave = e.target.value
+					SYNTH_A.releaseAll()
+				}
+
 				// SYNTH_A.triggerAttack("C" + synthOctaves["osc_a_octave"])
 				// console.log(synthOctaves)
 				// let newKey = "C4"
@@ -1715,7 +1805,22 @@ for (let i = 0; i < controls.length; i++) {
 				// })
 				break;
 			case "osc_a_semi":
-				PRESET.OSC_A.detune = e.target.value
+				if(synthPlaying){
+					// Release each voice
+					for(let frequency of playingFrequencies) {
+						console.log("releasing:", frequency)
+						SYNTH_A.triggerRelease(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
+					}
+					PRESET.OSC_A.detune = e.target.value
+					// Trigger new voices
+					for(let frequency of playingFrequencies) {
+						console.log("triggering:", frequency)
+						SYNTH_A.triggerAttack(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
+					}
+				} else {
+					PRESET.OSC_A.detune = e.target.value
+					SYNTH_A.releaseAll()
+				}
 				break;
 			case "osc_a_volume":
 				PRESET.OSC_A.volume = e.target.value
@@ -1813,10 +1918,40 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR B --- //
 			// -------------------- //
 			case "osc_b_octave":
-				PRESET.OSC_B.octave = e.target.value
+				if(synthPlaying){
+					// Release each voice
+					for(let frequency of playingFrequencies) {
+						console.log("releasing:", frequency)
+						SYNTH_B.triggerRelease(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
+					}
+					PRESET.OSC_B.octave = e.target.value
+					// Trigger new voices
+					for(let frequency of playingFrequencies) {
+						console.log("triggering:", frequency)
+						SYNTH_B.triggerAttack(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
+					}
+				} else {
+					PRESET.OSC_B.octave = e.target.value
+					SYNTH_B.releaseAll()
+				}
 				break;
 			case "osc_b_semi":
-				PRESET.OSC_B.detune = e.target.value
+				if(synthPlaying){
+					// Release each voice
+					for(let frequency of playingFrequencies) {
+						console.log("releasing:", frequency)
+						SYNTH_B.triggerRelease(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
+					}
+					PRESET.OSC_B.detune = e.target.value
+					// Trigger new voices
+					for(let frequency of playingFrequencies) {
+						console.log("triggering:", frequency)
+						SYNTH_B.triggerAttack(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
+					}
+				} else {
+					PRESET.OSC_B.detune = e.target.value
+					SYNTH_B.releaseAll()
+				}
 				break;
 			case "osc_b_volume":
 				PRESET.OSC_B.volume = e.target.value
@@ -1914,10 +2049,40 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR C --- //
 			// -------------------- //
 			case "osc_c_octave":
-				PRESET.OSC_C.octave = e.target.value
+				if(synthPlaying){
+					// Release each voice
+					for(let frequency of playingFrequencies) {
+						console.log("releasing:", frequency)
+						SYNTH_C.triggerRelease(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
+					}
+					PRESET.OSC_C.octave = e.target.value
+					// Trigger new voices
+					for(let frequency of playingFrequencies) {
+						console.log("triggering:", frequency)
+						SYNTH_C.triggerAttack(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
+					}
+				} else {
+					PRESET.OSC_C.octave = e.target.value
+					SYNTH_C.releaseAll()
+				}
 				break;
 			case "osc_c_semi":
-				PRESET.OSC_C.detune = e.target.value
+				if(synthPlaying){
+					// Release each voice
+					for(let frequency of playingFrequencies) {
+						console.log("releasing:", frequency)
+						SYNTH_C.triggerRelease(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
+					}
+					PRESET.OSC_C.detune = e.target.value
+					// Trigger new voices
+					for(let frequency of playingFrequencies) {
+						console.log("triggering:", frequency)
+						SYNTH_C.triggerAttack(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
+					}
+				} else {
+					PRESET.OSC_C.detune = e.target.value
+					SYNTH_C.releaseAll()
+				}
 				break;
 			case "osc_c_volume":
 				PRESET.OSC_C.volume = e.target.value

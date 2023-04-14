@@ -114,12 +114,12 @@
 				</div>
 			</div>
 		</div>
-		<div class="flex-col hidden w-min select-none bg-custom-black z-20 border border-orange-300 rounded-xl p-2" id="synth_container">
-			<div id="p5_canvas" class="self-center absolute -z-10"></div>
+		<div class="flex-col hidden w-min select-none bg-custom-black border border-orange-300 rounded-xl p-2" id="synth_container">
+			<div id="p5_canvas" class="self-center absolute"></div>
 			<!--********************-->
 			<!-- 	  TOP ROW 	    -->
 			<!--********************-->
-			<div class="flex justify-between border border-gray-700 w-full p-1">
+			<div class="flex justify-between border border-gray-700 w-full p-1 z-10">
 				<div class="w-[250px] flex">
 					<div class="flex self-center">
 						<button
@@ -212,11 +212,11 @@
 				<!--********************-->
 				<!--	  ROW ONE 	    -->
 				<!--********************-->
-				<div class="flex border border-gray-700 p-1">
+				<div class="flex border border-gray-700 p-1 z-10">
 					<!--********************-->
 					<!--	OSCILLATOR A	-->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex z-10">
 						<!--left-->
 						<div class="flex flex-col justify-between mr-1">
 							<div class="flex justify-between mb-1">
@@ -507,11 +507,11 @@
 					<!--********************-->
 					<!--	  MIDDLE		-->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
+					<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1 z-10"></div>
 					<!--********************-->
 					<!--	OSCILLATOR B	-->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex z-10">
 						<!--left-->
 						<div class="flex flex-col justify-between mr-1">
 							<div class="flex justify-between mb-1">
@@ -804,11 +804,11 @@
 				<!--********************-->
 				<!--	  ROW TWO 	    -->
 				<!--********************-->
-				<div class="flex border border-gray-700 p-1">
+				<div class="flex border border-gray-700 p-1 z-10">
 					<!--********************-->
 					<!--  SUB OSCILLATOR	-->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex z-10">
 						<!--left-->
 						<div class="flex flex-col justify-between mr-1">
 							<div class="flex justify-between mb-1">
@@ -1080,13 +1080,13 @@
 					<!--********************-->
 					<!--   FM VISUALISER 	-->
 					<!--********************-->
-					<div class="self-center border border-gray-600 flex rounded-lg p-1 mx-1 h-[202px]">
+					<div class="self-center border border-gray-600 flex rounded-lg p-1 mx-1 h-[202px] z-10">
 						<canvas class="self-center" id="fm_canvas" width="51" height="50"></canvas>
 					</div>
 					<!--********************-->
 					<!--    MULTI FILTER    -->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex z-10">
 						<!--left-->
 						<div class="flex flex-col justify-between mr-1">
 							<div class="flex p-1">
@@ -1224,11 +1224,11 @@
 				<!--********************-->
 				<!--	 ROW THREE 	    -->
 				<!--********************-->
-				<div class="flex border border-gray-700 p-1">
+				<div class="flex border border-gray-700 p-1 z-10">
 					<!--********************-->
 					<!--   LOW FREQ OSC 	-->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex z-10">
 						<!--left-->
 						<div class="flex flex-col justify-between mr-1">
 							<div class="flex p-1">
@@ -1347,11 +1347,11 @@
 					<!--************-->
 					<!--   MIDDLE 	-->
 					<!--************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1"></div>
+					<div class="self-center border border-gray-600 rounded-lg p-1 w-[61px] mx-1 z-10"></div>
 					<!--********************-->
 					<!--     MULTI FX       -->
 					<!--********************-->
-					<div class="self-center border border-gray-600 rounded-lg p-1 flex">
+					<div class="self-center border border-gray-600 rounded-lg p-1 flex z-10">
 						<!--left-->
 						<div class="flex flex-col justify-between mr-1">
 							<div class="flex p-1">
@@ -1473,16 +1473,16 @@
 				<!--********************-->
 				<!-- 	  KEYBOARD 	    -->
 				<!--********************-->
-				<div class="flex justify-center border border-gray-700 p-1">
+				<div class="flex justify-center border border-gray-700 p-1 z-10">
 					<div class="w-full">&nbsp;</div>
-					<div class="border border-gray-500 rounded-xl self-center p-2">
+					<div class="border border-gray-500 rounded-xl self-center p-2 z-10">
 						<webaudio-keyboard
 							id="keyboard"
 							keys="49"
 							class="self-center"
 						></webaudio-keyboard>
 					</div>
-					<div class="w-full flex flex-col">
+					<div class="w-full flex flex-col z-10">
 						<div class="h-full self-end flex items-end">
 							<p id="rec_label" class="mr-1">Record</p>
 							<webaudio-switch

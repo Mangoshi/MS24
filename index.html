@@ -231,6 +231,16 @@
 										></webaudio-switch>
 										<p class="font-inika font-bold self-center">OSC A</p>
 									</div>
+									<div class="flex p-1">
+										<webaudio-switch
+											id="arp_a_switch"
+											class="control"
+											colors="#AB9DF2;#2C292D;#D9D9D9"
+											diameter="30"
+											value="0"
+										></webaudio-switch>
+										<p id="arp_a_label" class="font-inika font-bold ml-1">ARP</p>
+									</div>
 								</div>
 								<div class="self-center border border-gray-600 flex rounded-lg p-1">
 									<div class="border border-gray-500 rounded-xl py-1 w-min flex flex-col self-end mr-1 w-[50px]">
@@ -525,6 +535,16 @@
 											value="0"
 										></webaudio-switch>
 										<p class="font-inika font-bold self-center">OSC B</p>
+									</div>
+									<div class="flex p-1">
+										<webaudio-switch
+											id="arp_b_switch"
+											class="control"
+											colors="#AB9DF2;#2C292D;#D9D9D9"
+											diameter="30"
+											value="0"
+										></webaudio-switch>
+										<p id="arp_b_label" class="font-inika font-bold ml-1">ARP</p>
 									</div>
 								</div>
 								<div class="self-center border border-gray-600 flex rounded-lg p-1">
@@ -822,6 +842,16 @@
 											value="0"
 										></webaudio-switch>
 										<p class="font-inika font-bold self-center">SUB OSC</p>
+									</div>
+									<div class="flex p-1">
+										<webaudio-switch
+											id="arp_c_switch"
+											class="control"
+											colors="#AB9DF2;#2C292D;#D9D9D9"
+											diameter="30"
+											value="0"
+										></webaudio-switch>
+										<p id="arp_c_label" class="font-inika font-bold ml-1">ARP</p>
 									</div>
 								</div>
 								<div class="self-center border border-gray-600 flex rounded-lg p-1">
@@ -1239,7 +1269,7 @@
 									diameter="30"
 									value="0"
 								></webaudio-switch>
-								<label class="font-inika font-light self-center" for="lfo_selector">
+								<label class="font-inika font-bold self-center" for="lfo_selector">
 									LFO
 									&nbsp;
 									<select
@@ -1474,11 +1504,83 @@
 				<!-- 	  KEYBOARD 	    -->
 				<!--********************-->
 				<div class="flex justify-center border border-gray-700 p-1 z-10">
-					<div class="w-full">&nbsp;</div>
-					<div class="border border-gray-500 rounded-xl self-center p-2 z-10">
+					<div class="w-full flex justify-between z-10">
+						<div class="flex">
+							<div class="flex flex-col mr-1 z-10">
+								<div class="border border-gray-600 rounded-xl p-1 flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Pattern</p>
+									<webaudio-slider
+										id="arp_pattern"
+										class="control mainControl4 self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										min="0"
+										max="8"
+										value="0"
+										direction="vert"
+										height="85"
+										conv="['up','down','upDown','downUp','alternateUp','alternateDown','random','randomOnce','randomWalk'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="arp_pattern_readout"
+										link="arp_pattern"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+							</div>
+							<div class="flex flex-col mr-1 z-10">
+								<div class="border border-gray-600 rounded-xl p-1 flex flex-col w-[90px]">
+									<p class="font-light self-center mb-0.5">Speed</p>
+									<webaudio-slider
+										id="arp_speed"
+										class="control mainControl4 self-center"
+										colors="#AB9DF2;#2C292D;#D9D9D9"
+										min="0"
+										max="6"
+										value="3"
+										direction="vert"
+										height="85"
+										conv="['1/1','1/2','1/4','1/8','1/16','1/32','1/64'][x]"
+									></webaudio-slider>
+									<webaudio-param
+										id="arp_speed_readout"
+										link="arp_speed"
+										class="self-center border border-violet-900 mt-1"
+										fontSize="14"
+										width="60"
+									></webaudio-param>
+								</div>
+							</div>
+						</div>
+						<div class="flex flex-col z-10">
+							<div class="border border-gray-600 rounded-xl p-1 flex flex-col w-[90px]">
+								<p class="font-light self-center mb-0.5">Octave</p>
+								<webaudio-slider
+									id="master_octave"
+									class="control mainControl4 self-center"
+									colors="#FFFFFF;#2C292D;#D9D9D9"
+									min="0"
+									max="4"
+									value="2"
+									direction="vert"
+									height="85"
+									conv="['-2','-1','0','+1','+2'][x]"
+								></webaudio-slider>
+								<webaudio-param
+									id="master_octave_readout"
+									link="master_octave"
+									class="self-center border border-gray-500 mt-1"
+									fontSize="14"
+									width="60"
+								></webaudio-param>
+							</div>
+						</div>
+					</div>
+					<div class="border border-gray-500 rounded-xl self-center p-2 mx-1 z-10">
 						<webaudio-keyboard
 							id="keyboard"
-							keys="49"
+							keys="65"
 							class="self-center"
 						></webaudio-keyboard>
 					</div>

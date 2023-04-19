@@ -3,168 +3,28 @@ import {MediaRecorder, register} from "extendable-media-recorder";
 import {connect} from 'extendable-media-recorder-wav-encoder'
 import BrowserDetector from 'browser-dtector';
 
+// Browser Detection
 const browserInfo = new BrowserDetector(window.navigator.userAgent);
 const browserName = browserInfo.getBrowserInfo().name;
-
 console.log("Browser:", browserName)
 
+// Media Encoder WAV plugin registration
 await register(await connect())
 	.then(() => {console.log("MediaRecorder WAV encoder registered")})
 	.catch((err) => {console.error(err)})
 
-class MIDIAccess {
-	constructor(args = {}) {
-		this.onDeviceInput = args.onDeviceInput || console.log;
-	}
-
-	start() {
-		return new Promise((resolve, reject) => {
-			this._requestAccess().then(access => {
-				this.initialize(access);
-				resolve();
-			}).catch(() => reject('Something went wrong.'));
-		});
-	}
-
-	initialize(access) {
-		const devices = access.inputs.values();
-		let index = 0
-		for (let device of devices){
-			index++
-			console.log('Device', index)
-			this.initializeDevice(device);
-		}
-	}
-
-	initializeDevice(device) {
-		device.onmidimessage = this.onMessage.bind(this);
-		console.log(`Name: ${device.name}\nState: ${device.state}\nType: ${device.type}`)
-	}
-
-	onMessage(message) {
-		let [command, note, velocity] = message.data;
-		this.onDeviceInput({ command, note, velocity });
-	}
-
-	_requestAccess() {
-		return new Promise((resolve, reject) => {
-			if (navigator.requestMIDIAccess)
-				navigator.requestMIDIAccess()
-					.then(resolve)
-					.catch(reject);
-			else reject();
-		});
-	}
-}
-
-const midi = new MIDIAccess({ onDeviceInput })
-
-midi.start().then(() => {
-	console.log("MIDI Access started")
-}).catch((err) => {
-	console.error(err)
-})
-
-function onDeviceInput({command, note, velocity}) {
-	console.log('onDeviceInput', {command, note, velocity})
-
-	switch(command) {
-		case 144:
-			// Note On
-			if (velocity > 0) {
-				// Note On
-				handleNote("on", note, velocity)
-			} else {
-				// Note Off
-				handleNote("off", note)
-			}
-			break;
-		case 128:
-			// Note Off
-			handleNote("off", note)
-			break;
-	}
-}
-
-function midiToFreq(note) {
-	return Math.pow(2, (note - 69) / 12) * 440
-}
-
-function frequencyOffset(octave, semitone) {
-	return Math.pow(2, (octave + semitone / 12))
-}
-
-let playingFrequencies = []
-let synthPlaying = false
-
-function handleNote(state, note, velocity) {
-	console.log('handleNote', state, note, velocity)
-	// let velocityScalar = velocity / 127
-	// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
-	let originalFrequency = midiToFreq(note)
-	playingFrequencies.push(originalFrequency)
-	let freqA = originalFrequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune)
-	let freqB = originalFrequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune)
-	let freqC = originalFrequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune)
-	if (state === 'on') {
-		if(PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled){
-			synthPlaying = true
-		}
-		if(PRESET.OSC_A.enabled){
-			SYNTH_A.triggerAttack(freqA)
-			console.log("OSC A attack", freqA)
-		}
-		if(PRESET.OSC_B.enabled){
-			SYNTH_B.triggerAttack(freqB)
-			console.log("OSC B attack", freqB)
-		}
-		if(PRESET.OSC_C.enabled){
-			SYNTH_C.triggerAttack(freqC)
-			console.log("OSC C attack", freqC)
-		}
-	} else {
-		SYNTH_A.triggerRelease(freqA)
-		console.log("OSC A release", freqA)
-		SYNTH_B.triggerRelease(freqB)
-		console.log("OSC B release", freqB)
-		SYNTH_C.triggerRelease(freqC)
-		console.log("OSC C release", freqC)
-		synthPlaying = false
-		playingFrequencies = playingFrequencies.filter(f => f !== originalFrequency)
-	}
-	console.log("playingFrequencies", playingFrequencies)
-}
-
-// import resolveConfig from 'tailwindcss/resolveConfig'
-// import tailwindConfig from './tailwind.config.cjs'
-
-// const twConfig = resolveConfig(tailwindConfig)
-// console.log(twConfig)
-
-// twConfig.theme.colors['custom-black'] = "#000"
-
-let pageBackgroundColour = "#000"
-let synthBackgroundColour = "#242424"
-let synthTextColour = "#FFFFFF"
-
-let currentTheme = "dark"
-let p5_enabled = false
-
-// -- TONE.JS SETUP -- //
-
 // TODO:
 //  1. LFO SWITCHING
-//  2. ARPEGGIATOR / PHRASE RECORDER
+//  2. PHRASE RECORDER (Arpeggiator Latch)
 //  3. GLIDE CONTROLS (Portamento)
 //  4. TOOLTIPS / HELP TEXT
-//  5. THEME SWITCHING
-//  6. MIDI KEYBOARD CONTROL
-//  7. RANDOMIZE PRESET
+//  5. RANDOMIZE PRESET
+//  6. MISSING VISUALIZATIONS (FILTER, LFO, FX)
 
 // TODO: BUG FIXES
-//  1. LFO SWITCHING
-//  2. REVERB LOAD
-//  3. STICKY NOTES
+//  1. REVERB LOAD ???
+//  2. DOUBLE NOTES !!!
+//  3. ARP PRESET LOGIC !!!
 
 // TODO: BONUS SYNTH FEATURES
 //  ✔ Unison/Spread (Requires "fat" oscillator types)
@@ -174,7 +34,33 @@ let p5_enabled = false
 //  - FX Buses (Will require using Tone.Channel: send generators to bus and receive on FX)
 //  - Noise Generators (Will require using Tone.Noise)
 
-// -- PRESET DATA (INITIAL) -- //
+// -- TONE.JS SETUP -- //
+
+// Start Tone.js Transport (so that the arpeggiator works)
+Tone.Transport.start()
+// TODO: BPM control?
+
+// -- SYNTH (INITIAL STATE) -- //
+
+let SYNTH = {
+	STATE: {
+		keysHeld: 0,
+		isPlaying: false,
+		playingFrequencies: [],
+		p5_enabled: false,
+		arp_A_frequencies: [],
+		arp_B_frequencies: [],
+		arp_C_frequencies: [],
+	},
+	THEME: {
+		name: "dark",
+		pageBackgroundColour: "#000",
+		synthBackgroundColour: "#242424",
+		synthTextColour: "#FFFFFF",
+	}
+}
+
+// -- PRESET (INITIAL DATA) -- //
 
 let PRESET = {
 	METADATA: {
@@ -184,7 +70,8 @@ let PRESET = {
 		rating: 0,
 	},
 	MASTER: {
-		gain: 1
+		gain: 1,
+		octaveOffset: 0,
 	},
 	OSC_A: {
 		enabled: 1,
@@ -266,6 +153,13 @@ let PRESET = {
 		osc_a: 1,
 		osc_b: 1,
 		osc_c: 1
+	},
+	ARP: {
+		A_enabled: 0,
+		B_enabled: 0,
+		C_enabled: 0,
+		pattern: "up",
+		playbackRate: 2,
 	}
 }
 
@@ -362,19 +256,19 @@ let MIN_MAX = {
 // -- DATA CONVERSION -- //
 
 let octaveValues = {
-	"-3": 0,
-	"-2": 1,
-	"-1": 2,
-	"0": 3,
-	"1": 4,
-	"2": 5,
-	"3": 6,
+	"-3": 1,
+	"-2": 2,
+	"-1": 3,
+	"0": 4,
+	"1": 5,
+	"2": 6,
+	"3": 7,
 }
 let subOctaveValues = {
-	"0": 1,
-	"1": 2,
-	"2": 3,
-	"3": 4,
+	"0": 2,
+	"1": 3,
+	"2": 4,
+	"3": 5,
 }
 let oscillatorShapeValues = {
 	"0": "fatsine",
@@ -459,6 +353,35 @@ let fxDelayTimeValues = {
 	"2": "4n",
 	"3": "2n",
 	"4": "1n",
+}
+let arpPatternValues = {
+	"0": "up",
+	"1": "down",
+	"2": "upDown",
+	"3": "downUp",
+	"4": "alternateUp",
+	"5": "alternateDown",
+	"6": "random",
+	"7": "randomOnce",
+	"8": "randomWalk",
+}
+let arpSpeedValues = {
+	"0": 0.25,
+	"1": 0.5,
+	"2": 1,
+	"3": 2,
+	"4": 4,
+	"5": 8,
+	"6": 16,
+}
+let arpTimeValues = {
+	"0": "1m",
+	"1": "2n",
+	"2": "4n",
+	"3": "8n",
+	"4": "16n",
+	"5": "32n",
+	"6": "64n",
 }
 
 // -- MASTER -- //
@@ -783,11 +706,17 @@ function resetFX() {
 
 // -- NOTES -- //
 
-const ARP = new Tone.Pattern(function(time, note){
-	SYNTH_A.triggerAttackRelease(note, 0.25);
-	SYNTH_B.triggerAttackRelease(note, 0.25);
-	SYNTH_C.triggerAttackRelease(note, 0.25);
-}, ["C4", "D4", "E4", "G4", "A4"]);
+const ARP_A = new Tone.Pattern(function(time, note){
+	SYNTH_A.triggerAttackRelease(note, "16n", time);
+}, SYNTH.STATE.arp_A_frequencies, PRESET.ARP.pattern).set({playbackRate: PRESET.ARP.playbackRate,})
+
+const ARP_B = new Tone.Pattern(function(time, note){
+	SYNTH_B.triggerAttackRelease(note, "16n", time);
+}, SYNTH.STATE.arp_B_frequencies, PRESET.ARP.pattern).set({playbackRate: PRESET.ARP.playbackRate,})
+
+const ARP_C = new Tone.Pattern(function(time, note){
+	SYNTH_C.triggerAttackRelease(note, "16n", time);
+}, SYNTH.STATE.arp_C_frequencies, PRESET.ARP.pattern).set({playbackRate: PRESET.ARP.playbackRate,})
 
 // -- WAVEFORMS -- //
 
@@ -862,17 +791,480 @@ function connectTone() {
 }
 connectTone()
 
-// -- CONTROLS DATA -- //
+// -- MIDI -- //
 
-let controls = document.getElementsByClassName("control");
-// console.log(controls);
+// MIDI Access Class
+class MIDIAccess {
+	constructor(args = {}) {
+		// Either use the passed in function or log to console
+		this.onDeviceInput = args.onDeviceInput || console.log;
+	}
 
-// TODO (?) [idea]:
-//  - Infinite loop / listener to fire attack/release signals on array of notes playing
-//  - This is kept outside the event listeners
-//  - onChange pushes note to array
-//  - onRelease removes note from array
-//  - Controls changes the array / signals
+	start() {
+		// Return a promise
+		return new Promise((resolve, reject) => {
+			// Request MIDI Access
+			this._requestAccess().then(access => {
+				// Initialize MIDI Access
+				this.initialize(access);
+				// Resolve the promise
+				resolve();
+			}).catch(() => reject('Something went wrong.'));
+		});
+	}
+
+	initialize(access) {
+		// Get all MIDI inputs
+		const devices = access.inputs.values();
+		// Loop through all MIDI inputs
+		let index = 0
+		for (let device of devices){
+			index++
+			console.log('Device', index)
+			// Initialize the MIDI device
+			this.initializeDevice(device);
+		}
+	}
+
+	initializeDevice(device) {
+		// Listen for MIDI messages
+		device.onmidimessage = this.onMessage.bind(this);
+		// Log the device name, state and type
+		console.log(`Name: ${device.name}\nState: ${device.state}\nType: ${device.type}`)
+	}
+
+	onMessage(message) {
+		// Initialize MIDI data array variables
+		let [command, note, velocity] = message.data;
+		// Run the onDeviceInput function using the MIDI data
+		this.onDeviceInput({ command, note, velocity });
+	}
+
+	_requestAccess() {
+		// Return a promise
+		return new Promise((resolve, reject) => {
+			// Check if the browser supports MIDI
+			if (navigator.requestMIDIAccess)
+				// Request MIDI Access
+				navigator.requestMIDIAccess()
+					.then(resolve)
+					.catch(reject);
+			else reject();
+		});
+	}
+}
+
+// Create a new instance of the MIDIAccess class
+const MIDI = new MIDIAccess({ onDeviceInput })
+
+// Start MIDI Access
+MIDI.start().then(() => {
+	console.log("MIDI Access started")
+}).catch((err) => {
+	console.error(err)
+})
+
+// Handle MIDI Inputs
+function onDeviceInput({command, note, velocity}) {
+	// Log the MIDI data
+	console.log('onDeviceInput', {command, note, velocity})
+	// MIDI command switch
+	switch(command) {
+		// Note On
+		case 144:
+			if (velocity > 0) {
+				handleNote("on", note, velocity)
+			} else {
+				handleNote("off", note)
+			}
+			break;
+		// Note Off
+		case 128:
+			handleNote("off", note)
+			break;
+	}
+}
+
+function midiToFreq(note) {
+	// Return the frequency of a MIDI note
+	return Math.pow(2, (note - 69) / 12) * 440
+}
+
+// function midiGuiActivator(note, state) {
+// 	let gui_state = state === "on" ? 1 : 0
+// 	// Activate the GUI keyboard key of a MIDI note
+// 	switch(note) {
+// 		case 48:
+// 			keyboard.setNote(gui_state, 0, 0)
+// 			break;
+// 		case 49:
+// 			keyboard.setNote(gui_state, 1, 0)
+// 			break;
+// 		case 50:
+// 			keyboard.setNote(gui_state, 2, 0)
+// 			break;
+// 		case 51:
+// 			keyboard.setNote(gui_state, 3, 0)
+// 			break;
+// 		case 52:
+// 			keyboard.setNote(gui_state, 4, 0)
+// 			break;
+// 		case 53:
+// 			keyboard.setNote(gui_state, 5, 0)
+// 			break;
+// 		case 54:
+// 			keyboard.setNote(gui_state, 6, 0)
+// 			break;
+// 		case 55:
+// 			keyboard.setNote(gui_state, 7, 0)
+// 			break;
+// 		case 56:
+// 			keyboard.setNote(gui_state, 8, 0)
+// 			break;
+// 		case 57:
+// 			keyboard.setNote(gui_state, 9, 0)
+// 			break;
+// 		case 58:
+// 			keyboard.setNote(gui_state, 10, 0)
+// 			break;
+// 		case 59:
+// 			keyboard.setNote(gui_state, 11, 0)
+// 			break;
+// 		case 60:
+// 			keyboard.setNote(gui_state, 12, 0)
+// 			break;
+// 		case 61:
+// 			keyboard.setNote(gui_state, 13, 0)
+// 			break;
+// 		case 62:
+// 			keyboard.setNote(gui_state, 14, 0)
+// 			break;
+// 		case 63:
+// 			keyboard.setNote(gui_state, 15, 0)
+// 			break;
+// 		case 64:
+// 			keyboard.setNote(gui_state, 16, 0)
+// 			break;
+// 		case 65:
+// 			keyboard.setNote(gui_state, 17, 0)
+// 			break;
+// 		case 66:
+// 			keyboard.setNote(gui_state, 18, 0)
+// 			break;
+// 		case 67:
+// 			keyboard.setNote(gui_state, 19, 0)
+// 			break;
+// 		case 68:
+// 			keyboard.setNote(gui_state, 20, 0)
+// 			break;
+// 		case 69:
+// 			keyboard.setNote(gui_state, 21, 0)
+// 			break;
+// 		case 70:
+// 			keyboard.setNote(gui_state, 22, 0)
+// 			break;
+// 		case 71:
+// 			keyboard.setNote(gui_state, 23, 0)
+// 			break;
+// 		case 72:
+// 			keyboard.setNote(gui_state, 24, 0)
+// 			break;
+// 		case 73:
+// 			keyboard.setNote(gui_state, 25, 0)
+// 			break;
+// 	}
+// }
+
+// TODO: midiGuiActivator problem
+// midiGuiActivator Problem: The GUI keyboard will only show C4-C6 rather than C0-C8
+// midiGuiActivator Solution: Divide the MIDI note by 12 and round down to get the octave
+// Use current octave as the base octave (start of the keyboard)
+// There are 49 keys in the GUI keyboard, 0-48
+// But no matter what octave the physical keyboard is in, the GUI keyboard should always start at 0
+// keyboard.setNote(gui_state, 0, 0)
+// Additional problem: There's no way to know what octave the physical keyboard is in
+
+// TODO: Fix minor bug where master octave modifier steps up by two octaves each time
+//  - It's due to the octave being determined by the MIDI note / 12
+//  - And having two octaves available on the physical keyboard
+function midiGuiActivator2(note, state) {
+	let gui_state = state === "on" ? 1 : 0
+	// Octave of the note (0 = C0, 1 = C1, 2 = C2, etc.)
+	let octave = Math.floor(note / 12)
+	// Key of the note (0 = C, 1 = C#, 2 = D, etc.)
+	let key = note % 12
+	// Modifier to add to the key to get the GUI key
+	let keyModifier = (PRESET.MASTER.octaveOffset*12)+(octave*12)+24
+	// GUI key
+	let guiKey = key + keyModifier
+	console.log("Octave: " + octave + ", Key: " + key + ", Key Modifier: " + keyModifier + ", GUI Key: " + guiKey)
+	keyboard.setNote(gui_state, guiKey, 0)
+}
+
+function frequencyOffset(octave, semitone) {
+	// Return the frequency offset of an octave and semitone
+	return Math.pow(2, (octave + semitone / 12))
+}
+
+function startArp(freqA, freqB, freqC) {
+	// If ARP A is enabled,
+	if (PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
+		// Add the frequency to the array
+		SYNTH.STATE.arp_A_frequencies.push(freqA)
+		// Set Tone Pattern values to the updated array of frequencies
+		ARP_A.set({
+			"values": SYNTH.STATE.arp_A_frequencies,
+		})
+		// If there is only one frequency in the array, start the arp
+		if (SYNTH.STATE.arp_A_frequencies.length === 1) {
+			ARP_A.start()
+		}
+	}
+	// Repeat for ARP B and ARP C
+	if (PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
+		SYNTH.STATE.arp_B_frequencies.push(freqB)
+		ARP_B.set({
+			"values": SYNTH.STATE.arp_B_frequencies,
+		})
+		if(SYNTH.STATE.arp_B_frequencies.length === 1) {
+			ARP_B.start()
+		}
+	}
+	if (PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
+		SYNTH.STATE.arp_C_frequencies.push(freqC)
+		ARP_C.set({
+			"values": SYNTH.STATE.arp_C_frequencies,
+		})
+		if(SYNTH.STATE.arp_C_frequencies.length === 1) {
+			ARP_C.start()
+		}
+	}
+}
+
+function stopArp(freqA, freqB, freqC) {
+	if(SYNTH.STATE.arp_A_frequencies.length > 0) {
+		SYNTH.STATE.arp_A_frequencies = SYNTH.STATE.arp_A_frequencies.filter(f => f !== freqA)
+		ARP_A.set({
+			"values": SYNTH.STATE.arp_A_frequencies,
+		})
+	}
+	if(SYNTH.STATE.arp_B_frequencies.length > 0) {
+		SYNTH.STATE.arp_B_frequencies = SYNTH.STATE.arp_B_frequencies.filter(f => f !== freqB)
+		ARP_B.set({
+			"values": SYNTH.STATE.arp_B_frequencies,
+		})
+	}
+	if(SYNTH.STATE.arp_C_frequencies.length > 0) {
+		SYNTH.STATE.arp_C_frequencies = SYNTH.STATE.arp_C_frequencies.filter(f => f !== freqC)
+		ARP_C.set({
+			"values": SYNTH.STATE.arp_C_frequencies,
+		})
+	}
+	if(SYNTH.STATE.arp_A_frequencies.length === 0 && SYNTH.STATE.arp_B_frequencies.length === 0 && SYNTH.STATE.arp_C_frequencies.length === 0) {
+		// Stop all arpeggiators
+		ARP_A.stop()
+		ARP_B.stop()
+		ARP_C.stop()
+	}
+}
+
+document.addEventListener("keydown", e => {
+	// console.log(e)
+	// If the key is being held down, return
+	if (e.repeat) { return }
+	// Increment keysHeld
+	SYNTH.STATE.keysHeld++
+	console.log("keysHeld (keydown):",SYNTH.STATE.keysHeld)
+	// Prevent default browser behaviour
+	e.preventDefault()
+	// If keysHeld is over 0, handle the note event
+	if (SYNTH.STATE.keysHeld > 0) {
+	handleKeyEvent(e)
+	}
+})
+document.addEventListener("keyup", e => {
+	// Decrement keysHeld
+	SYNTH.STATE.keysHeld--
+	console.log("keysHeld (keyup):",SYNTH.STATE.keysHeld)
+	// Prevent default browser behaviour
+	e.preventDefault()
+	// Start the keyboard listener
+	handleKeyEvent(e)
+})
+
+// Function which listens to the computer keyboard like a MIDI keyboard
+// Sending identical MIDI data to the handleNote function
+// The 123456 and QWERTY rows are mapped to the C4-C5 octave
+// The ASDFGH and ZXCVBN rows are mapped to the C3-C4 octave
+function handleKeyEvent(event) {
+	// Log the keydown event
+	console.log('keyboardListener', event)
+	let state = event.type === "keydown" ? "on" : "off"
+	let noteModifier = 0
+	console.log("noteModifier:", noteModifier)
+	// MIDI note switch
+	switch (event.key) {
+		// Top octave
+		case "q":
+			handleNote(state, 12+noteModifier, 127);
+			break;
+		case "2":
+			handleNote(state, 13+noteModifier, 127);
+			break;
+		case "w":
+			handleNote(state, 14+noteModifier, 127);
+			break;
+		case "3":
+			handleNote(state, 15+noteModifier, 127);
+			break;
+		case "e":
+			handleNote(state, 16+noteModifier, 127);
+			break;
+		case "r":
+			handleNote(state, 17+noteModifier, 127);
+			break;
+		case "5":
+			handleNote(state, 18+noteModifier, 127);
+			break;
+		case "t":
+			handleNote(state, 19+noteModifier, 127);
+			break;
+		case "6":
+			handleNote(state, 20+noteModifier, 127);
+			break;
+		case "y":
+			handleNote(state, 21+noteModifier, 127);
+			break;
+		case "7":
+			handleNote(state, 22+noteModifier, 127);
+			break;
+		case "u":
+			handleNote(state, 23+noteModifier, 127);
+			break;
+		case "i":
+			handleNote(state, 24+noteModifier, 127);
+			break;
+		case "9":
+			handleNote(state, 25+noteModifier, 127);
+			break;
+		case "o":
+			handleNote(state, 26+noteModifier, 127);
+			break;
+		case "0":
+			handleNote(state, 27+noteModifier, 127);
+			break;
+		case "p":
+			handleNote(state, 28+noteModifier, 127);
+			break;
+		case "z":
+			handleNote(state, noteModifier, 127)
+			break;
+		case "s":
+			handleNote(state, 1+noteModifier, 127)
+			break;
+		case "x":
+			handleNote(state, 2+noteModifier, 127)
+			break;
+		case "d":
+			handleNote(state, 3+noteModifier, 127)
+			break;
+		case "c":
+			handleNote(state, 4+noteModifier, 127)
+			break;
+		case "v":
+			handleNote(state, 5+noteModifier, 127)
+			break;
+		case "g":
+			handleNote(state, 6+noteModifier, 127)
+			break;
+		case "b":
+			handleNote(state, 7+noteModifier, 127)
+			break;
+		case "h":
+			handleNote(state, 8+noteModifier, 127)
+			break;
+		case "n":
+			handleNote(state, 9+noteModifier, 127)
+			break;
+		case "j":
+			handleNote(state, 10+noteModifier, 127)
+			break;
+		case "m":
+			handleNote(state, 11+noteModifier, 127)
+			break;
+		case ",":
+			handleNote(state, 12+noteModifier, 127)
+			break;
+		default:
+			// Do nothing for other keys
+			break;
+	}
+}
+
+function handleNote(state, note, velocity) {
+	// Log the note data
+	console.log('handleNote', {state, note, velocity})
+	// Optional velocity handling, currently disabled
+	// let velocityScalar = velocity / 127
+	// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
+	// SYNTH_B.volume.value = Tone.gainToDb(velocityScalar)
+	// SYNTH_C.volume.value = Tone.gainToDb(velocityScalar)
+	midiGuiActivator2(note, state)
+	// Assigning the frequency of the MIDI note to a variable
+	let originalFrequency = midiToFreq(note)
+	// Pushing the frequency to the array of currently playing frequencies
+	SYNTH.STATE.playingFrequencies.push(originalFrequency)
+	// Calculating the frequency for each oscillator (with octave and detune offsets)
+	let freqA = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_A.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
+	let freqB = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_B.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
+	let freqC = originalFrequency * frequencyOffset(subOctaveValues[PRESET.OSC_C.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_C.detune)
+	// If note state is "on"
+	if (state === 'on') {
+		// If any of the oscillators are enabled, set the isPlaying state to true
+		if(PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled){
+			SYNTH.STATE.isPlaying = true
+		}
+		// Start the arpeggiator listener
+		startArp(freqA, freqB, freqC)
+
+		if (!PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
+			SYNTH_A.triggerAttack(freqA)
+			console.log("OSC A attack", freqA, Tone.Frequency(freqA).toNote())
+		}
+		if (!PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
+			SYNTH_B.triggerAttack(freqB)
+			console.log("OSC B attack", freqB, Tone.Frequency(freqB).toNote())
+		}
+		if (!PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
+			SYNTH_C.triggerAttack(freqC)
+			console.log("OSC C attack", freqC, Tone.Frequency(freqC).toNote())
+		}
+	} else {
+		SYNTH_A.triggerRelease(freqA)
+		console.log("OSC A release", freqA, Tone.Frequency(freqA).toNote())
+		SYNTH_B.triggerRelease(freqB)
+		console.log("OSC B release", freqB, Tone.Frequency(freqB).toNote())
+		SYNTH_C.triggerRelease(freqC)
+		console.log("OSC C release", freqC, Tone.Frequency(freqC).toNote())
+		// Sometimes a note gets duplicated and this doesn't filter it out
+		SYNTH.STATE.playingFrequencies = SYNTH.STATE.playingFrequencies.filter(f => f !== originalFrequency)
+		// This should fix it
+		if(SYNTH.STATE.playingFrequencies.length === 0) {
+			SYNTH.STATE.isPlaying = false
+			console.log("isPlaying", SYNTH.STATE.isPlaying)
+			SYNTH_A.releaseAll()
+			SYNTH_B.releaseAll()
+			SYNTH_C.releaseAll()
+		}
+		stopArp(freqA, freqB, freqC)
+	}
+	console.log("SYNTH.STATE.playingFrequencies", SYNTH.STATE.playingFrequencies)
+	console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
+	console.log("ARP.notes_B", SYNTH.STATE.arp_B_frequencies)
+	console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
+}
+
+// -- GUI CONTROLS -- //
 
 let filterResonanceKnob = document.getElementById("filter_resonance")
 let filterResonanceReadout = document.getElementById("filter_resonance_readout")
@@ -907,22 +1299,18 @@ function filterGroupUpdate(target) {
 	}
 }
 
-let fxParam1Knob = document.getElementById("fx_param1")
 let fxParam1Readout = document.getElementById("fx_param1_readout")
 let fxParam1Label = document.getElementById("fx_param1_label")
 let fxParam1Group = document.getElementById("fx_param1_group")
 
-let fxParam2Knob = document.getElementById("fx_param2")
 let fxParam2Readout = document.getElementById("fx_param2_readout")
 let fxParam2Label = document.getElementById("fx_param2_label")
 let fxParam2Group = document.getElementById("fx_param2_group")
 
-let fxParam3Knob = document.getElementById("fx_param3")
 let fxParam3Readout = document.getElementById("fx_param3_readout")
 let fxParam3Label = document.getElementById("fx_param3_label")
 let fxParam3Group = document.getElementById("fx_param3_group")
 
-let fxParam4Knob = document.getElementById("fx_param4")
 let fxParam4Readout = document.getElementById("fx_param4_readout")
 let fxParam4Label = document.getElementById("fx_param4_label")
 let fxParam4Group = document.getElementById("fx_param4_group")
@@ -1148,8 +1536,8 @@ settingsButton.addEventListener("click", function () {
 })
 settingsThemeButton.addEventListener("click", function () {
 	console.log("Changing theme!")
-	if(currentTheme==="light"){
-		currentTheme = "dark"
+	if(SYNTH.THEME.name==="light"){
+		SYNTH.THEME.name = "dark"
 		updatePageColours("#111", "#242424", "#fff", "dark")
 		// #FFFFFF;#2C292D;#D9D9D9
 		updateControlColours("masterControl", "#FFFFFF", "#2C292D", "#D9D9D9")
@@ -1161,7 +1549,7 @@ settingsThemeButton.addEventListener("click", function () {
 		updateControlColours("mainControl4", "#78DCE8", "#2C292D", "#D9D9D9")
 		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
 	} else {
-		currentTheme = "light"
+		SYNTH.THEME.name = "light"
 		updatePageColours("#555", "#999", "#000", "light")
 		updateControlColours("masterControl", "#FFFFFF", "#000", "#FFFFFF")
 		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
@@ -1605,8 +1993,8 @@ function updatePageColours(pageBackground, synthBackground, text, theme){
 	document.body.style.backgroundColor = pageBackground
 	synthContainer.style.backgroundColor = synthBackground
 	document.body.style.color = text
-	synthBackgroundColour = synthBackground
-	synthTextColour = text
+	SYNTH.THEME.synthBackgroundColour = synthBackground
+	SYNTH.THEME.synthTextColour = text
 	consentContainer.style.backgroundColor = synthBackground
 	for(let i = 0; i < infoBlocks.length; i++){
 		if(theme==="dark") {
@@ -1617,9 +2005,9 @@ function updatePageColours(pageBackground, synthBackground, text, theme){
 	}
 	lfoSelector.style.backgroundColor = synthBackground
 	fxSelector.style.backgroundColor = synthBackground
-	pageBackgroundColour = pageBackground
-	synthBackgroundColour = synthBackground
-	synthTextColour = text
+	SYNTH.THEME.pageBackgroundColour = pageBackground
+	SYNTH.THEME.synthBackgroundColour = synthBackground
+	SYNTH.THEME.synthTextColour = text
 }
 
 // -- MAIN EVENT LISTENERS -- //
@@ -1668,6 +2056,88 @@ async function stopRecording() {
 		console.log("MediaRecorder is not recording!")
 	}
 }
+
+let arpLabel = document.getElementById("arp_label")
+
+function changeNote(targetSynth, targetValue, newValue){
+	// Original value + offset
+	// If octave/detune knob, then its octave/detune + master octave offset
+	// If master octave offset knob, then its master octave offset + master octave offset
+	let targetOscillator
+	let targetSynthName
+	if(targetSynth === SYNTH_A) {
+		targetOscillator = PRESET.OSC_A
+		targetSynthName = "A"
+	}
+	if(targetSynth === SYNTH_B) {
+		targetOscillator = PRESET.OSC_B
+		targetSynthName = "B"
+	}
+	if(targetSynth === SYNTH_C){
+		targetOscillator = PRESET.OSC_C
+		targetSynthName = "C"
+	}
+	console.log("changeNote from:", targetValue+"_"+targetSynthName, targetOscillator[targetValue] ? targetOscillator[targetValue] : PRESET.MASTER.octaveOffset, "NEW:", newValue)
+	// If synth is playing when control is changed
+	if(SYNTH.STATE.isPlaying){
+		// For each playing frequency
+		for (let frequency of SYNTH.STATE.playingFrequencies) {
+			// Calculate offset frequency
+			let offsetFrequency
+			if (targetSynth !== SYNTH_C) {
+				offsetFrequency = frequency * frequencyOffset(octaveValues[targetOscillator.octave]+PRESET.MASTER.octaveOffset, targetOscillator.detune)
+			} else {
+				offsetFrequency = frequency * frequencyOffset(subOctaveValues[targetOscillator.octave]+PRESET.MASTER.octaveOffset, targetOscillator.detune)
+			}
+			// Log data
+			console.log("releasing:", targetSynthName, offsetFrequency, Tone.Frequency(offsetFrequency).toNote())
+			// Trigger release
+			targetSynth.triggerRelease(offsetFrequency)
+		}
+		// Log old value
+		console.log("old value:", targetSynthName, targetOscillator[targetValue])
+		if(targetValue !== "master_octave"){
+			// Set new value
+			targetOscillator[targetValue] = newValue
+		} else {
+			PRESET.MASTER.octaveOffset = newValue
+		}
+		// Log new value
+		console.log("new value:", targetSynthName, targetOscillator[targetValue])
+		// For each playing frequency
+		for (let frequency of SYNTH.STATE.playingFrequencies) {
+			// Calculate offset frequency
+			let offsetFrequency
+			if (targetSynth !== SYNTH_C) {
+				offsetFrequency = frequency * frequencyOffset(octaveValues[targetOscillator.octave]+PRESET.MASTER.octaveOffset, targetOscillator.detune)
+			} else {
+				offsetFrequency = frequency * frequencyOffset(subOctaveValues[targetOscillator.octave]+PRESET.MASTER.octaveOffset, targetOscillator.detune)
+			}
+			// Log data
+			console.log("triggering:", targetSynthName, offsetFrequency, Tone.Frequency(offsetFrequency).toNote())
+			// Trigger attack
+			targetSynth.triggerAttack(offsetFrequency)
+		}
+	// If synth is not playing when control is changed
+	} else {
+		// Log old value
+		console.log("old value:", targetSynthName, targetOscillator[targetValue])
+		if(targetValue !== "master_octave"){
+			// Set new value
+			targetOscillator[targetValue] = newValue
+		} else {
+			PRESET.MASTER.octaveOffset = newValue
+		}
+		// Log new value
+		console.log("new value:", targetSynthName, targetOscillator[targetValue])
+		// Release all notes (to avoid hanging notes)
+		targetSynth.releaseAll()
+	}
+	console.log("changeNote from:", targetValue+"_"+targetSynthName, targetOscillator[targetValue] ? targetOscillator[targetValue] : PRESET.MASTER.octaveOffset, "NEW:", newValue)
+}
+
+let controls = document.getElementsByClassName("control");
+// console.log(controls);
 
 // Control events //
 for (let i = 0; i < controls.length; i++) {
@@ -1722,6 +2192,24 @@ for (let i = 0; i < controls.length; i++) {
 					})
 				}
 				break;
+			case "arp_a_switch":
+				PRESET.ARP.A_enabled = e.target.value
+				if(e.target.value === 0){
+					ARP_A.stop()
+				}
+				break;
+			case "arp_b_switch":
+				PRESET.ARP.B_enabled = e.target.value
+				if(e.target.value === 0){
+					ARP_B.stop()
+				}
+				break;
+			case "arp_c_switch":
+				PRESET.ARP.C_enabled = e.target.value
+				if(e.target.value === 0){
+					ARP_C.stop()
+				}
+				break;
 		}
 		// initialise URL variable
 		let recordingURL
@@ -1772,55 +2260,11 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR A --- //
 			// -------------------- //
 			case "osc_a_octave":
-				// TODO
-				// If currently playing
-				// Use current key + octave + semitone to release
-				// Then trigger new key with new octave
-				// ...
-				if(synthPlaying){
-					// Release each voice
-					for(let frequency of playingFrequencies) {
-						console.log("releasing:", frequency)
-						SYNTH_A.triggerRelease(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
-					}
-					PRESET.OSC_A.octave = e.target.value
-					// Trigger new voices
-					for(let frequency of playingFrequencies) {
-						console.log("triggering:", frequency)
-						SYNTH_A.triggerAttack(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
-					}
-				} else {
-					PRESET.OSC_A.octave = e.target.value
-					SYNTH_A.releaseAll()
-				}
-
-				// SYNTH_A.triggerAttack("C" + synthOctaves["osc_a_octave"])
-				// console.log(synthOctaves)
-				// let newKey = "C4"
-				// playingKeys[1] = newKey
-				// SYNTH_A.set({
-				// 	oscillator: {
-				// 		modulationFrequency: 'C4'
-				// 	}
-				// })
+				changeNote(SYNTH_A, "octave", e.target.value)
+				console.log("OSC_A OCTAVE:",PRESET.OSC_A.octave)
 				break;
 			case "osc_a_semi":
-				if(synthPlaying){
-					// Release each voice
-					for(let frequency of playingFrequencies) {
-						console.log("releasing:", frequency)
-						SYNTH_A.triggerRelease(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
-					}
-					PRESET.OSC_A.detune = e.target.value
-					// Trigger new voices
-					for(let frequency of playingFrequencies) {
-						console.log("triggering:", frequency)
-						SYNTH_A.triggerAttack(frequency * frequencyOffset(PRESET.OSC_A.octave+3, PRESET.OSC_A.detune))
-					}
-				} else {
-					PRESET.OSC_A.detune = e.target.value
-					SYNTH_A.releaseAll()
-				}
+				changeNote(SYNTH_A, "detune", e.target.value)
 				break;
 			case "osc_a_volume":
 				PRESET.OSC_A.volume = e.target.value
@@ -1918,40 +2362,10 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR B --- //
 			// -------------------- //
 			case "osc_b_octave":
-				if(synthPlaying){
-					// Release each voice
-					for(let frequency of playingFrequencies) {
-						console.log("releasing:", frequency)
-						SYNTH_B.triggerRelease(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
-					}
-					PRESET.OSC_B.octave = e.target.value
-					// Trigger new voices
-					for(let frequency of playingFrequencies) {
-						console.log("triggering:", frequency)
-						SYNTH_B.triggerAttack(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
-					}
-				} else {
-					PRESET.OSC_B.octave = e.target.value
-					SYNTH_B.releaseAll()
-				}
+				changeNote(SYNTH_B, "octave", e.target.value)
 				break;
 			case "osc_b_semi":
-				if(synthPlaying){
-					// Release each voice
-					for(let frequency of playingFrequencies) {
-						console.log("releasing:", frequency)
-						SYNTH_B.triggerRelease(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
-					}
-					PRESET.OSC_B.detune = e.target.value
-					// Trigger new voices
-					for(let frequency of playingFrequencies) {
-						console.log("triggering:", frequency)
-						SYNTH_B.triggerAttack(frequency * frequencyOffset(PRESET.OSC_B.octave+3, PRESET.OSC_B.detune))
-					}
-				} else {
-					PRESET.OSC_B.detune = e.target.value
-					SYNTH_B.releaseAll()
-				}
+				changeNote(SYNTH_B, "detune", e.target.value)
 				break;
 			case "osc_b_volume":
 				PRESET.OSC_B.volume = e.target.value
@@ -2049,40 +2463,10 @@ for (let i = 0; i < controls.length; i++) {
 			// --- OSCILLATOR C --- //
 			// -------------------- //
 			case "osc_c_octave":
-				if(synthPlaying){
-					// Release each voice
-					for(let frequency of playingFrequencies) {
-						console.log("releasing:", frequency)
-						SYNTH_C.triggerRelease(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
-					}
-					PRESET.OSC_C.octave = e.target.value
-					// Trigger new voices
-					for(let frequency of playingFrequencies) {
-						console.log("triggering:", frequency)
-						SYNTH_C.triggerAttack(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
-					}
-				} else {
-					PRESET.OSC_C.octave = e.target.value
-					SYNTH_C.releaseAll()
-				}
+				changeNote(SYNTH_C, "octave", e.target.value)
 				break;
 			case "osc_c_semi":
-				if(synthPlaying){
-					// Release each voice
-					for(let frequency of playingFrequencies) {
-						console.log("releasing:", frequency)
-						SYNTH_C.triggerRelease(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
-					}
-					PRESET.OSC_C.detune = e.target.value
-					// Trigger new voices
-					for(let frequency of playingFrequencies) {
-						console.log("triggering:", frequency)
-						SYNTH_C.triggerAttack(frequency * frequencyOffset(PRESET.OSC_C.octave, PRESET.OSC_C.detune))
-					}
-				} else {
-					PRESET.OSC_C.detune = e.target.value
-					SYNTH_C.releaseAll()
-				}
+				changeNote(SYNTH_C, "detune", e.target.value)
 				break;
 			case "osc_c_volume":
 				PRESET.OSC_C.volume = e.target.value
@@ -2296,6 +2680,53 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.FX.mix = e.target.value
 				setFXParam4(e.target.value)
 				break;
+			// ----------- //
+			// --- ARP --- //
+			// ----------- //
+			case "arp_pattern":
+				PRESET.ARP.pattern = e.target.value
+				ARP_A.set({
+					pattern: arpPatternValues[e.target.value]
+				})
+				ARP_B.set({
+					pattern: arpPatternValues[e.target.value]
+				})
+				ARP_C.set({
+					pattern: arpPatternValues[e.target.value]
+				})
+				break;
+			case "arp_speed":
+				PRESET.ARP.playbackRate = e.target.value
+				ARP_A.set({
+					playbackRate: arpSpeedValues[e.target.value]
+				})
+				ARP_B.set({
+					playbackRate: arpSpeedValues[e.target.value]
+				})
+				ARP_C.set({
+					playbackRate: arpSpeedValues[e.target.value]
+				})
+				break;
+			case "arp_note_length":
+				PRESET.ARP.noteLength = e.target.value
+				// ARP_A.set({
+				// 	interval: arpTimeValues[e.target.value]
+				// })
+				// ARP_B.set({
+				// 	interval: arpTimeValues[e.target.value]
+				// })
+				// ARP_C.set({
+				// 	interval: arpTimeValues[e.target.value]
+				// })
+				break;
+			case "master_octave":
+				let oldValue = PRESET.MASTER.octaveOffset
+				changeNote(SYNTH_A, "master_octave", e.target.value-2)
+				PRESET.MASTER.octaveOffset = oldValue
+				changeNote(SYNTH_B, "master_octave", e.target.value-2)
+				PRESET.MASTER.octaveOffset = oldValue
+				changeNote(SYNTH_C, "master_octave", e.target.value-2)
+				break;
 			default:
 				console.log("Switch default: Nothing set for this case!")
 		}
@@ -2350,22 +2781,6 @@ keyboard.addEventListener("mouseover", function () {
 
 let heldKeys = [];
 let playingKeys = [];
-let guiKeys = [];
-
-// TODO: Fix sticky keys if keys released after focusout
-keyboard.addEventListener("focusout", function (e) {
-	console.log("keyboard unfocused!", e);
-	console.log("guiKeys: " + guiKeys)
-	console.log("heldKeys: " + heldKeys)
-	console.log("playingKeys: " + playingKeys)
-	// SYNTH_A.releaseAll()
-	// SYNTH_B.releaseAll()
-	// SYNTH_C.releaseAll()
-	// guiKeys.forEach((key) => {
-	// 	console.log("releasing key: " + key)
-	// 	keyboard.setNote(0, key, 0);
-	// })
-})
 
 keyboard.addEventListener("change", function (e) {
 	// Calculate the notes to play based on the keyboard input and synth settings
@@ -2388,15 +2803,9 @@ keyboard.addEventListener("change", function (e) {
 	//  heldKeys: changing note parameters while playing keys will cause keys to stick,
 	//    but you can let go of keys without all keys being released...
 
-	// TODO: ARPEGGIATOR
-	//  - If on, push notes to array before triggering pattern
-	//  - If off, play normally
-
 
 	// If note on
 	if (e.note[0]) {
-		guiKeys.push(e.note[1])
-		console.log("guiKeys", guiKeys)
 		// if not already in heldKeys array, push it
 		if (!heldKeys.includes(note_a+"_OSC_A") || !heldKeys.includes(note_b+"_OSC_B") || !heldKeys.includes(note_c+"_OSC_C")) {
 			// LFO.stop()
@@ -2404,6 +2813,9 @@ keyboard.addEventListener("change", function (e) {
 			heldKeys.push(note_b+"_OSC_B");
 			heldKeys.push(note_c+"_OSC_C");
 			// Trigger the attack for the new notes and add them to the playingKeys array
+
+			// Start the arpeggiator listener
+			startArp(note_a, note_b, note_c)
 
 			SYNTH_A.triggerAttack(note_a);
 			playingKeys.push(note_a+"_OSC_A");
@@ -2423,10 +2835,12 @@ keyboard.addEventListener("change", function (e) {
 		}
 		// If note off
 	} else {
-		guiKeys = guiKeys.filter(item => item !== e.note[1])
-		console.log("guiKeys", guiKeys)
+		stopArp(note_a, note_b, note_c)
 		// remove the note from the heldKeys array
 		heldKeys = heldKeys.filter(item => item !== note_a+"_OSC_A" && item !== note_b+"_OSC_B" && item !== note_c+"_OSC_C");
+		if (playingKeys.includes(note_a+"_OSC_A") || playingKeys.includes(note_b+"_OSC_B") || playingKeys.includes(note_c+"_OSC_C")) {
+			SYNTH.STATE.isPlaying = true;
+		}
 		// Trigger the release for the playing notes and remove them from the playingKeys array
 		if (playingKeys.includes(note_a+"_OSC_A")) {
 			SYNTH_A.triggerRelease(note_a);
@@ -2448,6 +2862,7 @@ keyboard.addEventListener("change", function (e) {
 			SYNTH_B.releaseAll();
 			SYNTH_C.releaseAll();
 			console.log("released all!");
+			SYNTH.STATE.isPlaying = false;
 		}
 		// LFO.stop()
 	}
@@ -2513,8 +2928,6 @@ window.addEventListener("keypress", function (e) {
 // let height = synthContainer.offsetHeight;
 
 // TODO: Figure out zoom-out issue with P5 canvas
-// TODO: Draw rectangles to enclose the oscilloscopes
-// TODO: Reduce height of oscilloscopes // reduce maximum volume control
 
 function p5_sketch(p) {
 	p.setup = function () {
@@ -2536,7 +2949,7 @@ function p5_sketch(p) {
 	}
 	p.draw = function () {
 		// Redraw background
-		p.background(synthBackgroundColour)
+		p.background(SYNTH.THEME.synthBackgroundColour)
 		// Reset stroke
 		p.strokeWeight(1)
 		// Draw oscilloscopes
@@ -2552,7 +2965,7 @@ function p5_sketch(p) {
 		// Set stroke and fill for rectangles
 		p.strokeWeight(0)
 		// p.fill(0)
-		p.fill(synthBackgroundColour)
+		p.fill(SYNTH.THEME.synthBackgroundColour)
 		// Horizontal rectangles to enclose the oscilloscopes
 		p.rect(0, 0, canvasWidth, 242)
 		p.rect(0, 374, canvasWidth, 122)
@@ -2591,7 +3004,7 @@ function p5_sketch(p) {
 		let end = start + buffer.length/2;
 
 		// Set stroke colour to white
-		p.stroke(synthTextColour);
+		p.stroke(SYNTH.THEME.synthTextColour);
 
 		// Map x/y values and draw waveform
 		for (let i = start; i < end; i++){
@@ -2614,13 +3027,13 @@ consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
 	synthContainer.style.display = "flex";
 	bodyContainer.style.paddingTop = "2rem";
-	document.body.style.backgroundColor = pageBackgroundColour;
+	document.body.style.backgroundColor = SYNTH.THEME.pageBackgroundColour;
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();
 	}
-	if(!p5_enabled){
+	if(!SYNTH.STATE.p5_enabled){
 		new p5(p5_sketch, "p5_canvas");
-		p5_enabled = true;
+		SYNTH.STATE.p5_enabled = true;
 	}
 	p5_canvas.classList.remove("hidden");
 })
@@ -2631,7 +3044,7 @@ homeButton.addEventListener("click", function () {
 	consentContainer.style.display = "flex";
 	synthContainer.style.display = "none";
 	bodyContainer.style.paddingTop = "0rem";
-	document.body.style.backgroundColor = synthBackgroundColour;
+	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
 	p5_canvas.classList.add("hidden");
 	if(settingsDropdownOpen){
 		toggleDropdown(settingsDropdown)

@@ -1042,19 +1042,23 @@ function startArp(freqA, freqB, freqC) {
 }
 
 function stopArp(freqA, freqB, freqC) {
-	if(SYNTH.STATE.arp_A_frequencies.length > 0) {
+	if(freqA && !freqB && !freqC) {
+		freqB = freqA
+		freqC = freqA
+	}
+	if (SYNTH.STATE.arp_A_frequencies.length > 0) {
 		SYNTH.STATE.arp_A_frequencies = SYNTH.STATE.arp_A_frequencies.filter(f => f !== freqA)
 		ARP_A.set({
 			"values": SYNTH.STATE.arp_A_frequencies,
 		})
 	}
-	if(SYNTH.STATE.arp_B_frequencies.length > 0) {
+	if (SYNTH.STATE.arp_B_frequencies.length > 0) {
 		SYNTH.STATE.arp_B_frequencies = SYNTH.STATE.arp_B_frequencies.filter(f => f !== freqB)
 		ARP_B.set({
 			"values": SYNTH.STATE.arp_B_frequencies,
 		})
 	}
-	if(SYNTH.STATE.arp_C_frequencies.length > 0) {
+	if (SYNTH.STATE.arp_C_frequencies.length > 0) {
 		SYNTH.STATE.arp_C_frequencies = SYNTH.STATE.arp_C_frequencies.filter(f => f !== freqC)
 		ARP_C.set({
 			"values": SYNTH.STATE.arp_C_frequencies,
@@ -1062,6 +1066,15 @@ function stopArp(freqA, freqB, freqC) {
 	}
 	if(SYNTH.STATE.arp_A_frequencies.length === 0 && SYNTH.STATE.arp_B_frequencies.length === 0 && SYNTH.STATE.arp_C_frequencies.length === 0) {
 		// Stop all arpeggiators
+		ARP_A.stop()
+		ARP_B.stop()
+		ARP_C.stop()
+	}
+	if(SYNTH.STATE.keysHeld === 0) {
+		// Stop all arpeggiators
+		SYNTH.STATE.arp_A_frequencies = []
+		SYNTH.STATE.arp_B_frequencies = []
+		SYNTH.STATE.arp_C_frequencies = []
 		ARP_A.stop()
 		ARP_B.stop()
 		ARP_C.stop()
@@ -1084,7 +1097,9 @@ document.addEventListener("keydown", e => {
 })
 document.addEventListener("keyup", e => {
 	// Decrement keysHeld
-	SYNTH.STATE.keysHeld--
+	if (SYNTH.STATE.keysHeld > 0){
+		SYNTH.STATE.keysHeld--
+	}
 	console.log("keysHeld (keyup):",SYNTH.STATE.keysHeld)
 	// Prevent default browser behaviour
 	e.preventDefault()
@@ -2064,17 +2079,29 @@ function changeNote(targetSynth, targetValue, newValue){
 	// If octave/detune knob, then its octave/detune + master octave offset
 	// If master octave offset knob, then its master octave offset + master octave offset
 	let targetOscillator
+	let targetArpeggiator
+	let targetArpeggiatorState
+	let targetArpeggiatorNotes
 	let targetSynthName
 	if(targetSynth === SYNTH_A) {
 		targetOscillator = PRESET.OSC_A
+		targetArpeggiator = ARP_A
+		targetArpeggiatorState = PRESET.ARP.A_enabled
+		targetArpeggiatorNotes = SYNTH.STATE.arp_A_frequencies
 		targetSynthName = "A"
 	}
 	if(targetSynth === SYNTH_B) {
 		targetOscillator = PRESET.OSC_B
+		targetArpeggiator = ARP_B
+		targetArpeggiatorState = PRESET.ARP.B_enabled
+		targetArpeggiatorNotes = SYNTH.STATE.arp_B_frequencies
 		targetSynthName = "B"
 	}
 	if(targetSynth === SYNTH_C){
 		targetOscillator = PRESET.OSC_C
+		targetArpeggiator = ARP_C
+		targetArpeggiatorState = PRESET.ARP.C_enabled
+		targetArpeggiatorNotes = SYNTH.STATE.arp_C_frequencies
 		targetSynthName = "C"
 	}
 	console.log("changeNote from:", targetValue+"_"+targetSynthName, targetOscillator[targetValue] ? targetOscillator[targetValue] : PRESET.MASTER.octaveOffset, "NEW:", newValue)
@@ -2091,6 +2118,18 @@ function changeNote(targetSynth, targetValue, newValue){
 			}
 			// Log data
 			console.log("releasing:", targetSynthName, offsetFrequency, Tone.Frequency(offsetFrequency).toNote())
+			if(targetOscillator.enabled && targetArpeggiatorState){
+				console.log("Target oscillator & arpeggiator enabled. Stopping:", offsetFrequency)
+				if (targetArpeggiatorNotes.length > 0) {
+					targetArpeggiatorNotes = targetArpeggiatorNotes.filter(f => f !== offsetFrequency)
+					targetArpeggiator.set({
+						"values": targetArpeggiatorNotes
+					})
+				}
+				if(targetArpeggiatorNotes.length === 0) {
+					targetArpeggiator.stop()
+				}
+			}
 			// Trigger release
 			targetSynth.triggerRelease(offsetFrequency)
 		}
@@ -2116,7 +2155,22 @@ function changeNote(targetSynth, targetValue, newValue){
 			// Log data
 			console.log("triggering:", targetSynthName, offsetFrequency, Tone.Frequency(offsetFrequency).toNote())
 			// Trigger attack
-			targetSynth.triggerAttack(offsetFrequency)
+			if(targetOscillator.enabled && targetArpeggiatorState){
+				console.log("Target oscillator & arpeggiator enabled. Stopping:", offsetFrequency)
+				// Add the frequency to the array
+				targetArpeggiatorNotes.push(offsetFrequency)
+				// Set Tone Pattern values to the updated array of frequencies
+				targetArpeggiator.set({
+					"values": targetArpeggiatorNotes,
+				})
+				// If there is only one frequency in the array, start the arp
+				if (targetArpeggiatorNotes.length === 1) {
+					targetArpeggiator.start()
+				}
+				console.log("New arp notes:", targetArpeggiatorNotes)
+			} else {
+				targetSynth.triggerAttack(offsetFrequency)
+			}
 		}
 	// If synth is not playing when control is changed
 	} else {
@@ -2133,7 +2187,21 @@ function changeNote(targetSynth, targetValue, newValue){
 		// Release all notes (to avoid hanging notes)
 		targetSynth.releaseAll()
 	}
+	switch(targetSynth) {
+		case SYNTH_A:
+		SYNTH.STATE.arp_A_frequencies = targetArpeggiatorNotes
+		break;
+		case SYNTH_B:
+		SYNTH.STATE.arp_B_frequencies = targetArpeggiatorNotes
+		break;
+		case SYNTH_C:
+		SYNTH.STATE.arp_C_frequencies = targetArpeggiatorNotes
+		break;
+	}
 	console.log("changeNote from:", targetValue+"_"+targetSynthName, targetOscillator[targetValue] ? targetOscillator[targetValue] : PRESET.MASTER.octaveOffset, "NEW:", newValue)
+	console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
+	console.log("ARP.notes_B", SYNTH.STATE.arp_B_frequencies)
+	console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
 }
 
 let controls = document.getElementsByClassName("control");

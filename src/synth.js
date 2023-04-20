@@ -1042,10 +1042,6 @@ function startArp(freqA, freqB, freqC) {
 }
 
 function stopArp(freqA, freqB, freqC) {
-	if(freqA && !freqB && !freqC) {
-		freqB = freqA
-		freqC = freqA
-	}
 	if (SYNTH.STATE.arp_A_frequencies.length > 0) {
 		SYNTH.STATE.arp_A_frequencies = SYNTH.STATE.arp_A_frequencies.filter(f => f !== freqA)
 		ARP_A.set({
@@ -1071,40 +1067,67 @@ function stopArp(freqA, freqB, freqC) {
 		ARP_C.stop()
 	}
 	if(SYNTH.STATE.keysHeld === 0) {
-		// Stop all arpeggiators
+		// Empty all arpeggiator frequency arrays
 		SYNTH.STATE.arp_A_frequencies = []
 		SYNTH.STATE.arp_B_frequencies = []
 		SYNTH.STATE.arp_C_frequencies = []
+		// Stop all arpeggiators
 		ARP_A.stop()
 		ARP_B.stop()
 		ARP_C.stop()
 	}
 }
-
+let physicalKeyboardActive = true
+let webaudioControlsReadouts = document.getElementsByTagName("webaudio-param")
+for(let readout of webaudioControlsReadouts){
+	readout.addEventListener("focusin", e => {
+		console.log(e)
+		physicalKeyboardActive = false
+	})
+	readout.addEventListener("focusout", e => {
+		console.log(e)
+		physicalKeyboardActive = true
+	})
+}
+let inputs = document.getElementsByTagName("input")
+for(let input of inputs){
+	input.addEventListener("focusin", e => {
+		console.log(e)
+		physicalKeyboardActive = false
+	})
+	input.addEventListener("focusout", e => {
+		console.log(e)
+		physicalKeyboardActive = true
+	})
+}
 document.addEventListener("keydown", e => {
-	// console.log(e)
-	// If the key is being held down, return
-	if (e.repeat) { return }
-	// Increment keysHeld
-	SYNTH.STATE.keysHeld++
-	console.log("keysHeld (keydown):",SYNTH.STATE.keysHeld)
-	// Prevent default browser behaviour
-	e.preventDefault()
-	// If keysHeld is over 0, handle the note event
-	if (SYNTH.STATE.keysHeld > 0) {
-	handleKeyEvent(e)
+	if(physicalKeyboardActive){
+		// console.log(e)
+		// If the key is being held down, return
+		if (e.repeat) { return }
+		// Increment keysHeld
+		SYNTH.STATE.keysHeld++
+		console.log("keysHeld (keydown):",SYNTH.STATE.keysHeld)
+		// Prevent default browser behaviour
+		// e.preventDefault()
+		// If keysHeld is over 0, handle the note event
+		if (SYNTH.STATE.keysHeld > 0) {
+			handleKeyEvent(e)
+		}
 	}
 })
 document.addEventListener("keyup", e => {
-	// Decrement keysHeld
-	if (SYNTH.STATE.keysHeld > 0){
-		SYNTH.STATE.keysHeld--
+	if(physicalKeyboardActive) {
+		// Decrement keysHeld
+		if (SYNTH.STATE.keysHeld > 0) {
+			SYNTH.STATE.keysHeld--
+		}
+		console.log("keysHeld (keyup):", SYNTH.STATE.keysHeld)
+		// Prevent default browser behaviour
+		// e.preventDefault()
+		// Start the keyboard listener
+		handleKeyEvent(e)
 	}
-	console.log("keysHeld (keyup):",SYNTH.STATE.keysHeld)
-	// Prevent default browser behaviour
-	e.preventDefault()
-	// Start the keyboard listener
-	handleKeyEvent(e)
 })
 
 // Function which listens to the computer keyboard like a MIDI keyboard

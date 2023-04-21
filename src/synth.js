@@ -1738,8 +1738,10 @@ function frequencyOffset(octave, semitone) {
 function startArp(freqA, freqB, freqC) {
 	// If ARP A is enabled,
 	if (PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
-		// Add the frequency to the array
-		SYNTH.STATE.arp_A_frequencies.push(freqA)
+		// Add the frequency to the array if it is not already in the array
+		if (!SYNTH.STATE.arp_A_frequencies.includes(freqA)) {
+			SYNTH.STATE.arp_A_frequencies.push(freqA)
+		}
 		// Set Tone Pattern values to the updated array of frequencies
 		ARP_A.set({
 			"values": SYNTH.STATE.arp_A_frequencies,
@@ -1751,7 +1753,9 @@ function startArp(freqA, freqB, freqC) {
 	}
 	// Repeat for ARP B and ARP C
 	if (PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
-		SYNTH.STATE.arp_B_frequencies.push(freqB)
+		if (!SYNTH.STATE.arp_B_frequencies.includes(freqB)) {
+			SYNTH.STATE.arp_B_frequencies.push(freqB)
+		}
 		ARP_B.set({
 			"values": SYNTH.STATE.arp_B_frequencies,
 		})
@@ -1760,7 +1764,9 @@ function startArp(freqA, freqB, freqC) {
 		}
 	}
 	if (PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
-		SYNTH.STATE.arp_C_frequencies.push(freqC)
+		if (!SYNTH.STATE.arp_C_frequencies.includes(freqC)) {
+			SYNTH.STATE.arp_C_frequencies.push(freqC)
+		}
 		ARP_C.set({
 			"values": SYNTH.STATE.arp_C_frequencies,
 		})
@@ -1844,14 +1850,20 @@ function handleNote(state, note, velocity, origin) {
 		// If the note is a MIDI note, subtract 48 to get the correct frequency
 		note = origin === 'midi' ? note - 48 : note
 		// console.log("note:",note)
-		// If the origin is not the mouse, activate a GUI key
-		if (origin !== "mouse") {
+		// If the origin is not the mouse or toggle, activate a GUI key
+		if (origin !== "mouse" && origin !== "toggle") {
 			guiKeyActivator(note, state)
 		}
-		// Initialize the original frequency with midiToFreq
-		let originalFrequency = midiToFreq(note)
-		// Push the frequency to the array of currently playing frequencies
-		SYNTH.STATE.playingFrequencies.push(originalFrequency)
+		let originalFrequency
+		if(origin !== "toggle") {
+			// Assign to frequency determined by MIDI value
+			originalFrequency = midiToFreq(note)
+			// Push the frequency to the array of currently playing frequencies
+			SYNTH.STATE.playingFrequencies.push(originalFrequency)
+		} else {
+			// Assign to frequency passed in from toggle
+			originalFrequency = note
+		}
 		// Calculate the frequency for each oscillator (with octave and detune offsets)
 		let freqA = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_A.octave] + PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
 		let freqB = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_B.octave] + PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
@@ -2301,18 +2313,78 @@ for (let i = 0; i < controls.length; i++) {
 				PRESET.ARP.A_enabled = e.target.value
 				if(e.target.value === 0){
 					ARP_A.stop()
+					if(PRESET.OSC_A.enabled){
+						for(let i = 0; i < SYNTH.STATE.playingFrequencies.length; i++){
+							handleNote("on", SYNTH.STATE.playingFrequencies[i], 127, "toggle")
+						}
+					}
+				} else {
+					let offsetFrequency
+					for(let i= 0; i < SYNTH.STATE.playingFrequencies.length; i++){
+						offsetFrequency = SYNTH.STATE.playingFrequencies[i] * frequencyOffset(octaveValues[PRESET.OSC_A.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
+						SYNTH_A.triggerRelease(offsetFrequency)
+						// Add the frequency to the array if it doesn't already exist
+						if(!SYNTH.STATE.arp_A_frequencies.includes(offsetFrequency)){
+							SYNTH.STATE.arp_A_frequencies.push(offsetFrequency)
+						}
+						// Set Tone Pattern values to the updated array of frequencies
+						ARP_A.set({
+							"values": SYNTH.STATE.arp_A_frequencies,
+						})
+						ARP_A.start()
+					}
 				}
 				break;
 			case "arp_b_switch":
 				PRESET.ARP.B_enabled = e.target.value
 				if(e.target.value === 0){
 					ARP_B.stop()
+					if(PRESET.OSC_B.enabled){
+						for(let i = 0; i < SYNTH.STATE.playingFrequencies.length; i++){
+							handleNote("on", SYNTH.STATE.playingFrequencies[i], 127, "toggle")
+						}
+					}
+				} else {
+					let offsetFrequency
+					for(let i= 0; i < SYNTH.STATE.playingFrequencies.length; i++){
+						offsetFrequency = SYNTH.STATE.playingFrequencies[i] * frequencyOffset(octaveValues[PRESET.OSC_B.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
+						SYNTH_B.triggerRelease(offsetFrequency)
+						// Add the frequency to the array if it doesn't already exist
+						if(!SYNTH.STATE.arp_B_frequencies.includes(offsetFrequency)){
+							SYNTH.STATE.arp_B_frequencies.push(offsetFrequency)
+						}
+						// Set Tone Pattern values to the updated array of frequencies
+						ARP_B.set({
+							"values": SYNTH.STATE.arp_B_frequencies,
+						})
+						ARP_B.start()
+					}
 				}
 				break;
 			case "arp_c_switch":
 				PRESET.ARP.C_enabled = e.target.value
 				if(e.target.value === 0){
 					ARP_C.stop()
+					if(PRESET.OSC_C.enabled){
+						for(let i = 0; i < SYNTH.STATE.playingFrequencies.length; i++){
+							handleNote("on", SYNTH.STATE.playingFrequencies[i], 127, "toggle")
+						}
+					}
+				} else {
+					let offsetFrequency
+					for(let i= 0; i < SYNTH.STATE.playingFrequencies.length; i++){
+						offsetFrequency = SYNTH.STATE.playingFrequencies[i] * frequencyOffset(subOctaveValues[PRESET.OSC_C.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_C.detune)
+						SYNTH_C.triggerRelease(offsetFrequency)
+						// Add the frequency to the array if it doesn't already exist
+						if(!SYNTH.STATE.arp_C_frequencies.includes(offsetFrequency)){
+							SYNTH.STATE.arp_C_frequencies.push(offsetFrequency)
+						}
+						// Set Tone Pattern values to the updated array of frequencies
+						ARP_C.set({
+							"values": SYNTH.STATE.arp_C_frequencies,
+						})
+						ARP_C.start()
+					}
 				}
 				break;
 		}

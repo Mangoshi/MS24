@@ -569,23 +569,23 @@ ${this.basestyle}
       if(this._setValue(v) && f)
         this.sendEvent("input"),this.sendEvent("change");
     }
-    keydown(e){
-      const delta = this.step;
-      if(delta==0)
-        delta=1;
-      switch(e.key){
-      case "ArrowUp":
-        this.setValue(this.value+delta,true);
-        break;
-      case "ArrowDown":
-        this.setValue(this.value-delta,true);
-        break;
-      default:
-          return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    // keydown(e){
+    //   const delta = this.step;
+    //   if(delta==0)
+    //     delta=1;
+    //   switch(e.key){
+    //   case "ArrowUp":
+    //     this.setValue(this.value+delta,true);
+    //     break;
+    //   case "ArrowDown":
+    //     this.setValue(this.value-delta,true);
+    //     break;
+    //   default:
+    //       return;
+    //   }
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    // }
     wheel(e) {
       if (!this.enable)
         return;
@@ -752,7 +752,7 @@ ${this.basestyle}
       this.ttframe=this.knob.nextSibling;
       this.label=this.ttframe.nextSibling;
       this.enable=this.getAttr("enable",1);
-      this.tracking=this.getAttr("tracking","rel"); 
+      this.tracking=this.getAttr("tracking","rel");
       this._src=this.getAttr("src",opt.sliderSrc); if (!this.hasOwnProperty("src")) Object.defineProperty(this,"src",{get:()=>{return this._src},set:(v)=>{this._src=v;this.setupImage()}});
       this._knobsrc=this.getAttr("knobsrc",opt.sliderKnobSrc); if (!this.hasOwnProperty("knobsrc")) Object.defineProperty(this,"knobsrc",{get:()=>{return this._knobsrc},set:(v)=>{this._knobsrc=v;this.setupImage()}});
       this._value=this.getAttr("value",0); if (!this.hasOwnProperty("value")) Object.defineProperty(this,"value",{get:()=>{return this._value},set:(v)=>{this._value=v;this.redraw()}});
@@ -987,23 +987,23 @@ ${this.basestyle}
       if(this._setValue(v)&&f)
         this.sendEvent("input"),this.sendEvent("change");
     }
-    keydown(e){
-      const delta = this.step;
-      if(delta==0)
-        delta=1;
-      switch(e.key){
-      case "ArrowUp":
-        this.setValue(this.value+delta,true);
-        break;
-      case "ArrowDown":
-        this.setValue(this.value-delta,true);
-        break;
-      default:
-          return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    // keydown(e){
+    //   const delta = this.step;
+    //   if(delta==0)
+    //     delta=1;
+    //   switch(e.key){
+    //   case "ArrowUp":
+    //     this.setValue(this.value+delta,true);
+    //     break;
+    //   case "ArrowDown":
+    //     this.setValue(this.value-delta,true);
+    //     break;
+    //   default:
+    //       return;
+    //   }
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    // }
     wheel(e) {
       if (!this.enable)
         return;
@@ -1718,36 +1718,36 @@ ${this.basestyle}
         this.sendEvent("input"),this.sendEvent("change");
     }
     wheel(e){}
-    keydown(e){
-      let m=Math.floor((this.min+11)/12)*12;
-      let k=this.keycodes1.indexOf(e.keyCode);
-      if(k<0) {
-        k=this.keycodes2.indexOf(e.keyCode);
-        if(k>=0) k+=12;
-      }
-      if(k>=0){
-        k+=m;
-        if(this.currentKey!=k){
-          this.currentKey=k;
-          this.sendEventFromKey(1,k);
-          this.setNote(1,k);
-        }
-      }
-    }
-    keyup(e){
-      let m=Math.floor((this.min+11)/12)*12;
-      let k=this.keycodes1.indexOf(e.keyCode);
-      if(k<0) {
-        k=this.keycodes2.indexOf(e.keyCode);
-        if(k>=0) k+=12;
-      }
-      if(k>=0){
-        k+=m;
-        this.currentKey=-1;
-        this.sendEventFromKey(0,k);
-        this.setNote(0,k);
-      }
-    }
+    // keydown(e){
+    //   let m=Math.floor((this.min+11)/12)*12;
+    //   let k=this.keycodes1.indexOf(e.keyCode);
+    //   if(k<0) {
+    //     k=this.keycodes2.indexOf(e.keyCode);
+    //     if(k>=0) k+=12;
+    //   }
+    //   if(k>=0){
+    //     k+=m;
+    //     if(this.currentKey!=k){
+    //       this.currentKey=k;
+    //       this.sendEventFromKey(1,k);
+    //       this.setNote(1,k);
+    //     }
+    //   }
+    // }
+    // keyup(e){
+    //   let m=Math.floor((this.min+11)/12)*12;
+    //   let k=this.keycodes1.indexOf(e.keyCode);
+    //   if(k<0) {
+    //     k=this.keycodes2.indexOf(e.keyCode);
+    //     if(k>=0) k+=12;
+    //   }
+    //   if(k>=0){
+    //     k+=m;
+    //     this.currentKey=-1;
+    //     this.sendEventFromKey(0,k);
+    //     this.setNote(0,k);
+    //   }
+    // }
     pointerdown(ev){
       this.cv.focus();
       if(this.enable) {
@@ -1790,7 +1790,7 @@ ${this.basestyle}
         this.sendevent();
         this.redraw();
       }
-        
+
       let pointerup=(ev)=>{
         if(this.enable) {
           if(ev.touches)

@@ -73,6 +73,7 @@ let PRESET = {
 	MASTER: {
 		gain: 1,
 		octaveOffset: 0,
+		bpm: 120,
 	},
 	OSC_A: {
 		enabled: 1,
@@ -2292,6 +2293,10 @@ for (let i = 0; i < controls.length; i++) {
 				MASTER_GAIN.set({
 					"gain": e.target.value
 				})
+				break;
+			case "master_bpm":
+				PRESET.MASTER.bpm = e.target.value
+				Tone.Transport.bpm.value = e.target.value
 				break;
 			// -------------------- //
 			// --- OSCILLATOR A --- //

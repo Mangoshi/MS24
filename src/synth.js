@@ -14,22 +14,15 @@ await register(await connect())
 	.catch((err) => {console.error(err)})
 
 // TODO:
-//  1. LFO SWITCHING
-//  2. PHRASE RECORDER (Arpeggiator Latch)
-//  3. GLIDE CONTROLS (Portamento)
-//  4. TOOLTIPS / HELP TEXT
-//  5. RANDOMIZE PRESET
-//  6. MISSING VISUALIZATIONS (FILTER, LFO, FX)
-
-// TODO: BUG FIXES
-//  1. REVERB LOAD ???
-//  2. DOUBLE NOTES !!!
-//  3. ARP PRESET LOGIC !!!
+//  1. TOOLTIPS / HELP TEXT
+//  2. RANDOMIZE PRESET
+//  4. MISSING VISUALIZATIONS (FILTER, LFO, FX)
+//  5. PHRASE RECORDER? (Arpeggiator Latch)
+//  6. FIX LFO SWITCHING
+//  7. DISPLAY REVERB LOAD (If possible)
 
 // TODO: BONUS SYNTH FEATURES
-//  ✔ Unison/Spread (Requires "fat" oscillator types)
 //  - Glide (Figure out why it's not working)
-//  ✔ FM (Requires FMSynth) (Can combine with fat oscillator types)
 //  - Partials control (Will require strange dynamic controls for each partial)
 //  - FX Buses (Will require using Tone.Channel: send generators to bus and receive on FX)
 //  - Noise Generators (Will require using Tone.Noise)
@@ -1902,8 +1895,8 @@ function handleNote(state, note, velocity, origin) {
 			console.log("OSC C release", freqC, Tone.Frequency(freqC).toNote())
 			// Sometimes a note gets duplicated and this doesn't always filter it out
 			SYNTH.STATE.playingFrequencies = SYNTH.STATE.playingFrequencies.filter(f => f !== originalFrequency)
-			// This should fix it
-			// TODO: Figure out why this is happening
+			// This doesn't fix it, but it's still a useful safeguard
+			// The actual issue is bypassed in the keydown event handler below
 			if (SYNTH.STATE.playingFrequencies.length === 0) {
 				SYNTH.STATE.isPlaying = false
 				console.log("isPlaying", SYNTH.STATE.isPlaying)
@@ -2310,6 +2303,8 @@ for (let i = 0; i < controls.length; i++) {
 				}
 				break;
 			case "arp_a_switch":
+				// TODO: BUG: If octave is changed while arp is off,
+				//  and then arp is turned on, the arp will play the old octave
 				PRESET.ARP.A_enabled = e.target.value
 				if(e.target.value === 0){
 					ARP_A.stop()

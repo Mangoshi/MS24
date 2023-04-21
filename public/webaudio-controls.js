@@ -1,3 +1,4 @@
+
 /* *
  *
  *  WebAudio-Controls is based on
@@ -21,6 +22,10 @@
  *	 limitations under the License.
  *
  * */
+
+// EDITED BY: Seán Óg Durack Monks (Mangoshi)
+// EDITS MADE: Keydown logic has been commented-out, as it conflicts with the keydown logic of the main app.
+
 if(window.customElements){
   let styles=document.createElement("style");
   styles.innerHTML=

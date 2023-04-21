@@ -44,6 +44,7 @@ Tone.Transport.start()
 
 let SYNTH = {
 	STATE: {
+		physicalKeyboardActive: true,
 		keysHeld: 0,
 		isPlaying: false,
 		playingFrequencies: [],
@@ -256,19 +257,19 @@ let MIN_MAX = {
 // -- DATA CONVERSION -- //
 
 let octaveValues = {
-	"-3": 1,
-	"-2": 2,
-	"-1": 3,
-	"0": 4,
-	"1": 5,
-	"2": 6,
-	"3": 7,
+	"-3": 2,
+	"-2": 3,
+	"-1": 4,
+	"0": 5,
+	"1": 6,
+	"2": 7,
+	"3": 8,
 }
 let subOctaveValues = {
-	"0": 2,
-	"1": 3,
-	"2": 4,
-	"3": 5,
+	"0": 3,
+	"1": 4,
+	"2": 5,
+	"3": 6,
 }
 let oscillatorShapeValues = {
 	"0": "fatsine",
@@ -704,7 +705,7 @@ function resetFX() {
 }
 // TODO: Fix bug where FX params are kept when switching FX, but the GUI doesn't reflect this
 
-// -- NOTES -- //
+// -- ARPEGGIATORS -- //
 
 const ARP_A = new Tone.Pattern(function(time, note){
 	SYNTH_A.triggerAttackRelease(note, "16n", time);
@@ -791,520 +792,8 @@ function connectTone() {
 }
 connectTone()
 
-// -- MIDI -- //
-
-// MIDI Access Class
-class MIDIAccess {
-	constructor(args = {}) {
-		// Either use the passed in function or log to console
-		this.onDeviceInput = args.onDeviceInput || console.log;
-	}
-
-	start() {
-		// Return a promise
-		return new Promise((resolve, reject) => {
-			// Request MIDI Access
-			this._requestAccess().then(access => {
-				// Initialize MIDI Access
-				this.initialize(access);
-				// Resolve the promise
-				resolve();
-			}).catch(() => reject('Something went wrong.'));
-		});
-	}
-
-	initialize(access) {
-		// Get all MIDI inputs
-		const devices = access.inputs.values();
-		// Loop through all MIDI inputs
-		let index = 0
-		for (let device of devices){
-			index++
-			console.log('Device', index)
-			// Initialize the MIDI device
-			this.initializeDevice(device);
-		}
-	}
-
-	initializeDevice(device) {
-		// Listen for MIDI messages
-		device.onmidimessage = this.onMessage.bind(this);
-		// Log the device name, state and type
-		console.log(`Name: ${device.name}\nState: ${device.state}\nType: ${device.type}`)
-	}
-
-	onMessage(message) {
-		// Initialize MIDI data array variables
-		let [command, note, velocity] = message.data;
-		// Run the onDeviceInput function using the MIDI data
-		this.onDeviceInput({ command, note, velocity });
-	}
-
-	_requestAccess() {
-		// Return a promise
-		return new Promise((resolve, reject) => {
-			// Check if the browser supports MIDI
-			if (navigator.requestMIDIAccess)
-				// Request MIDI Access
-				navigator.requestMIDIAccess()
-					.then(resolve)
-					.catch(reject);
-			else reject();
-		});
-	}
-}
-
-// Create a new instance of the MIDIAccess class
-const MIDI = new MIDIAccess({ onDeviceInput })
-
-// Start MIDI Access
-MIDI.start().then(() => {
-	console.log("MIDI Access started")
-}).catch((err) => {
-	console.error(err)
-})
-
-// Handle MIDI Inputs
-function onDeviceInput({command, note, velocity}) {
-	// Log the MIDI data
-	console.log('onDeviceInput', {command, note, velocity})
-	// MIDI command switch
-	switch(command) {
-		// Note On
-		case 144:
-			if (velocity > 0) {
-				handleNote("on", note, velocity)
-			} else {
-				handleNote("off", note)
-			}
-			break;
-		// Note Off
-		case 128:
-			handleNote("off", note)
-			break;
-	}
-}
-
-function midiToFreq(note) {
-	// Return the frequency of a MIDI note
-	return Math.pow(2, (note - 69) / 12) * 440
-}
-
-// function midiGuiActivator(note, state) {
-// 	let gui_state = state === "on" ? 1 : 0
-// 	// Activate the GUI keyboard key of a MIDI note
-// 	switch(note) {
-// 		case 48:
-// 			keyboard.setNote(gui_state, 0, 0)
-// 			break;
-// 		case 49:
-// 			keyboard.setNote(gui_state, 1, 0)
-// 			break;
-// 		case 50:
-// 			keyboard.setNote(gui_state, 2, 0)
-// 			break;
-// 		case 51:
-// 			keyboard.setNote(gui_state, 3, 0)
-// 			break;
-// 		case 52:
-// 			keyboard.setNote(gui_state, 4, 0)
-// 			break;
-// 		case 53:
-// 			keyboard.setNote(gui_state, 5, 0)
-// 			break;
-// 		case 54:
-// 			keyboard.setNote(gui_state, 6, 0)
-// 			break;
-// 		case 55:
-// 			keyboard.setNote(gui_state, 7, 0)
-// 			break;
-// 		case 56:
-// 			keyboard.setNote(gui_state, 8, 0)
-// 			break;
-// 		case 57:
-// 			keyboard.setNote(gui_state, 9, 0)
-// 			break;
-// 		case 58:
-// 			keyboard.setNote(gui_state, 10, 0)
-// 			break;
-// 		case 59:
-// 			keyboard.setNote(gui_state, 11, 0)
-// 			break;
-// 		case 60:
-// 			keyboard.setNote(gui_state, 12, 0)
-// 			break;
-// 		case 61:
-// 			keyboard.setNote(gui_state, 13, 0)
-// 			break;
-// 		case 62:
-// 			keyboard.setNote(gui_state, 14, 0)
-// 			break;
-// 		case 63:
-// 			keyboard.setNote(gui_state, 15, 0)
-// 			break;
-// 		case 64:
-// 			keyboard.setNote(gui_state, 16, 0)
-// 			break;
-// 		case 65:
-// 			keyboard.setNote(gui_state, 17, 0)
-// 			break;
-// 		case 66:
-// 			keyboard.setNote(gui_state, 18, 0)
-// 			break;
-// 		case 67:
-// 			keyboard.setNote(gui_state, 19, 0)
-// 			break;
-// 		case 68:
-// 			keyboard.setNote(gui_state, 20, 0)
-// 			break;
-// 		case 69:
-// 			keyboard.setNote(gui_state, 21, 0)
-// 			break;
-// 		case 70:
-// 			keyboard.setNote(gui_state, 22, 0)
-// 			break;
-// 		case 71:
-// 			keyboard.setNote(gui_state, 23, 0)
-// 			break;
-// 		case 72:
-// 			keyboard.setNote(gui_state, 24, 0)
-// 			break;
-// 		case 73:
-// 			keyboard.setNote(gui_state, 25, 0)
-// 			break;
-// 	}
-// }
-
-// TODO: midiGuiActivator problem
-// midiGuiActivator Problem: The GUI keyboard will only show C4-C6 rather than C0-C8
-// midiGuiActivator Solution: Divide the MIDI note by 12 and round down to get the octave
-// Use current octave as the base octave (start of the keyboard)
-// There are 49 keys in the GUI keyboard, 0-48
-// But no matter what octave the physical keyboard is in, the GUI keyboard should always start at 0
-// keyboard.setNote(gui_state, 0, 0)
-// Additional problem: There's no way to know what octave the physical keyboard is in
-
-// TODO: Fix minor bug where master octave modifier steps up by two octaves each time
-//  - It's due to the octave being determined by the MIDI note / 12
-//  - And having two octaves available on the physical keyboard
-function midiGuiActivator2(note, state) {
-	let gui_state = state === "on" ? 1 : 0
-	// Octave of the note (0 = C0, 1 = C1, 2 = C2, etc.)
-	let octave = Math.floor(note / 12)
-	// Key of the note (0 = C, 1 = C#, 2 = D, etc.)
-	let key = note % 12
-	// Modifier to add to the key to get the GUI key
-	let keyModifier = (PRESET.MASTER.octaveOffset*12)+(octave*12)+24
-	// GUI key
-	let guiKey = key + keyModifier
-	console.log("Octave: " + octave + ", Key: " + key + ", Key Modifier: " + keyModifier + ", GUI Key: " + guiKey)
-	keyboard.setNote(gui_state, guiKey, 0)
-}
-
-function frequencyOffset(octave, semitone) {
-	// Return the frequency offset of an octave and semitone
-	return Math.pow(2, (octave + semitone / 12))
-}
-
-function startArp(freqA, freqB, freqC) {
-	// If ARP A is enabled,
-	if (PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
-		// Add the frequency to the array
-		SYNTH.STATE.arp_A_frequencies.push(freqA)
-		// Set Tone Pattern values to the updated array of frequencies
-		ARP_A.set({
-			"values": SYNTH.STATE.arp_A_frequencies,
-		})
-		// If there is only one frequency in the array, start the arp
-		if (SYNTH.STATE.arp_A_frequencies.length === 1) {
-			ARP_A.start()
-		}
-	}
-	// Repeat for ARP B and ARP C
-	if (PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
-		SYNTH.STATE.arp_B_frequencies.push(freqB)
-		ARP_B.set({
-			"values": SYNTH.STATE.arp_B_frequencies,
-		})
-		if(SYNTH.STATE.arp_B_frequencies.length === 1) {
-			ARP_B.start()
-		}
-	}
-	if (PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
-		SYNTH.STATE.arp_C_frequencies.push(freqC)
-		ARP_C.set({
-			"values": SYNTH.STATE.arp_C_frequencies,
-		})
-		if(SYNTH.STATE.arp_C_frequencies.length === 1) {
-			ARP_C.start()
-		}
-	}
-}
-
-function stopArp(freqA, freqB, freqC) {
-	if (SYNTH.STATE.arp_A_frequencies.length > 0) {
-		SYNTH.STATE.arp_A_frequencies = SYNTH.STATE.arp_A_frequencies.filter(f => f !== freqA)
-		ARP_A.set({
-			"values": SYNTH.STATE.arp_A_frequencies,
-		})
-	}
-	if (SYNTH.STATE.arp_B_frequencies.length > 0) {
-		SYNTH.STATE.arp_B_frequencies = SYNTH.STATE.arp_B_frequencies.filter(f => f !== freqB)
-		ARP_B.set({
-			"values": SYNTH.STATE.arp_B_frequencies,
-		})
-	}
-	if (SYNTH.STATE.arp_C_frequencies.length > 0) {
-		SYNTH.STATE.arp_C_frequencies = SYNTH.STATE.arp_C_frequencies.filter(f => f !== freqC)
-		ARP_C.set({
-			"values": SYNTH.STATE.arp_C_frequencies,
-		})
-	}
-	if(SYNTH.STATE.arp_A_frequencies.length === 0 && SYNTH.STATE.arp_B_frequencies.length === 0 && SYNTH.STATE.arp_C_frequencies.length === 0) {
-		// Stop all arpeggiators
-		ARP_A.stop()
-		ARP_B.stop()
-		ARP_C.stop()
-	}
-	if(SYNTH.STATE.keysHeld === 0) {
-		// Empty all arpeggiator frequency arrays
-		SYNTH.STATE.arp_A_frequencies = []
-		SYNTH.STATE.arp_B_frequencies = []
-		SYNTH.STATE.arp_C_frequencies = []
-		// Stop all arpeggiators
-		ARP_A.stop()
-		ARP_B.stop()
-		ARP_C.stop()
-	}
-}
-let physicalKeyboardActive = true
-let webaudioControlsReadouts = document.getElementsByTagName("webaudio-param")
-for(let readout of webaudioControlsReadouts){
-	readout.addEventListener("focusin", e => {
-		console.log(e)
-		physicalKeyboardActive = false
-	})
-	readout.addEventListener("focusout", e => {
-		console.log(e)
-		physicalKeyboardActive = true
-	})
-}
-let inputs = document.getElementsByTagName("input")
-for(let input of inputs){
-	input.addEventListener("focusin", e => {
-		console.log(e)
-		physicalKeyboardActive = false
-	})
-	input.addEventListener("focusout", e => {
-		console.log(e)
-		physicalKeyboardActive = true
-	})
-}
-document.addEventListener("keydown", e => {
-	if(physicalKeyboardActive){
-		// console.log(e)
-		// If the key is being held down, return
-		if (e.repeat) { return }
-		// Increment keysHeld
-		SYNTH.STATE.keysHeld++
-		console.log("keysHeld (keydown):",SYNTH.STATE.keysHeld)
-		// Prevent default browser behaviour
-		// e.preventDefault()
-		// If keysHeld is over 0, handle the note event
-		if (SYNTH.STATE.keysHeld > 0) {
-			handleKeyEvent(e)
-		}
-	}
-})
-document.addEventListener("keyup", e => {
-	if(physicalKeyboardActive) {
-		// Decrement keysHeld
-		if (SYNTH.STATE.keysHeld > 0) {
-			SYNTH.STATE.keysHeld--
-		}
-		console.log("keysHeld (keyup):", SYNTH.STATE.keysHeld)
-		// Prevent default browser behaviour
-		// e.preventDefault()
-		// Start the keyboard listener
-		handleKeyEvent(e)
-	}
-})
-
-// Function which listens to the computer keyboard like a MIDI keyboard
-// Sending identical MIDI data to the handleNote function
-// The 123456 and QWERTY rows are mapped to the C4-C5 octave
-// The ASDFGH and ZXCVBN rows are mapped to the C3-C4 octave
-function handleKeyEvent(event) {
-	// Log the keydown event
-	console.log('keyboardListener', event)
-	let state = event.type === "keydown" ? "on" : "off"
-	let noteModifier = 0
-	console.log("noteModifier:", noteModifier)
-	// MIDI note switch
-	switch (event.key) {
-		// Top octave
-		case "q":
-			handleNote(state, 12+noteModifier, 127);
-			break;
-		case "2":
-			handleNote(state, 13+noteModifier, 127);
-			break;
-		case "w":
-			handleNote(state, 14+noteModifier, 127);
-			break;
-		case "3":
-			handleNote(state, 15+noteModifier, 127);
-			break;
-		case "e":
-			handleNote(state, 16+noteModifier, 127);
-			break;
-		case "r":
-			handleNote(state, 17+noteModifier, 127);
-			break;
-		case "5":
-			handleNote(state, 18+noteModifier, 127);
-			break;
-		case "t":
-			handleNote(state, 19+noteModifier, 127);
-			break;
-		case "6":
-			handleNote(state, 20+noteModifier, 127);
-			break;
-		case "y":
-			handleNote(state, 21+noteModifier, 127);
-			break;
-		case "7":
-			handleNote(state, 22+noteModifier, 127);
-			break;
-		case "u":
-			handleNote(state, 23+noteModifier, 127);
-			break;
-		case "i":
-			handleNote(state, 24+noteModifier, 127);
-			break;
-		case "9":
-			handleNote(state, 25+noteModifier, 127);
-			break;
-		case "o":
-			handleNote(state, 26+noteModifier, 127);
-			break;
-		case "0":
-			handleNote(state, 27+noteModifier, 127);
-			break;
-		case "p":
-			handleNote(state, 28+noteModifier, 127);
-			break;
-		case "z":
-			handleNote(state, noteModifier, 127)
-			break;
-		case "s":
-			handleNote(state, 1+noteModifier, 127)
-			break;
-		case "x":
-			handleNote(state, 2+noteModifier, 127)
-			break;
-		case "d":
-			handleNote(state, 3+noteModifier, 127)
-			break;
-		case "c":
-			handleNote(state, 4+noteModifier, 127)
-			break;
-		case "v":
-			handleNote(state, 5+noteModifier, 127)
-			break;
-		case "g":
-			handleNote(state, 6+noteModifier, 127)
-			break;
-		case "b":
-			handleNote(state, 7+noteModifier, 127)
-			break;
-		case "h":
-			handleNote(state, 8+noteModifier, 127)
-			break;
-		case "n":
-			handleNote(state, 9+noteModifier, 127)
-			break;
-		case "j":
-			handleNote(state, 10+noteModifier, 127)
-			break;
-		case "m":
-			handleNote(state, 11+noteModifier, 127)
-			break;
-		case ",":
-			handleNote(state, 12+noteModifier, 127)
-			break;
-		default:
-			// Do nothing for other keys
-			break;
-	}
-}
-
-function handleNote(state, note, velocity) {
-	// Log the note data
-	console.log('handleNote', {state, note, velocity})
-	// Optional velocity handling, currently disabled
-	// let velocityScalar = velocity / 127
-	// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
-	// SYNTH_B.volume.value = Tone.gainToDb(velocityScalar)
-	// SYNTH_C.volume.value = Tone.gainToDb(velocityScalar)
-	midiGuiActivator2(note, state)
-	// Assigning the frequency of the MIDI note to a variable
-	let originalFrequency = midiToFreq(note)
-	// Pushing the frequency to the array of currently playing frequencies
-	SYNTH.STATE.playingFrequencies.push(originalFrequency)
-	// Calculating the frequency for each oscillator (with octave and detune offsets)
-	let freqA = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_A.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
-	let freqB = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_B.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
-	let freqC = originalFrequency * frequencyOffset(subOctaveValues[PRESET.OSC_C.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_C.detune)
-	// If note state is "on"
-	if (state === 'on') {
-		// If any of the oscillators are enabled, set the isPlaying state to true
-		if(PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled){
-			SYNTH.STATE.isPlaying = true
-		}
-		// Start the arpeggiator listener
-		startArp(freqA, freqB, freqC)
-
-		if (!PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
-			SYNTH_A.triggerAttack(freqA)
-			console.log("OSC A attack", freqA, Tone.Frequency(freqA).toNote())
-		}
-		if (!PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
-			SYNTH_B.triggerAttack(freqB)
-			console.log("OSC B attack", freqB, Tone.Frequency(freqB).toNote())
-		}
-		if (!PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
-			SYNTH_C.triggerAttack(freqC)
-			console.log("OSC C attack", freqC, Tone.Frequency(freqC).toNote())
-		}
-	} else {
-		SYNTH_A.triggerRelease(freqA)
-		console.log("OSC A release", freqA, Tone.Frequency(freqA).toNote())
-		SYNTH_B.triggerRelease(freqB)
-		console.log("OSC B release", freqB, Tone.Frequency(freqB).toNote())
-		SYNTH_C.triggerRelease(freqC)
-		console.log("OSC C release", freqC, Tone.Frequency(freqC).toNote())
-		// Sometimes a note gets duplicated and this doesn't filter it out
-		SYNTH.STATE.playingFrequencies = SYNTH.STATE.playingFrequencies.filter(f => f !== originalFrequency)
-		// This should fix it
-		if(SYNTH.STATE.playingFrequencies.length === 0) {
-			SYNTH.STATE.isPlaying = false
-			console.log("isPlaying", SYNTH.STATE.isPlaying)
-			SYNTH_A.releaseAll()
-			SYNTH_B.releaseAll()
-			SYNTH_C.releaseAll()
-		}
-		stopArp(freqA, freqB, freqC)
-	}
-	console.log("SYNTH.STATE.playingFrequencies", SYNTH.STATE.playingFrequencies)
-	console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
-	console.log("ARP.notes_B", SYNTH.STATE.arp_B_frequencies)
-	console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
-}
-
 // -- GUI CONTROLS -- //
 
-let filterResonanceKnob = document.getElementById("filter_resonance")
 let filterResonanceReadout = document.getElementById("filter_resonance_readout")
 let filterResonanceLabel = document.getElementById("filter_resonance_label")
 let filterResonanceGroup = document.getElementById("filter_resonance_group")
@@ -2048,20 +1537,7 @@ function updatePageColours(pageBackground, synthBackground, text, theme){
 	SYNTH.THEME.synthTextColour = text
 }
 
-// -- MAIN EVENT LISTENERS -- //
-
-// Key-press events //
-document.addEventListener("keypress", function (e) {
-	// console.log(e)
-	// disable quick-find in browser
-	if (e.key === "/") {
-		e.preventDefault()
-	}
-	// disable quick-find (links only) in browser
-	if (e.key === "'") {
-		e.preventDefault()
-	}
-})
+// -- RECORDING -- //
 
 async function startRecording() {
 	// log state of MediaRecorder
@@ -2095,8 +1571,475 @@ async function stopRecording() {
 	}
 }
 
-let arpLabel = document.getElementById("arp_label")
+// -- MIDI LOGIC -- //
 
+// MIDI Access Class
+class MIDIAccess {
+	constructor(args = {}) {
+		// Either use the passed in function or log to console
+		this.onDeviceInput = args.onDeviceInput || console.log;
+	}
+
+	start() {
+		// Return a promise
+		return new Promise((resolve, reject) => {
+			// Request MIDI Access
+			this._requestAccess().then(access => {
+				// Initialize MIDI Access
+				this.initialize(access);
+				// Resolve the promise
+				resolve();
+			}).catch(() => reject('Something went wrong.'));
+		});
+	}
+
+	initialize(access) {
+		// Get all MIDI inputs
+		const devices = access.inputs.values();
+		// Loop through all MIDI inputs
+		let index = 0
+		for (let device of devices){
+			index++
+			console.log('Device', index)
+			// Initialize the MIDI device
+			this.initializeDevice(device);
+		}
+	}
+
+	initializeDevice(device) {
+		// Listen for MIDI messages
+		device.onmidimessage = this.onMessage.bind(this);
+		// Log the device name, state and type
+		console.log(`Name: ${device.name}\nState: ${device.state}\nType: ${device.type}`)
+	}
+
+	onMessage(message) {
+		// Initialize MIDI data array variables
+		let [command, note, velocity] = message.data;
+		// Run the onDeviceInput function using the MIDI data
+		this.onDeviceInput({ command, note, velocity });
+	}
+
+	_requestAccess() {
+		// Return a promise
+		return new Promise((resolve, reject) => {
+			// Check if the browser supports MIDI
+			if (navigator.requestMIDIAccess)
+				// Request MIDI Access
+				navigator.requestMIDIAccess()
+					.then(resolve)
+					.catch(reject);
+			else reject();
+		});
+	}
+}
+
+// Create a new instance of the MIDIAccess class
+const MIDI = new MIDIAccess({ onDeviceInput })
+
+// Start MIDI Access
+MIDI.start().then(() => {
+	console.log("MIDI Access started")
+}).catch((err) => {
+	console.error(err)
+})
+
+// Handle MIDI Inputs
+function onDeviceInput({command, note, velocity}) {
+	// Log the MIDI data
+	console.log('onDeviceInput', {command, note, velocity})
+	// MIDI command switch
+	switch(command) {
+		// Note On
+		case 144:
+			if (velocity > 0) {
+				handleNote("on", note, velocity, "midi")
+			} else {
+				handleNote("off", note, 127,"midi")
+			}
+			break;
+		// Note Off
+		case 128:
+			handleNote("off", note, 127, "midi")
+			break;
+	}
+}
+
+// Get the frequency a MIDI note should trigger
+function midiToFreq(note) {
+	// Return the frequency of a MIDI note
+	return Math.pow(2, (note - 69) / 12) * 440
+}
+
+// Activate a GUI key based on a MIDI note & state
+function guiKeyActivator(note, state) {
+	let gui_state = state === "on" ? 1 : 0
+	// Octave of the note (0 = C0, 1 = C1, 2 = C2, etc.)
+	let octave = Math.floor(note / 12)
+	// Key of the note (0 = C, 1 = C#, 2 = D, etc.)
+	let key = note % 12
+	// Modifier to add to the key to get the GUI key
+	let keyModifier = (octave*12)+24
+	// GUI key
+	let guiKey = key + keyModifier
+	console.log("Octave: " + octave + ", Key: " + key + ", Key Modifier: " + keyModifier + ", GUI Key: " + guiKey)
+	keyboard.setNote(gui_state, guiKey, 0)
+}
+
+// Offset a frequency by an octave and/or semitone
+function frequencyOffset(octave, semitone) {
+	// Return the frequency offset of an octave and semitone
+	return Math.pow(2, (octave + semitone / 12))
+}
+
+// -- ARP LOGIC -- //
+
+function startArp(freqA, freqB, freqC) {
+	// If ARP A is enabled,
+	if (PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
+		// Add the frequency to the array
+		SYNTH.STATE.arp_A_frequencies.push(freqA)
+		// Set Tone Pattern values to the updated array of frequencies
+		ARP_A.set({
+			"values": SYNTH.STATE.arp_A_frequencies,
+		})
+		// If there is only one frequency in the array, start the arp
+		if (SYNTH.STATE.arp_A_frequencies.length === 1) {
+			ARP_A.start()
+		}
+	}
+	// Repeat for ARP B and ARP C
+	if (PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
+		SYNTH.STATE.arp_B_frequencies.push(freqB)
+		ARP_B.set({
+			"values": SYNTH.STATE.arp_B_frequencies,
+		})
+		if(SYNTH.STATE.arp_B_frequencies.length === 1) {
+			ARP_B.start()
+		}
+	}
+	if (PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
+		SYNTH.STATE.arp_C_frequencies.push(freqC)
+		ARP_C.set({
+			"values": SYNTH.STATE.arp_C_frequencies,
+		})
+		if(SYNTH.STATE.arp_C_frequencies.length === 1) {
+			ARP_C.start()
+		}
+	}
+}
+function stopArp(freqA, freqB, freqC) {
+	if (SYNTH.STATE.arp_A_frequencies.length > 0) {
+		SYNTH.STATE.arp_A_frequencies = SYNTH.STATE.arp_A_frequencies.filter(f => f !== freqA)
+		ARP_A.set({
+			"values": SYNTH.STATE.arp_A_frequencies,
+		})
+	}
+	if (SYNTH.STATE.arp_B_frequencies.length > 0) {
+		SYNTH.STATE.arp_B_frequencies = SYNTH.STATE.arp_B_frequencies.filter(f => f !== freqB)
+		ARP_B.set({
+			"values": SYNTH.STATE.arp_B_frequencies,
+		})
+	}
+	if (SYNTH.STATE.arp_C_frequencies.length > 0) {
+		SYNTH.STATE.arp_C_frequencies = SYNTH.STATE.arp_C_frequencies.filter(f => f !== freqC)
+		ARP_C.set({
+			"values": SYNTH.STATE.arp_C_frequencies,
+		})
+	}
+	if(SYNTH.STATE.arp_A_frequencies.length === 0 && SYNTH.STATE.arp_B_frequencies.length === 0 && SYNTH.STATE.arp_C_frequencies.length === 0) {
+		// Stop all arpeggiators
+		ARP_A.stop()
+		ARP_B.stop()
+		ARP_C.stop()
+	}
+	if(SYNTH.STATE.keysHeld === 0) {
+		// Empty all arpeggiator frequency arrays
+		SYNTH.STATE.arp_A_frequencies = []
+		SYNTH.STATE.arp_B_frequencies = []
+		SYNTH.STATE.arp_C_frequencies = []
+		// Stop all arpeggiators
+		ARP_A.stop()
+		ARP_B.stop()
+		ARP_C.stop()
+	}
+}
+
+// -- KEYBOARD LOGIC -- //
+
+let webaudioControlsReadouts = document.getElementsByTagName("webaudio-param")
+for(let readout of webaudioControlsReadouts){
+	readout.addEventListener("focusin", e => {
+		console.log(e)
+		SYNTH.STATE.physicalKeyboardActive = false
+	})
+	readout.addEventListener("focusout", e => {
+		console.log(e)
+		SYNTH.STATE.physicalKeyboardActive = true
+	})
+}
+let inputs = document.getElementsByTagName("input")
+for(let input of inputs) {
+	input.addEventListener("focusin", e => {
+		console.log(e)
+		SYNTH.STATE.physicalKeyboardActive = false
+	})
+	input.addEventListener("focusout", e => {
+		console.log(e)
+		SYNTH.STATE.physicalKeyboardActive = true
+	})
+}
+
+// Handle any note events (MIDI, keyboard, or mouse)
+function handleNote(state, note, velocity, origin) {
+	// Log the note data
+	console.log('handleNote', {state, note, velocity})
+	// Optional velocity handling, currently disabled
+	// let velocityScalar = velocity / 127
+	// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
+	// SYNTH_B.volume.value = Tone.gainToDb(velocityScalar)
+	// SYNTH_C.volume.value = Tone.gainToDb(velocityScalar)
+	// If the note is a MIDI note, subtract 48 to get the correct frequency
+	note = origin === 'midi' ? note - 48 : note
+	// console.log("note:",note)
+	// If the origin is not the mouse, activate a GUI key
+	if(origin !== "mouse"){
+		guiKeyActivator(note, state)
+	}
+	// Initialize the original frequency with midiToFreq
+	let originalFrequency = midiToFreq(note)
+	// Push the frequency to the array of currently playing frequencies
+	SYNTH.STATE.playingFrequencies.push(originalFrequency)
+	// Calculate the frequency for each oscillator (with octave and detune offsets)
+	let freqA = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_A.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
+	let freqB = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_B.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
+	let freqC = originalFrequency * frequencyOffset(subOctaveValues[PRESET.OSC_C.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_C.detune)
+	// If note state is "on"
+	if (state === 'on') {
+		// If any of the oscillators are enabled, set the isPlaying state to true
+		if(PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled){
+			SYNTH.STATE.isPlaying = true
+		}
+		// Start the arpeggiator listener
+		startArp(freqA, freqB, freqC)
+
+		// If the arpeggiator is not enabled for an enabled oscillator,
+		// trigger the attack for that oscillator with the calculated frequency
+		if (!PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
+			SYNTH_A.triggerAttack(freqA)
+			console.log("OSC A attack", freqA, Tone.Frequency(freqA).toNote())
+		}
+		if (!PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
+			SYNTH_B.triggerAttack(freqB)
+			console.log("OSC B attack", freqB, Tone.Frequency(freqB).toNote())
+		}
+		if (!PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
+			SYNTH_C.triggerAttack(freqC)
+			console.log("OSC C attack", freqC, Tone.Frequency(freqC).toNote())
+		}
+		// If note state is "off"
+	} else {
+		// Release the note for each oscillator
+		SYNTH_A.triggerRelease(freqA)
+		console.log("OSC A release", freqA, Tone.Frequency(freqA).toNote())
+		SYNTH_B.triggerRelease(freqB)
+		console.log("OSC B release", freqB, Tone.Frequency(freqB).toNote())
+		SYNTH_C.triggerRelease(freqC)
+		console.log("OSC C release", freqC, Tone.Frequency(freqC).toNote())
+		// Sometimes a note gets duplicated and this doesn't always filter it out
+		SYNTH.STATE.playingFrequencies = SYNTH.STATE.playingFrequencies.filter(f => f !== originalFrequency)
+		// This should fix it
+		// TODO: Figure out why this is happening
+		if(SYNTH.STATE.playingFrequencies.length === 0) {
+			SYNTH.STATE.isPlaying = false
+			console.log("isPlaying", SYNTH.STATE.isPlaying)
+			SYNTH_A.releaseAll()
+			SYNTH_B.releaseAll()
+			SYNTH_C.releaseAll()
+		}
+		// Stop the arpeggiators
+		stopArp(freqA, freqB, freqC)
+	}
+	// Log the currently playing frequencies
+	console.log("SYNTH.STATE.playingFrequencies", SYNTH.STATE.playingFrequencies)
+	// Log the arpeggiator frequency array, if enabled
+	if(PRESET.ARP.A_enabled && PRESET.OSC_A.enabled){
+		console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
+	}
+	if(PRESET.ARP.B_enabled && PRESET.OSC_B.enabled){
+		console.log("ARP.notes_B", SYNTH.STATE.arp_B_frequencies)
+	}
+	if(PRESET.ARP.C_enabled && PRESET.OSC_C.enabled){
+		console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
+	}
+}
+
+// Function which listens to the computer keyboard like a MIDI keyboard
+// Sending identical MIDI data to the handleNote function
+// The 123456 and QWERTY rows are mapped to the C4-C5 octave
+// The ASDFGH and ZXCVBN rows are mapped to the C3-C4 octave
+function handleKeyEvent(event) {
+	// Log the keydown event
+	console.log('keyboardListener', event)
+	let state = event.type === "keydown" ? "on" : "off"
+	// MIDI note switch
+	switch (event.key) {
+		// Bottom octave (C3-C4)
+		case "z":
+			handleNote(state, 0, 127)
+			break;
+		case "s":
+			handleNote(state, 1, 127)
+			break;
+		case "x":
+			handleNote(state, 2, 127)
+			break;
+		case "d":
+			handleNote(state, 3, 127)
+			break;
+		case "c":
+			handleNote(state, 4, 127)
+			break;
+		case "v":
+			handleNote(state, 5, 127)
+			break;
+		case "g":
+			handleNote(state, 6, 127)
+			break;
+		case "b":
+			handleNote(state, 7, 127)
+			break;
+		case "h":
+			handleNote(state, 8, 127)
+			break;
+		case "n":
+			handleNote(state, 9, 127)
+			break;
+		case "j":
+			handleNote(state, 10, 127)
+			break;
+		case "m":
+			handleNote(state, 11, 127)
+			break;
+		case ",":
+			handleNote(state, 12, 127)
+			break;
+		// Top octave (C4-C5)
+		case "q":
+			handleNote(state, 12, 127);
+			break;
+		case "2":
+			handleNote(state, 13, 127);
+			break;
+		case "w":
+			handleNote(state, 14, 127);
+			break;
+		case "3":
+			handleNote(state, 15, 127);
+			break;
+		case "e":
+			handleNote(state, 16, 127);
+			break;
+		case "r":
+			handleNote(state, 17, 127);
+			break;
+		case "5":
+			handleNote(state, 18, 127);
+			break;
+		case "t":
+			handleNote(state, 19, 127);
+			break;
+		case "6":
+			handleNote(state, 20, 127);
+			break;
+		case "y":
+			handleNote(state, 21, 127);
+			break;
+		case "7":
+			handleNote(state, 22, 127);
+			break;
+		case "u":
+			handleNote(state, 23, 127);
+			break;
+		case "i":
+			handleNote(state, 24, 127);
+			break;
+		case "9":
+			handleNote(state, 25, 127);
+			break;
+		case "o":
+			handleNote(state, 26, 127);
+			break;
+		case "0":
+			handleNote(state, 27, 127);
+			break;
+		case "p":
+			handleNote(state, 28, 127);
+			break;
+		default:
+			// Do nothing for other keys
+			break;
+	}
+}
+
+// Keypress listener to disable quick-find in browser
+document.addEventListener("keypress", function (e) {
+	// console.log(e)
+	// disable quick-find in browser
+	if (e.key === "/") {
+		e.preventDefault()
+	}
+	// disable quick-find (links only) in browser
+	if (e.key === "'") {
+		e.preventDefault()
+	}
+})
+
+// Keydown listener to handle computer keyboard events (on)
+document.addEventListener("keydown", e => {
+	// If the physical keyboard is active (not disabled by focused input box)
+	if(SYNTH.STATE.physicalKeyboardActive){
+		// If the key is being held down, return
+		// (This prevents the keydown event from firing multiple times)
+		if (e.repeat) { return }
+		// Increment keysHeld
+		SYNTH.STATE.keysHeld++
+		// Log the number of keys held on keydown
+		console.log("keysHeld (keydown):",SYNTH.STATE.keysHeld)
+		// If keysHeld is over 0, handle the note event
+		if (SYNTH.STATE.keysHeld > 0) {
+			handleKeyEvent(e)
+		}
+	}
+})
+
+// Keyup listener to handle computer keyboard events (off)
+document.addEventListener("keyup", e => {
+	// Decrement keysHeld if it is over 0
+	// (This prevents bug where keysHeld can become negative)
+	if (SYNTH.STATE.keysHeld > 0) {
+		SYNTH.STATE.keysHeld--
+	}
+	// Log the number of keys held on keyup
+	console.log("keysHeld (keyup):", SYNTH.STATE.keysHeld)
+	// Handle the note event
+	handleKeyEvent(e)
+})
+
+// Virtual (GUI) keyboard
+let keyboard = document.getElementById("keyboard");
+
+// Event listener for the virtual (GUI) keyboard
+keyboard.addEventListener("change", function (e) {
+	// Handle note event
+	// e.note[0] is the note state (on/off)
+	// e.note[1] is the note number (0-127)
+	// Subtracting 24 to align the octave with the other input methods
+	handleNote(e.note[0] ? "on" : "off", e.note[1]-24, 127, "mouse")
+});
+
+// Function which changes note values on the fly
+// Allowing for octave/detune offsets to work while the synth is playing
 function changeNote(targetSynth, targetValue, newValue){
 	// Original value + offset
 	// If octave/detune knob, then its octave/detune + master octave offset
@@ -2195,7 +2138,7 @@ function changeNote(targetSynth, targetValue, newValue){
 				targetSynth.triggerAttack(offsetFrequency)
 			}
 		}
-	// If synth is not playing when control is changed
+		// If synth is not playing when control is changed
 	} else {
 		// Log old value
 		console.log("old value:", targetSynthName, targetOscillator[targetValue])
@@ -2212,14 +2155,14 @@ function changeNote(targetSynth, targetValue, newValue){
 	}
 	switch(targetSynth) {
 		case SYNTH_A:
-		SYNTH.STATE.arp_A_frequencies = targetArpeggiatorNotes
-		break;
+			SYNTH.STATE.arp_A_frequencies = targetArpeggiatorNotes
+			break;
 		case SYNTH_B:
-		SYNTH.STATE.arp_B_frequencies = targetArpeggiatorNotes
-		break;
+			SYNTH.STATE.arp_B_frequencies = targetArpeggiatorNotes
+			break;
 		case SYNTH_C:
-		SYNTH.STATE.arp_C_frequencies = targetArpeggiatorNotes
-		break;
+			SYNTH.STATE.arp_C_frequencies = targetArpeggiatorNotes
+			break;
 	}
 	console.log("changeNote from:", targetValue+"_"+targetSynthName, targetOscillator[targetValue] ? targetOscillator[targetValue] : PRESET.MASTER.octaveOffset, "NEW:", newValue)
 	console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
@@ -2227,15 +2170,18 @@ function changeNote(targetSynth, targetValue, newValue){
 	console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
 }
 
+// -- GUI CONTROLS LOGIC -- //
+
 let controls = document.getElementsByClassName("control");
 // console.log(controls);
 
-// Control events //
+// For each control...
 for (let i = 0; i < controls.length; i++) {
-	// -- TOGGLE CONTROLS -- //
+	// ...add a "change" event listener
 	controls[i].addEventListener("change", async function (e) {
-		// log the control and its value
+		// Log the event target ID and its value
 		console.log(e.target.id, e.target.value)
+		// Switch case for each control
 		switch (e.target.id) {
 			case "osc_a_switch":
 				PRESET.OSC_A.enabled = e.target.value
@@ -2823,141 +2769,6 @@ for (let i = 0; i < controls.length; i++) {
 		}
 	})
 }
-
-// -- KEYBOARD LOGIC -- //
-
-let keyboard = document.getElementById("keyboard");
-
-function getNoteFromNumber(number, semitoneOffset, octaveOffset) {
-	const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-	let adjustedNumber = (number + semitoneOffset) % 12;
-	if (adjustedNumber < 0) {
-		adjustedNumber += 12;
-	}
-	const noteIndex = (notes.indexOf('C') + adjustedNumber) % 12;
-	let octave = Math.floor((number + semitoneOffset) / 12) + octaveOffset;
-	if (adjustedNumber < 0) {
-		octave -= 1;
-	}
-	return notes[noteIndex] + octave;
-}
-
-// If keyboard change listener is triggered, send notes to array in outer scope
-// If notes exist in the array, trigger them.
-// If notes don't exist in the array, release them?
-// If controls are updated, update the array, trigger the new notes, release old ones
-
-// TODO: Attempt incorporating the function below, note calc + trigger outside of change EL
-
-// function triggerNoteTest(number, semitoneOffset, octaveOffset) {
-// 	const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-// 	let adjustedNumber = (number + semitoneOffset) % 12;
-// 	if (adjustedNumber < 0) {
-// 		adjustedNumber += 12;
-// 	}
-// 	const noteIndex = (notes.indexOf('C') + adjustedNumber) % 12;
-// 	let octave = Math.floor((number + semitoneOffset) / 12) + octaveOffset;
-// 	if (adjustedNumber < 0) {
-// 		octave -= 1;
-// 	}
-// 	SYNTH_A.releaseAll()
-// 	SYNTH_A.triggerAttack(notes[noteIndex] + octave, "8n")
-// }
-
-keyboard.addEventListener("mouseover", function () {
-	// Focus on keyboard element so it activates physical keyboard input
-	keyboard.cv.focus();
-	console.log("mouse over keyboard!");
-});
-
-let heldKeys = [];
-let playingKeys = [];
-
-keyboard.addEventListener("change", function (e) {
-	// Calculate the notes to play based on the keyboard input and synth settings
-	let note_a = getNoteFromNumber(e.note[1], PRESET.OSC_A.detune, octaveValues[PRESET.OSC_A.octave]);
-	let note_b = getNoteFromNumber(e.note[1], PRESET.OSC_B.detune, octaveValues[PRESET.OSC_B.octave]);
-	let note_c = getNoteFromNumber(e.note[1], PRESET.OSC_C.detune, subOctaveValues[PRESET.OSC_C.octave]);
-
-	// console.log(e.note)
-
-	console.log("note_a", note_a, e.note[0] ? "on" : "off");
-	console.log("note_b", note_b, e.note[0] ? "on" : "off");
-	console.log("note_c", note_c, e.note[0] ? "on" : "off");
-
-	// Initialize an empty array to keep track of the currently playing keys
-
-	// TODO: Figure out playingKeys / heldKeys logic
-	//  playingKeys: you can change note parameters while playing keys,
-	//    but playing new keys overwrites playingKeys,
-	//    so when you release the last set of keys, it kills all keys...
-	//  heldKeys: changing note parameters while playing keys will cause keys to stick,
-	//    but you can let go of keys without all keys being released...
-
-
-	// If note on
-	if (e.note[0]) {
-		// if not already in heldKeys array, push it
-		if (!heldKeys.includes(note_a+"_OSC_A") || !heldKeys.includes(note_b+"_OSC_B") || !heldKeys.includes(note_c+"_OSC_C")) {
-			// LFO.stop()
-			heldKeys.push(note_a+"_OSC_A");
-			heldKeys.push(note_b+"_OSC_B");
-			heldKeys.push(note_c+"_OSC_C");
-			// Trigger the attack for the new notes and add them to the playingKeys array
-
-			// Start the arpeggiator listener
-			startArp(note_a, note_b, note_c)
-
-			SYNTH_A.triggerAttack(note_a);
-			playingKeys.push(note_a+"_OSC_A");
-			console.log("OSC_A Frequency:", SYNTH_A.toFrequency(note_a))
-
-			SYNTH_B.triggerAttack(note_b);
-			playingKeys.push(note_b+"_OSC_B");
-			console.log("OSC_B Frequency:", SYNTH_B.toFrequency(note_b))
-
-			SYNTH_C.triggerAttack(note_c);
-			playingKeys.push(note_c+"_OSC_C");
-			console.log("OSC_C Frequency:", SYNTH_C.toFrequency(note_c))
-
-			console.log("playingKeys:", playingKeys)
-			console.log("heldKeys:", heldKeys)
-			// LFO.start()
-		}
-		// If note off
-	} else {
-		stopArp(note_a, note_b, note_c)
-		// remove the note from the heldKeys array
-		heldKeys = heldKeys.filter(item => item !== note_a+"_OSC_A" && item !== note_b+"_OSC_B" && item !== note_c+"_OSC_C");
-		if (playingKeys.includes(note_a+"_OSC_A") || playingKeys.includes(note_b+"_OSC_B") || playingKeys.includes(note_c+"_OSC_C")) {
-			SYNTH.STATE.isPlaying = true;
-		}
-		// Trigger the release for the playing notes and remove them from the playingKeys array
-		if (playingKeys.includes(note_a+"_OSC_A")) {
-			SYNTH_A.triggerRelease(note_a);
-			playingKeys = playingKeys.filter(item => item !== note_a+"_OSC_A");
-		}
-		if (playingKeys.includes(note_b+"_OSC_B")) {
-			SYNTH_B.triggerRelease(note_b);
-			playingKeys = playingKeys.filter(item => item !== note_b+"_OSC_B");
-		}
-		if (playingKeys.includes(note_c+"_OSC_C")) {
-			SYNTH_C.triggerRelease(note_c);
-			playingKeys = playingKeys.filter(item => item !== note_c+"_OSC_C");
-		}
-		console.log("playingKeys:", playingKeys)
-		console.log("heldKeys:", heldKeys)
-		if (playingKeys.length === 0) {
-			// Stop all playing notes when no keys are held down
-			SYNTH_A.releaseAll();
-			SYNTH_B.releaseAll();
-			SYNTH_C.releaseAll();
-			console.log("released all!");
-			SYNTH.STATE.isPlaying = false;
-		}
-		// LFO.stop()
-	}
-});
 
 // -- CANVAS SETUP -- //
 

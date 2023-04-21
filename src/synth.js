@@ -38,7 +38,6 @@ await register(await connect())
 
 // Start Tone.js Transport (so that the arpeggiator works)
 Tone.Transport.start()
-// TODO: BPM control?
 
 // -- SYNTH (INITIAL STATE) -- //
 
@@ -376,14 +375,21 @@ let arpSpeedValues = {
 	"5": 8,
 	"6": 16,
 }
-let arpTimeValues = {
-	"0": "1m",
-	"1": "2n",
-	"2": "4n",
-	"3": "8n",
-	"4": "16n",
-	"5": "32n",
-	"6": "64n",
+let arpSpeedReadoutValues = {
+	"0": "1/1",
+	"1": "1/2",
+	"2": "1/4",
+	"3": "1/8",
+	"4": "1/16",
+	"5": "1/32",
+	"6": "1/64",
+}
+let masterOctaveReadoutValues = {
+	"0": "-2",
+	"1": "-1",
+	"2": "0",
+	"3": "1",
+	"4": "2",
 }
 
 // -- MASTER -- //
@@ -763,34 +769,39 @@ function connectSynths(){
 }
 
 function connectTone() {
+	// Disconnect Synths
 	SYNTH_A.disconnect()
 	SYNTH_B.disconnect()
 	SYNTH_C.disconnect()
+	// Disconnect Filter
 	FILTER.disconnect()
+	// Stop LFO
 	LFO.stop()
+	// Reset all FX
 	resetFX()
 
-	// FX //
+	// Set enabled FX
 	if(PRESET.FX.enabled) {
 		SELECTED_FX.set({
 			"wet": PRESET.FX.mix
 		})
 	}
 
-	// Synths //
+	// Reconnect Synths
 	connectSynths()
 
-	// Master FX Chain //
+	// Reconnect Master FX chain //
 	OUTPUT.chain(MASTER_GAIN, MASTER_LIMITER)
 
-	// Modulation //
+	// Reconnect LFO if enabled
 	if(PRESET.LFO.enabled){
 		LFO.connect(LFO_TARGET).start()
 	}
 
-	// Master Record
+	// Reconnect Master Record
 	OUTPUT.connect(REC_DEST)
 }
+// Make initial connection
 connectTone()
 
 // -- GUI CONTROLS -- //
@@ -1180,6 +1191,7 @@ function loadPreset(preset) {
 	// Update GUI //
 	// MASTER
 	updateGUI("master_gain", preset.MASTER.gain, preset.MASTER.gain)
+	updateGUI("master_bpm", preset.MASTER.bpm, preset.MASTER.bpm)
 	// OSC A
 	updateGUI("osc_a_switch", preset.OSC_A.enabled)
 	updateGUI("osc_a_octave", preset.OSC_A.octave, preset.OSC_A.octave)
@@ -1249,6 +1261,13 @@ function loadPreset(preset) {
 	updateGUI("fx_param2", preset.FX.param2, preset.FX.param2)
 	updateGUI("fx_param3", preset.FX.param3, preset.FX.param3)
 	updateGUI("fx_param4", preset.FX.param4, preset.FX.param4)
+	// ARP & NOTES
+	updateGUI("arp_a_switch", preset.ARP.A_enabled)
+	updateGUI("arp_b_switch", preset.ARP.B_enabled)
+	updateGUI("arp_c_switch", preset.ARP.C_enabled)
+	updateGUI("arp_pattern", preset.ARP.pattern, arpPatternValues[preset.ARP.pattern])
+	updateGUI("arp_speed", preset.ARP.playbackRate, arpSpeedReadoutValues[preset.ARP.playbackRate])
+	updateGUI("master_octave", preset.MASTER.octaveOffset+2, masterOctaveReadoutValues[preset.MASTER.octaveOffset+2])
 
 	// Update Tone.js //
 	// OSC A
@@ -1360,6 +1379,26 @@ function loadPreset(preset) {
 	setFXParam2(preset.FX.param2)
 	setFXParam3(preset.FX.param3)
 	setFXParam4(preset.FX.param4)
+	// ARP
+	ARP_A.set({
+		"pattern": arpPatternValues[preset.ARP.pattern],
+		"playbackRate": arpSpeedValues[preset.ARP.playbackRate]
+	})
+	ARP_B.set({
+		"pattern": arpPatternValues[preset.ARP.pattern],
+		"playbackRate": arpSpeedValues[preset.ARP.playbackRate]
+	})
+	ARP_C.set({
+		"pattern": arpPatternValues[preset.ARP.pattern],
+		"playbackRate": arpSpeedValues[preset.ARP.playbackRate]
+	})
+	// MASTER
+	MASTER_GAIN.set({
+		"gain": preset.MASTER.gain
+	})
+	Tone.Transport.set({
+		"bpm": preset.MASTER.bpm
+	})
 	// CONNECTIONS
 	connectTone()
 }
@@ -1879,9 +1918,11 @@ function handleNote(state, note, velocity, origin) {
 // Sending identical MIDI data to the handleNote function
 // The 123456 and QWERTY rows are mapped to the C4-C5 octave
 // The ASDFGH and ZXCVBN rows are mapped to the C3-C4 octave
+let lastEvents = []
 function handleKeyEvent(event) {
+	lastEvents.push = event
 	// Log the keydown event
-	console.log('keyboardListener', event)
+	console.log('keyboardEvent', event)
 	let state = event.type === "keydown" ? "on" : "off"
 	// MIDI note switch
 	switch (event.key) {
@@ -1996,8 +2037,14 @@ document.addEventListener("keypress", function (e) {
 	}
 })
 
+// TODO: Fix double keydown event bug (kdown->kdown->kup->kup->phantom kdown)
+//  - Possible fix: Keep last 2 events in memory, compare before firing event
+//  - If the second-last event is the same as the last event, ignore the event
+
 // Keydown listener to handle computer keyboard events (on)
 document.addEventListener("keydown", e => {
+	console.log("keydown", e)
+	let previouslyHeld = SYNTH.STATE.keysHeld
 	// If the physical keyboard is active (not disabled by focused input box)
 	if(SYNTH.STATE.physicalKeyboardActive){
 		// If the key is being held down, return
@@ -2011,20 +2058,31 @@ document.addEventListener("keydown", e => {
 		if (SYNTH.STATE.keysHeld > 0) {
 			handleKeyEvent(e)
 		}
+		// If keysHeld is 1 and previouslyHeld was 0, start the transport
+		if (SYNTH.STATE.keysHeld === 1 && previouslyHeld === 0){
+			Tone.Transport.start()
+		}
 	}
+	console.log("lastEvents", lastEvents)
 })
 
 // Keyup listener to handle computer keyboard events (off)
 document.addEventListener("keyup", e => {
+	console.log("keydown", e)
 	// Decrement keysHeld if it is over 0
 	// (This prevents bug where keysHeld can become negative)
 	if (SYNTH.STATE.keysHeld > 0) {
 		SYNTH.STATE.keysHeld--
 	}
+	// If keysHeld is 0, stop the transport
+	if(SYNTH.STATE.keysHeld === 0){
+		Tone.Transport.stop()
+	}
 	// Log the number of keys held on keyup
 	console.log("keysHeld (keyup):", SYNTH.STATE.keysHeld)
 	// Handle the note event
 	handleKeyEvent(e)
+	console.log("lastEvents", lastEvents)
 })
 
 // Virtual (GUI) keyboard
@@ -2295,8 +2353,25 @@ for (let i = 0; i < controls.length; i++) {
 				})
 				break;
 			case "master_bpm":
+				// Set preset value
 				PRESET.MASTER.bpm = e.target.value
-				Tone.Transport.bpm.value = e.target.value
+				// Set Tone Transport BPM
+				Tone.Transport.set({
+					"bpm": e.target.value
+				})
+				// // Stop & start transport to update BPM without glitches
+				// Tone.Transport.stop(+10)
+				// Tone.Transport.start(+10)
+				// If ARP is enabled, restart it to update BPM
+				if(PRESET.ARP.A_enabled){
+					ARP_A.start()
+				}
+				if(PRESET.ARP.B_enabled){
+					ARP_B.start()
+				}
+				if(PRESET.ARP.C_enabled){
+					ARP_C.start()
+				}
 				break;
 			// -------------------- //
 			// --- OSCILLATOR A --- //

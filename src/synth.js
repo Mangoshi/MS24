@@ -43,14 +43,15 @@ Tone.Transport.start()
 
 let SYNTH = {
 	STATE: {
-		physicalKeyboardActive: true,
-		keysHeld: 0,
-		isPlaying: false,
-		playingFrequencies: [],
 		p5_enabled: false,
+		physicalKeyboardActive: true,
+		isPlaying: false,
+		keysHeld: 0,
+		lastKeyDownEvents: [],
+		playingFrequencies: [],
 		arp_A_frequencies: [],
 		arp_B_frequencies: [],
-		arp_C_frequencies: [],
+		arp_C_frequencies: []
 	},
 	THEME: {
 		name: "dark",
@@ -1918,9 +1919,7 @@ function handleNote(state, note, velocity, origin) {
 // Sending identical MIDI data to the handleNote function
 // The 123456 and QWERTY rows are mapped to the C4-C5 octave
 // The ASDFGH and ZXCVBN rows are mapped to the C3-C4 octave
-let lastEvents = []
 function handleKeyEvent(event) {
-	lastEvents.push = event
 	// Log the keydown event
 	console.log('keyboardEvent', event)
 	let state = event.type === "keydown" ? "on" : "off"
@@ -2037,37 +2036,46 @@ document.addEventListener("keypress", function (e) {
 	}
 })
 
-// TODO: Fix double keydown event bug (kdown->kdown->kup->kup->phantom kdown)
-//  - Possible fix: Keep last 2 events in memory, compare before firing event
-//  - If the second-last event is the same as the last event, ignore the event
-
 // Keydown listener to handle computer keyboard events (on)
 document.addEventListener("keydown", e => {
-	console.log("keydown", e)
-	let previouslyHeld = SYNTH.STATE.keysHeld
-	// If the physical keyboard is active (not disabled by focused input box)
-	if(SYNTH.STATE.physicalKeyboardActive){
-		// If the key is being held down, return
-		// (This prevents the keydown event from firing multiple times)
-		if (e.repeat) { return }
-		// Increment keysHeld
-		SYNTH.STATE.keysHeld++
-		// Log the number of keys held on keydown
-		console.log("keysHeld (keydown):",SYNTH.STATE.keysHeld)
-		// If keysHeld is over 0, handle the note event
-		if (SYNTH.STATE.keysHeld > 0) {
-			handleKeyEvent(e)
-		}
-		// If keysHeld is 1 and previouslyHeld was 0, start the transport
-		if (SYNTH.STATE.keysHeld === 1 && previouslyHeld === 0){
-			Tone.Transport.start()
+	// If the key is being held down, return
+	// (This prevents the keydown event from firing multiple times)
+	if (e.repeat) {
+		return
+	}
+	// Push the key to the lastKeyDownEvents array
+	SYNTH.STATE.lastKeyDownEvents.push(e.key)
+	// If lastKeyDownEvents does not already contain the key, handle the event
+	if (SYNTH.STATE.lastKeyDownEvents.indexOf(e.key) === SYNTH.STATE.lastKeyDownEvents.length - 1) {
+		// Log the event
+		console.log("keydown", e)
+		// Store previous keysHeld value
+		let previouslyHeld = SYNTH.STATE.keysHeld
+		// If the physical keyboard is active (not disabled by focused input box)
+		if (SYNTH.STATE.physicalKeyboardActive) {
+			// Increment keysHeld
+			SYNTH.STATE.keysHeld++
+			// Log the number of keys held on keydown
+			console.log("keysHeld (keydown):", SYNTH.STATE.keysHeld)
+			// If keysHeld is over 0, handle the note event
+			if (SYNTH.STATE.keysHeld > 0) {
+				handleKeyEvent(e)
+			}
+			// If keysHeld is 1 and previouslyHeld was 0, start the transport
+			if (SYNTH.STATE.keysHeld === 1 && previouslyHeld === 0) {
+				Tone.Transport.start()
+			}
 		}
 	}
-	console.log("lastEvents", lastEvents)
+	// Log the lastKeyDownEvents array
+	console.log("lastEvents", SYNTH.STATE.lastKeyDownEvents)
 })
 
 // Keyup listener to handle computer keyboard events (off)
 document.addEventListener("keyup", e => {
+	// Filter the key out of the lastKeyDownEvents array
+	SYNTH.STATE.lastKeyDownEvents = SYNTH.STATE.lastKeyDownEvents.filter(event => event !== e.key)
+	// Log the event
 	console.log("keydown", e)
 	// Decrement keysHeld if it is over 0
 	// (This prevents bug where keysHeld can become negative)
@@ -2082,7 +2090,8 @@ document.addEventListener("keyup", e => {
 	console.log("keysHeld (keyup):", SYNTH.STATE.keysHeld)
 	// Handle the note event
 	handleKeyEvent(e)
-	console.log("lastEvents", lastEvents)
+	// Log the lastKeyDownEvents array
+	console.log("lastEvents", SYNTH.STATE.lastKeyDownEvents)
 })
 
 // Virtual (GUI) keyboard
@@ -2910,6 +2919,7 @@ window.addEventListener("keypress", function (e) {
 // let height = synthContainer.offsetHeight;
 
 // TODO: Figure out zoom-out issue with P5 canvas
+// TODO: Figure out why P5 canvas has become offset from the oscilloscope divs
 
 function p5_sketch(p) {
 	p.setup = function () {

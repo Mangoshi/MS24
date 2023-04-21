@@ -43,7 +43,7 @@ Tone.Transport.start()
 
 let SYNTH = {
 	STATE: {
-		p5_enabled: false,
+		enabled: false,
 		physicalKeyboardActive: true,
 		isPlaying: false,
 		keysHeld: 0,
@@ -1833,85 +1833,87 @@ for(let input of inputs) {
 
 // Handle any note events (MIDI, keyboard, or mouse)
 function handleNote(state, note, velocity, origin) {
-	// Log the note data
-	console.log('handleNote', {state, note, velocity})
-	// Optional velocity handling, currently disabled
-	// let velocityScalar = velocity / 127
-	// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
-	// SYNTH_B.volume.value = Tone.gainToDb(velocityScalar)
-	// SYNTH_C.volume.value = Tone.gainToDb(velocityScalar)
-	// If the note is a MIDI note, subtract 48 to get the correct frequency
-	note = origin === 'midi' ? note - 48 : note
-	// console.log("note:",note)
-	// If the origin is not the mouse, activate a GUI key
-	if(origin !== "mouse"){
-		guiKeyActivator(note, state)
-	}
-	// Initialize the original frequency with midiToFreq
-	let originalFrequency = midiToFreq(note)
-	// Push the frequency to the array of currently playing frequencies
-	SYNTH.STATE.playingFrequencies.push(originalFrequency)
-	// Calculate the frequency for each oscillator (with octave and detune offsets)
-	let freqA = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_A.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
-	let freqB = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_B.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
-	let freqC = originalFrequency * frequencyOffset(subOctaveValues[PRESET.OSC_C.octave]+PRESET.MASTER.octaveOffset, PRESET.OSC_C.detune)
-	// If note state is "on"
-	if (state === 'on') {
-		// If any of the oscillators are enabled, set the isPlaying state to true
-		if(PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled){
-			SYNTH.STATE.isPlaying = true
+	if(SYNTH.STATE.enabled) {
+		// Log the note data
+		console.log('handleNote', {state, note, velocity})
+		// Optional velocity handling, currently disabled
+		// let velocityScalar = velocity / 127
+		// SYNTH_A.volume.value = Tone.gainToDb(velocityScalar)
+		// SYNTH_B.volume.value = Tone.gainToDb(velocityScalar)
+		// SYNTH_C.volume.value = Tone.gainToDb(velocityScalar)
+		// If the note is a MIDI note, subtract 48 to get the correct frequency
+		note = origin === 'midi' ? note - 48 : note
+		// console.log("note:",note)
+		// If the origin is not the mouse, activate a GUI key
+		if (origin !== "mouse") {
+			guiKeyActivator(note, state)
 		}
-		// Start the arpeggiator listener
-		startArp(freqA, freqB, freqC)
+		// Initialize the original frequency with midiToFreq
+		let originalFrequency = midiToFreq(note)
+		// Push the frequency to the array of currently playing frequencies
+		SYNTH.STATE.playingFrequencies.push(originalFrequency)
+		// Calculate the frequency for each oscillator (with octave and detune offsets)
+		let freqA = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_A.octave] + PRESET.MASTER.octaveOffset, PRESET.OSC_A.detune)
+		let freqB = originalFrequency * frequencyOffset(octaveValues[PRESET.OSC_B.octave] + PRESET.MASTER.octaveOffset, PRESET.OSC_B.detune)
+		let freqC = originalFrequency * frequencyOffset(subOctaveValues[PRESET.OSC_C.octave] + PRESET.MASTER.octaveOffset, PRESET.OSC_C.detune)
+		// If note state is "on"
+		if (state === 'on') {
+			// If any of the oscillators are enabled, set the isPlaying state to true
+			if (PRESET.OSC_A.enabled || PRESET.OSC_B.enabled || PRESET.OSC_C.enabled) {
+				SYNTH.STATE.isPlaying = true
+			}
+			// Start the arpeggiator listener
+			startArp(freqA, freqB, freqC)
 
-		// If the arpeggiator is not enabled for an enabled oscillator,
-		// trigger the attack for that oscillator with the calculated frequency
-		if (!PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
-			SYNTH_A.triggerAttack(freqA)
-			console.log("OSC A attack", freqA, Tone.Frequency(freqA).toNote())
+			// If the arpeggiator is not enabled for an enabled oscillator,
+			// trigger the attack for that oscillator with the calculated frequency
+			if (!PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
+				SYNTH_A.triggerAttack(freqA)
+				console.log("OSC A attack", freqA, Tone.Frequency(freqA).toNote())
+			}
+			if (!PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
+				SYNTH_B.triggerAttack(freqB)
+				console.log("OSC B attack", freqB, Tone.Frequency(freqB).toNote())
+			}
+			if (!PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
+				SYNTH_C.triggerAttack(freqC)
+				console.log("OSC C attack", freqC, Tone.Frequency(freqC).toNote())
+			}
+			// If note state is "off"
+		} else {
+			// Release the note for each oscillator
+			SYNTH_A.triggerRelease(freqA)
+			console.log("OSC A release", freqA, Tone.Frequency(freqA).toNote())
+			SYNTH_B.triggerRelease(freqB)
+			console.log("OSC B release", freqB, Tone.Frequency(freqB).toNote())
+			SYNTH_C.triggerRelease(freqC)
+			console.log("OSC C release", freqC, Tone.Frequency(freqC).toNote())
+			// Sometimes a note gets duplicated and this doesn't always filter it out
+			SYNTH.STATE.playingFrequencies = SYNTH.STATE.playingFrequencies.filter(f => f !== originalFrequency)
+			// This should fix it
+			// TODO: Figure out why this is happening
+			if (SYNTH.STATE.playingFrequencies.length === 0) {
+				SYNTH.STATE.isPlaying = false
+				console.log("isPlaying", SYNTH.STATE.isPlaying)
+				SYNTH_A.releaseAll()
+				SYNTH_B.releaseAll()
+				SYNTH_C.releaseAll()
+			}
+			// Stop the arpeggiators
+			stopArp(freqA, freqB, freqC)
 		}
-		if (!PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
-			SYNTH_B.triggerAttack(freqB)
-			console.log("OSC B attack", freqB, Tone.Frequency(freqB).toNote())
+		// Log the currently playing frequencies
+		console.log("SYNTH.STATE.playingFrequencies", SYNTH.STATE.playingFrequencies)
+		// Log the arpeggiator frequency array, if enabled
+		if (PRESET.ARP.A_enabled && PRESET.OSC_A.enabled) {
+			console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
 		}
-		if (!PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
-			SYNTH_C.triggerAttack(freqC)
-			console.log("OSC C attack", freqC, Tone.Frequency(freqC).toNote())
+		if (PRESET.ARP.B_enabled && PRESET.OSC_B.enabled) {
+			console.log("ARP.notes_B", SYNTH.STATE.arp_B_frequencies)
 		}
-		// If note state is "off"
-	} else {
-		// Release the note for each oscillator
-		SYNTH_A.triggerRelease(freqA)
-		console.log("OSC A release", freqA, Tone.Frequency(freqA).toNote())
-		SYNTH_B.triggerRelease(freqB)
-		console.log("OSC B release", freqB, Tone.Frequency(freqB).toNote())
-		SYNTH_C.triggerRelease(freqC)
-		console.log("OSC C release", freqC, Tone.Frequency(freqC).toNote())
-		// Sometimes a note gets duplicated and this doesn't always filter it out
-		SYNTH.STATE.playingFrequencies = SYNTH.STATE.playingFrequencies.filter(f => f !== originalFrequency)
-		// This should fix it
-		// TODO: Figure out why this is happening
-		if(SYNTH.STATE.playingFrequencies.length === 0) {
-			SYNTH.STATE.isPlaying = false
-			console.log("isPlaying", SYNTH.STATE.isPlaying)
-			SYNTH_A.releaseAll()
-			SYNTH_B.releaseAll()
-			SYNTH_C.releaseAll()
+		if (PRESET.ARP.C_enabled && PRESET.OSC_C.enabled) {
+			console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
 		}
-		// Stop the arpeggiators
-		stopArp(freqA, freqB, freqC)
-	}
-	// Log the currently playing frequencies
-	console.log("SYNTH.STATE.playingFrequencies", SYNTH.STATE.playingFrequencies)
-	// Log the arpeggiator frequency array, if enabled
-	if(PRESET.ARP.A_enabled && PRESET.OSC_A.enabled){
-		console.log("ARP.notes_A", SYNTH.STATE.arp_A_frequencies)
-	}
-	if(PRESET.ARP.B_enabled && PRESET.OSC_B.enabled){
-		console.log("ARP.notes_B", SYNTH.STATE.arp_B_frequencies)
-	}
-	if(PRESET.ARP.C_enabled && PRESET.OSC_C.enabled){
-		console.log("ARP.notes_C", SYNTH.STATE.arp_C_frequencies)
 	}
 }
 
@@ -1920,8 +1922,6 @@ function handleNote(state, note, velocity, origin) {
 // The 123456 and QWERTY rows are mapped to the C4-C5 octave
 // The ASDFGH and ZXCVBN rows are mapped to the C3-C4 octave
 function handleKeyEvent(event) {
-	// Log the keydown event
-	console.log('keyboardEvent', event)
 	let state = event.type === "keydown" ? "on" : "off"
 	// MIDI note switch
 	switch (event.key) {
@@ -2048,7 +2048,7 @@ document.addEventListener("keydown", e => {
 	// If lastKeyDownEvents does not already contain the key, handle the event
 	if (SYNTH.STATE.lastKeyDownEvents.indexOf(e.key) === SYNTH.STATE.lastKeyDownEvents.length - 1) {
 		// Log the event
-		console.log("keydown", e)
+		// console.log("keydown", e)
 		// Store previous keysHeld value
 		let previouslyHeld = SYNTH.STATE.keysHeld
 		// If the physical keyboard is active (not disabled by focused input box)
@@ -2076,7 +2076,7 @@ document.addEventListener("keyup", e => {
 	// Filter the key out of the lastKeyDownEvents array
 	SYNTH.STATE.lastKeyDownEvents = SYNTH.STATE.lastKeyDownEvents.filter(event => event !== e.key)
 	// Log the event
-	console.log("keydown", e)
+	// console.log("keyup", e)
 	// Decrement keysHeld if it is over 0
 	// (This prevents bug where keysHeld can become negative)
 	if (SYNTH.STATE.keysHeld > 0) {
@@ -3009,12 +3009,13 @@ function p5_sketch(p) {
 	}
 }
 
-// -- SCREEN SETUP -- //
+// -- SYNTH STATE / SCREEN SETUP -- //
 
 let consentContainer = document.getElementById("consent_container");
 let consentButton = document.getElementById("context_consent_button");
 let bodyContainer = document.getElementById("body_container");
 
+let firstEntry = true
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
 	synthContainer.style.display = "flex";
@@ -3023,9 +3024,12 @@ consentButton.addEventListener("click", function () {
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();
 	}
-	if(!SYNTH.STATE.p5_enabled){
+	if(!SYNTH.STATE.enabled && firstEntry){
 		new p5(p5_sketch, "p5_canvas");
-		SYNTH.STATE.p5_enabled = true;
+		SYNTH.STATE.enabled = true;
+		firstEntry = false;
+	} else if (!SYNTH.STATE.enabled && !firstEntry){
+		SYNTH.STATE.enabled = true;
 	}
 	p5_canvas.classList.remove("hidden");
 })
@@ -3033,6 +3037,7 @@ consentButton.addEventListener("click", function () {
 let homeButton = document.getElementById("home_button");
 
 homeButton.addEventListener("click", function () {
+	SYNTH.STATE.enabled = false;
 	consentContainer.style.display = "flex";
 	synthContainer.style.display = "none";
 	bodyContainer.style.paddingTop = "0rem";

@@ -4,6 +4,21 @@ module.exports = {
     files: ["*.{html, css, js}"],
     relative: true
   },
+  safelist: [
+    'bg-black',
+    'bg-white',
+    'bg-custom-white',
+    'hover:bg-custom-white',
+    'bg-custom-gray',
+    'bg-stone-900',
+    'border-blue-400',
+    'bg-blue-400',
+    'border-red-400',
+    'bg-red-400',
+    'bg-green-400',
+    'w-[135px]',
+    'h-[45px]',
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -23,8 +38,8 @@ module.exports = {
         "custom-black": "#242424",
         "custom-black-2": "#2F2F2F",
         "custom-purple": "#646CFF",
-        "custom-gray": "#EBEBEB99",
-        "custom-white": "#FFFFFFDE",
+        "custom-gray": "#999",
+        "custom-white": "#a8a8a8",
         // ...color-name: color-code (hex/hsl/rgb/rgba/hsla...)
       },
     },

@@ -37,6 +37,8 @@ Tone.Transport.start()
 let SYNTH = {
 	STATE: {
 		enabled: false,
+		settingsDropdownOpen: false,
+		presetsPageOpen: false,
 		physicalKeyboardActive: true,
 		isPlaying: false,
 		keysHeld: 0,
@@ -47,7 +49,7 @@ let SYNTH = {
 		arp_C_frequencies: []
 	},
 	THEME: {
-		name: "dark",
+		current: "dark",
 		pageBackgroundColour: "#000",
 		synthBackgroundColour: "#242424",
 		synthTextColour: "#FFFFFF",
@@ -1012,6 +1014,7 @@ function fxGroupUpdate(switchTarget){
 
 // Top-row elements //
 let synthBody = document.getElementById("synth_body")
+let topRowContainer = document.getElementById("top_row_container")
 let presetsContainer = document.getElementById("presets_container")
 let presetsButton = document.getElementById("presets_button")
 let presetDiskLoadButton = document.getElementById("preset_disk_load_button")
@@ -1025,11 +1028,8 @@ let fileInput = document.getElementById("preset_file_input")
 let settingsButton = document.getElementById("settings_button")
 let settingsDropdown = document.getElementById("settings_dropdown")
 let settingsThemeButton = document.getElementById("settings_theme_button")
+let settingsHomeButton = document.getElementById("settings_home_button");
 let randomButton = document.getElementById("random_preset_button")
-
-// Dropdown states
-let settingsDropdownOpen = 0
-let presetsPageOpen = 0
 
 // Functions for top-row buttons
 function toggleDropdown(target) {
@@ -1039,7 +1039,7 @@ function toggleDropdown(target) {
 		target.classList.add("hidden")
 	}
 	if (target === settingsDropdown) {
-		settingsDropdownOpen = !settingsDropdownOpen
+		SYNTH.STATE.settingsDropdownOpen = !SYNTH.STATE.settingsDropdownOpen
 	}
 }
 function togglePresetsPage() {
@@ -1047,42 +1047,59 @@ function togglePresetsPage() {
 	SYNTH_A.releaseAll()
 	SYNTH_B.releaseAll()
 	SYNTH_C.releaseAll()
-	if (!presetsPageOpen) {
+	if (!SYNTH.STATE.presetsPageOpen) {
 		// hide synthBody and p5_canvas
 		synthBody.classList.add("hidden")
 		p5_canvas.classList.add("hidden");
 		// show presetsContainer
 		presetsContainer.classList.remove("hidden")
+		// change topRowContainer border styling
+		topRowContainer.classList.add("rounded-br-none", "rounded-bl-none")
 	} else {
 		// show synthBody and p5_canvas
 		synthBody.classList.remove("hidden")
 		p5_canvas.classList.remove("hidden");
 		// hide presetsContainer
 		presetsContainer.classList.add("hidden")
+		// undo topRowContainer border styling
+		topRowContainer.classList.remove("rounded-br-none", "rounded-bl-none")
 	}
-	presetsPageOpen = !presetsPageOpen
+	SYNTH.STATE.presetsPageOpen = !SYNTH.STATE.presetsPageOpen
 }
 
 // Event listeners for top-row buttons
 settingsButton.addEventListener("click", function () {
 	toggleDropdown(settingsDropdown)
 })
+presetsButton.addEventListener("click", function () {
+	togglePresetsPage()
+	if(SYNTH.STATE.settingsDropdownOpen){
+		toggleDropdown(settingsDropdown)
+	}
+})
+randomButton.addEventListener("click", function () {
+	console.log("This button will return a randomized preset!")
+})
+
+// Function which loops through all elements on the page, goes through each classList, and changes the colours
+function updateHtmlClasses(targetClass, newClass) {
+	let targetElements = document.getElementsByClassName(targetClass)
+	console.log(targetElements.length + " elements found with class '" + targetClass + "'" + "\nChanging to '" + newClass + "'")
+	while(targetElements.length > 0) {
+		targetElements.item(0).classList.add(newClass)
+		targetElements[0].classList.remove(targetClass)
+	}
+}
+
+// Event listeners for settings dropdown
 settingsThemeButton.addEventListener("click", function () {
-	console.log("Changing theme!")
-	if(SYNTH.THEME.name==="light"){
-		SYNTH.THEME.name = "dark"
-		updatePageColours("#111", "#242424", "#fff", "dark")
-		// #FFFFFF;#2C292D;#D9D9D9
-		updateControlColours("masterControl", "#FFFFFF", "#2C292D", "#D9D9D9")
-		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
-		updateControlColours("subControl", "#FFFFFF", "#2C292D", "#D9D9D9")
-		updateControlColours("mainControl1", "#FF6188", "#2C292D", "#D9D9D9")
-		updateControlColours("mainControl2", "#A9DC76", "#2C292D", "#D9D9D9")
-		updateControlColours("mainControl3", "#FFD866", "#2C292D", "#D9D9D9")
-		updateControlColours("mainControl4", "#78DCE8", "#2C292D", "#D9D9D9")
-		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
-	} else {
-		SYNTH.THEME.name = "light"
+
+	// toggleDropdown(settingsDropdown)
+	if (SYNTH.THEME.current === "dark") {
+		console.log("Changing theme from " + SYNTH.THEME.current + " to light")
+		// Set theme to light
+		SYNTH.THEME.current = "light"
+		// Update page colours
 		updatePageColours("#555", "#999", "#000", "light")
 		updateControlColours("masterControl", "#FFFFFF", "#000", "#FFFFFF")
 		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
@@ -1092,23 +1109,59 @@ settingsThemeButton.addEventListener("click", function () {
 		updateControlColours("mainControl3", "#000", "#FFD866", "#FFFFFF")
 		updateControlColours("mainControl4", "#000", "#78DCE8", "#FFFFFF")
 		updateControlColours("adsrControl", "#000", "#AB9DF2", "#FFFFFF")
+		// Replace classes
+		// updateHtmlClasses("bg-gray-700", "bg-pink-500")
+		// updateHtmlClasses("hover:bg-gray-600", "hover:bg-pink-800")
+		updateHtmlClasses("border-gray-500", "border-gray-100")
+		updateHtmlClasses("border-gray-600", "border-gray-200")
+		updateHtmlClasses("border-gray-700", "border-gray-300")
+		updateHtmlClasses("bg-stone-900", "bg-custom-white")
+		updateHtmlClasses("hover:bg-stone-600", "hover:bg-custom-white")
+		updateHtmlClasses("text-gray-300", "text-black")
+		updateHtmlClasses("bg-custom-black", "bg-custom-gray")
+		updateHtmlClasses("border-blue-400", "bg-blue-400")
+		updateHtmlClasses("border-red-400", "bg-red-400")
+		updateHtmlClasses("border-green-400", "bg-green-400")
+	} else {
+		console.log("Changing theme from " + SYNTH.THEME.current + " to dark")
+		// Set theme to dark
+		SYNTH.THEME.current = "dark"
+		// Update page colours
+		updatePageColours("#111", "#242424", "#fff", "dark")
+		updateControlColours("masterControl", "#FFFFFF", "#2C292D", "#D9D9D9")
+		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
+		updateControlColours("subControl", "#FFFFFF", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl1", "#FF6188", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl2", "#A9DC76", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl3", "#FFD866", "#2C292D", "#D9D9D9")
+		updateControlColours("mainControl4", "#78DCE8", "#2C292D", "#D9D9D9")
+		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
+		// Replace classes
+		// updateHtmlClasses("bg-gray-50", "bg-gray-700")
+		updateHtmlClasses("border-gray-100", "border-gray-500")
+		updateHtmlClasses("border-gray-200", "border-gray-600")
+		updateHtmlClasses("border-gray-300", "border-gray-700")
+		updateHtmlClasses("bg-custom-white", "bg-stone-900")
+		updateHtmlClasses("hover:bg-custom-white", "hover:bg-stone-600")
+		updateHtmlClasses("text-black", "text-gray-300")
+		updateHtmlClasses("bg-custom-gray", "bg-custom-black")
+		updateHtmlClasses("bg-blue-400", "border-blue-400")
+		updateHtmlClasses("bg-red-400", "border-red-400")
+		updateHtmlClasses("bg-green-400", "border-green-400")
 	}
 })
-presetsButton.addEventListener("click", function () {
-	togglePresetsPage()
-	if(settingsDropdownOpen){
+settingsHomeButton.addEventListener("click", function () {
+	SYNTH.STATE.enabled = false;
+	consentContainer.style.display = "flex";
+	synthContainer.style.display = "none";
+	bodyContainer.style.paddingTop = "0rem";
+	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
+	p5_canvas.classList.add("hidden");
+	if(SYNTH.STATE.settingsDropdownOpen){
 		toggleDropdown(settingsDropdown)
 	}
 })
-randomButton.addEventListener("click", function () {
-	console.log("This button will return a randomized preset!")
-})
 
-// Event listeners for settings dropdown
-settingsThemeButton.addEventListener("click", function () {
-	console.log("This button will change the theme!")
-	toggleDropdown(settingsDropdown)
-})
 // Event listeners for presets page
 presetSaveButton.addEventListener("click", function() {
 	savePreset(PRESET)
@@ -1174,7 +1227,7 @@ function loadPreset(preset) {
 	PRESET = preset
 	console.log("Preset loaded:", preset.METADATA.name)
 	// Close presets page if open
-	if(presetsPageOpen) {
+	if(SYNTH.STATE.presetsPageOpen) {
 		togglePresetsPage()
 	}
 	// Set input fields
@@ -1447,6 +1500,7 @@ checkForPresets()
 function populatePresetsTable(){
 	let presetsTableBody = document.getElementById("presets_table_body")
 	let presetsTableBodyHTML = ""
+	let bgState = 0
 	for(let i = 0; i < localStorage.length; i++) {
 		if (localStorage.key(i).includes("preset-")) {
 			let preset = JSON.parse(localStorage.getItem(localStorage.key(i)))
@@ -1459,24 +1513,79 @@ function populatePresetsTable(){
 			if(preset.METADATA.rating === ""){
 				preset.METADATA.rating = "?"
 			}
-			presetsTableBodyHTML += `
-	        <tr class="text-left">
-	            <td>${preset.METADATA.name}</td>
-	            <td>${preset.METADATA.type}</td>
-	            <td>${preset.METADATA.author}</td>
-	            <td>${preset.METADATA.rating}</td>
-	            <td class="text-right">
-	                <button class="preset_load_button bg-gray-700 text-gray-300 rounded-lg p-1" id="${localStorage.key(i)}-load-button">
-	                Load
+			if(bgState === 0 && SYNTH.THEME.current === "dark") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left bg-stone-900 h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border border-blue-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
 	                </button>
-	            </td>
-	            <td class="text-right">
-	                <button class="preset_delete_button bg-gray-700 text-gray-300 rounded-lg p-1" id="${localStorage.key(i)}-delete-button">
-	                Delete
+	                <button class="preset_delete_button border border-red-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
 	                </button>
 	            </td>
 	        </tr>
         	`
+				bgState++
+			} else if (bgState === 0 && SYNTH.THEME.current === "light") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left bg-custom-white h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border bg-blue-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
+	                </button>
+	                <button class="preset_delete_button border bg-red-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
+	                </button>
+	            </td>
+	        </tr>
+        	`
+				bgState++
+			} else if (bgState === 1 && SYNTH.THEME.current === "dark") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border border-blue-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
+	                </button>
+	                <button class="preset_delete_button border border-red-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
+	                </button>
+	            </td>
+	        </tr>
+        	`
+				bgState--
+			} else if (bgState === 1 && SYNTH.THEME.current === "light") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border bg-blue-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
+	                </button>
+	                <button class="preset_delete_button border bg-red-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
+	                </button>
+	            </td>
+	        </tr>
+			`
+				bgState--
+			}
 		}
 
 	}
@@ -3099,18 +3208,4 @@ consentButton.addEventListener("click", function () {
 		SYNTH.STATE.enabled = true;
 	}
 	p5_canvas.classList.remove("hidden");
-})
-
-let homeButton = document.getElementById("home_button");
-
-homeButton.addEventListener("click", function () {
-	SYNTH.STATE.enabled = false;
-	consentContainer.style.display = "flex";
-	synthContainer.style.display = "none";
-	bodyContainer.style.paddingTop = "0rem";
-	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
-	p5_canvas.classList.add("hidden");
-	if(settingsDropdownOpen){
-		toggleDropdown(settingsDropdown)
-	}
 })

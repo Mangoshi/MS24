@@ -3086,7 +3086,7 @@ let firstEntry = true
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
 	synthContainer.style.display = "flex";
-	bodyContainer.style.paddingTop = "2rem";
+	bodyContainer.style.paddingTop = "1rem";
 	document.body.style.backgroundColor = SYNTH.THEME.pageBackgroundColour;
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();

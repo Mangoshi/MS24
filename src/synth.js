@@ -1120,7 +1120,7 @@ settingsThemeButton.addEventListener("click", function () {
 		SYNTH.THEME.current = "light"
 		// Update page colours
 		updatePageColours("#555", "#999", "#000", "light")
-		updateControlColours("masterControl", "#FFFFFF", "#000", "#FFFFFF")
+		updateControlColours("masterControl", "#000", "#FFFFFF", "#FFFFFF")
 		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
 		updateControlColours("subControl", "#000", "#FFFFFF", "#FFFFFF")
 		updateControlColours("mainControl1", "#000", "#FF6188", "#FFFFFF")
@@ -1128,6 +1128,8 @@ settingsThemeButton.addEventListener("click", function () {
 		updateControlColours("mainControl3", "#000", "#FFD866", "#FFFFFF")
 		updateControlColours("mainControl4", "#000", "#78DCE8", "#FFFFFF")
 		updateControlColours("adsrControl", "#000", "#AB9DF2", "#FFFFFF")
+		updateControlColours("arpControl", "#000", "#AB9DF2", "#FFFFFF")
+		updateParamColours("#000", "#ccc")
 		// Replace classes
 		// updateHtmlClasses("bg-gray-700", "bg-pink-500")
 		// updateHtmlClasses("hover:bg-gray-600", "hover:bg-pink-800")
@@ -1155,6 +1157,8 @@ settingsThemeButton.addEventListener("click", function () {
 		updateControlColours("mainControl3", "#FFD866", "#2C292D", "#D9D9D9")
 		updateControlColours("mainControl4", "#78DCE8", "#2C292D", "#D9D9D9")
 		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
+		updateControlColours("arpControl", "#AB9DF2", "#2C292D", "#D9D9D9")
+		updateParamColours("#FFF", "#000")
 		// Replace classes
 		// updateHtmlClasses("bg-gray-50", "bg-gray-700")
 		updateHtmlClasses("border-gray-100", "border-gray-500")
@@ -1676,6 +1680,25 @@ function updateControlColours(targetClass, indicator, background, highlight){
 	$(jQtargetGroup).each(function(){
 		$(this)[0].colors = `${indicator};${background};${highlight}`
 	})
+}
+function updateParamColours(textColor, backgroundColor){
+	/*
+	for(let i = 0; i < targets.length; i++){
+		console.log(targets[i])
+		let target = "#"+targets[i].id
+		console.log("Updating colour of", target, "to", textColor+";"+backgroundColor)
+		$(target)[0].colors = `${textColor};${backgroundColor}`
+		console.log(targets[i])
+	}
+	*/
+	for(let i = 0; i < webaudioControlsReadouts.length; i++){
+		console.log("Updating colour of", webaudioControlsReadouts[i])
+		let width = webaudioControlsReadouts[i].width
+		let fontSize = webaudioControlsReadouts[i].fontsize
+		webaudioControlsReadouts[i]
+			.shadowRoot.querySelector("input")
+			.setAttribute("style", `color: ${textColor}; background-color: ${backgroundColor}; width: ${width}px; height: 20px; font-size: ${fontSize}px;`)
+	}
 }
 let infoBlocks = document.getElementsByClassName("info_block")
 let lfoSelector = document.getElementById("lfo_selector")

@@ -16,10 +16,9 @@ await register(await connect())
 // TODO:
 //  1. TOOLTIPS / HELP TEXT
 //  2. RANDOMIZE PRESET
-//  4. MISSING VISUALIZATIONS (FILTER, LFO, FX)
-//  5. PHRASE RECORDER? (Arpeggiator Latch)
-//  6. FIX LFO SWITCHING
-//  7. DISPLAY REVERB LOAD (If possible)
+//  3. PHRASE RECORDER? (Arpeggiator Latch)
+//  4. FIX LFO SWITCHING
+//  5. DISPLAY REVERB LOAD (If possible)
 
 // TODO: BONUS SYNTH FEATURES
 //  - Glide (Figure out why it's not working)
@@ -737,8 +736,9 @@ let oscB_waveform_gain = new Tone.Gain(1)
 let oscC_waveform = new Tone.Waveform().set({size: 2048})
 let oscC_waveform_gain = new Tone.Gain(1)
 
-let lfo_waveform = new Tone.Waveform().set({size: 2048})
-let lfo_waveform_gain = new Tone.Gain(1)
+let lfo_waveform = new Tone.Waveform().set({size: 16384})
+let lfo_scale = new Tone.Scale(-0.000001, 0.000001)
+let lfo_waveform_gain = new Tone.Gain(100)
 
 let master_waveform = new Tone.Waveform().set({size: 2048})
 let master_waveform_gain = new Tone.Gain(0.5)
@@ -807,7 +807,8 @@ function connectTone() {
 	// Reconnect LFO if enabled
 	if(PRESET.LFO.enabled){
 		LFO.connect(LFO_TARGET).start()
-		LFO.chain(lfo_waveform_gain, lfo_waveform)
+		// LFO -> Scale Values -> Amplify Values -> To Waveform
+		LFO.chain(lfo_scale, lfo_waveform_gain, lfo_waveform)
 	}
 
 	// Connect master waveform
@@ -3243,6 +3244,9 @@ function p5_sketch(p) {
 		if(PRESET.OSC_C.enabled){
 			p.drawWaveform(oscC_waveform, 220, 320, 388, 340)
 		}
+		if(PRESET.LFO.enabled){
+			p.drawWaveform(lfo_waveform, 220, 50, 388, 690)
+		}
 		p.drawWaveform(master_waveform, 220, 320, 1072, 570)
 		// Set stroke and fill for rectangles
 		p.strokeWeight(0)
@@ -3266,24 +3270,44 @@ function p5_sketch(p) {
 
 		// Waveform buffer
 		let buffer = wave.getValue(0);
+		// console.log(buffer)
 
 		// Initialise start variable
 		let start;
 
 		// Find the first zero crossing
 		for (let i = 1; i < buffer.length; i++){
-			// if the previous point is negative, and the current point is positive/zero
-			// then we've found the zero crossing
-			if (buffer[i-1] < 0 && buffer[i] >= 0) {
-				// Set the start to the zero crossing
-				start = i;
-				break
+			if(wave !== lfo_waveform) {
+				// if the previous point is negative, and the current point is positive/zero
+				// then we've found the zero crossing
+				if (buffer[i - 1] < 0 && buffer[i] >= 0) {
+					// Set the start to the zero crossing
+					start = i;
+					break
+				}
+			} else {
+				// since LFO values may be all positive or all negative,
+				// to find the zero crossing we need to find the first point
+				// where the value is not equal to the previous value
+				if (buffer[i - 1] !== buffer[i]) {
+					// Set the start to the zero crossing
+					start = i;
+					break
+				}
 			}
 		}
 
-		// Drawing a portion of the waveform, to avoid the initial transient
-		// Otherwise we would see the waveform "jump" horizontally to the start of the buffer
-		let end = start + buffer.length/2;
+		// If visualising anything other than the LFO,
+		let end
+		if(wave !== lfo_waveform) {
+			// We draw a portion of the waveform, to avoid the initial transient
+			// Otherwise we would see the waveform "jump" horizontally to the start of the buffer
+			end = start + buffer.length / 2;
+		} else {
+			// If visualising the LFO, we draw the whole waveform
+			end = buffer.length;
+		}
+
 
 		// Set stroke colour to white
 		p.stroke(SYNTH.THEME.synthTextColour);

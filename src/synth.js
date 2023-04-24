@@ -165,21 +165,32 @@ let PRESET = {
 
 let MIN_MAX = {
 	MASTER: {
-		gain: [0, 2]
+		gain: [0, 2],
+		octaveOffset: [-2, 2],
+		bpm: [1, 600]
 	},
 	OSCILLATOR: {
+		enabled: [0, 1],
 		octave: [-3, 3],
+		subOctave: [0, 3],
 		detune: [-12, 12],
 		volume: [-10, 10],
 		shape: [0, 3],
 		attack: [0, 2],
 		decay: [0, 2],
 		sustain: [0, 1],
-		release: [0, 5]
+		release: [0, 5],
+		count: [1, 10],
+		spread: [1, 100],
+		harmonicity: [0, 50],
+		modulationIndex: [0, 50],
+		modulationShape: [0, 3]
 	},
 	FILTER: {
+		enabled: [0, 1],
 		frequency: [1, 10000],
-		Q: [0, 24],
+		Q: [0, 10],
+		gain: [0, 24],
 		rolloff: [0, 3],
 		type: [0, 3],
 		osc_a: [0, 1],
@@ -187,18 +198,23 @@ let MIN_MAX = {
 		osc_c: [0, 1]
 	},
 	LFO: {
-		target: [0, 4],
+		enabled: [0, 1],
+		target: [0, 3],
 		grid: [0, 9],
-		shape: [0, 3],
+		type: [0, 3],
 		osc_a: [0, 1],
 		osc_b: [0, 1],
-		osc_c: [0, 1]
+		osc_c: [0, 1],
+		filterFrequency: [0, 10000],
+		oscillatorVolume: [-10, 10]
 	},
 	FX: {
+		enabled: [0, 1],
 		type: [0, 8],
 		osc_a: [0, 1],
 		osc_b: [0, 1],
-		osc_c: [0, 1]
+		osc_c: [0, 1],
+		mix: [0, 1],
 	},
 	FX_DISTORTION: {
 		intensity: [0, 20],
@@ -246,6 +262,13 @@ let MIN_MAX = {
 	FX_FREQSHIFT: {
 		frequency: [0, 20000],
 		mix: [0, 1],
+	},
+	ARP: {
+		A_enabled: [0, 1],
+		B_enabled: [0, 1],
+		C_enabled: [0, 1],
+		pattern: [0, 8],
+		playbackRate: [0, 6],
 	}
 }
 
@@ -385,6 +408,23 @@ let masterOctaveReadoutValues = {
 	"2": "0",
 	"3": "1",
 	"4": "2",
+}
+let fxTypeValues = {
+	0: "Distortion",
+	1: "Chebyshev",
+	2: "Phaser",
+	3: "Tremolo",
+	4: "Vibrato",
+	5: "Delay",
+	6: "Reverb",
+	7: "PitchShift",
+	8: "FreqShift",
+}
+let lfoTargetValues = {
+	0: "FilterFrequency",
+	1: "OscAVol",
+	2: "OscBVol",
+	3: "OscCVol",
 }
 
 // -- MASTER -- //
@@ -854,6 +894,25 @@ function filterGroupUpdate(target) {
 	}
 }
 
+function updateLFOKnob(target, min, max, step, value){
+	if(target!=="FilterFrequency"){
+
+	} else {
+		if(value > 20000){
+			value = 20000
+		} else if (value < 5){
+			value = 5
+		}
+	}
+	target = "#" + target
+	$(target)[0].min=min;
+	$(target)[0].max=max;
+	$(target)[0].step=step;
+	$(target)[0].value=value;
+	let readout = target + "_readout"
+	$(readout)[0].value=value;
+}
+
 let fxParam1Readout = document.getElementById("fx_param1_readout")
 let fxParam1Label = document.getElementById("fx_param1_label")
 let fxParam1Group = document.getElementById("fx_param1_group")
@@ -1097,8 +1156,185 @@ presetsButton.addEventListener("click", function () {
 		toggleDropdown(settingsDropdown)
 	}
 })
+function getRandomNumber(min, max, decimalPlaces) {
+	if(decimalPlaces === 0 || decimalPlaces === undefined){
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	} else {
+		return (Math.random() * (max - min) + min).toFixed(decimalPlaces)
+	}
+}
 randomButton.addEventListener("click", function () {
 	console.log("This button will return a randomized preset!")
+	// Randomize all PRESET values (except for METADATA) using MIN and MAX values as bounds
+	let newPreset = {
+		METADATA: {
+			name: PRESET.METADATA.name,
+			type: PRESET.METADATA.type,
+			author: PRESET.METADATA.author,
+			rating: PRESET.METADATA.rating
+		},
+		MASTER: {
+			// Randomize master volume using MIN and MAX values as bounds
+			gain: PRESET.MASTER.gain,
+			octaveOffset: PRESET.MASTER.octaveOffset,
+			bpm: PRESET.MASTER.bpm
+		},
+		OSC_A: {
+			enabled: getRandomNumber(MIN_MAX.OSCILLATOR.enabled[0], MIN_MAX.OSCILLATOR.enabled[1]),
+			octave: getRandomNumber(MIN_MAX.OSCILLATOR.octave[0], MIN_MAX.OSCILLATOR.octave[1]),
+			detune: getRandomNumber(MIN_MAX.OSCILLATOR.detune[0], MIN_MAX.OSCILLATOR.detune[1]),
+			volume: getRandomNumber(MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1]),
+			shape: getRandomNumber(MIN_MAX.OSCILLATOR.shape[0], MIN_MAX.OSCILLATOR.shape[1]),
+			attack: getRandomNumber(MIN_MAX.OSCILLATOR.attack[0], MIN_MAX.OSCILLATOR.attack[1], 3),
+			decay: getRandomNumber(MIN_MAX.OSCILLATOR.decay[0], MIN_MAX.OSCILLATOR.decay[1], 3),
+			sustain: getRandomNumber(MIN_MAX.OSCILLATOR.sustain[0], MIN_MAX.OSCILLATOR.sustain[1], 3),
+			release: getRandomNumber(MIN_MAX.OSCILLATOR.release[0], MIN_MAX.OSCILLATOR.release[1], 3),
+			count: getRandomNumber(MIN_MAX.OSCILLATOR.count[0], MIN_MAX.OSCILLATOR.count[1]),
+			spread: getRandomNumber(MIN_MAX.OSCILLATOR.spread[0], MIN_MAX.OSCILLATOR.spread[1]),
+			harmonicity: getRandomNumber(MIN_MAX.OSCILLATOR.harmonicity[0], MIN_MAX.OSCILLATOR.harmonicity[1]),
+			modulationIndex: getRandomNumber(MIN_MAX.OSCILLATOR.modulationIndex[0], MIN_MAX.OSCILLATOR.modulationIndex[1]),
+			modulationShape: getRandomNumber(MIN_MAX.OSCILLATOR.modulationShape[0], MIN_MAX.OSCILLATOR.modulationShape[1]),
+		},
+		OSC_B: {
+			enabled: getRandomNumber(MIN_MAX.OSCILLATOR.enabled[0], MIN_MAX.OSCILLATOR.enabled[1]),
+			octave: getRandomNumber(MIN_MAX.OSCILLATOR.octave[0], MIN_MAX.OSCILLATOR.octave[1]),
+			detune: getRandomNumber(MIN_MAX.OSCILLATOR.detune[0], MIN_MAX.OSCILLATOR.detune[1]),
+			volume: getRandomNumber(MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1]),
+			shape: getRandomNumber(MIN_MAX.OSCILLATOR.shape[0], MIN_MAX.OSCILLATOR.shape[1]),
+			attack: getRandomNumber(MIN_MAX.OSCILLATOR.attack[0], MIN_MAX.OSCILLATOR.attack[1], 3),
+			decay: getRandomNumber(MIN_MAX.OSCILLATOR.decay[0], MIN_MAX.OSCILLATOR.decay[1], 3),
+			sustain: getRandomNumber(MIN_MAX.OSCILLATOR.sustain[0], MIN_MAX.OSCILLATOR.sustain[1], 3),
+			release: getRandomNumber(MIN_MAX.OSCILLATOR.release[0], MIN_MAX.OSCILLATOR.release[1], 3),
+			count: getRandomNumber(MIN_MAX.OSCILLATOR.count[0], MIN_MAX.OSCILLATOR.count[1]),
+			spread: getRandomNumber(MIN_MAX.OSCILLATOR.spread[0], MIN_MAX.OSCILLATOR.spread[1]),
+			harmonicity: getRandomNumber(MIN_MAX.OSCILLATOR.harmonicity[0], MIN_MAX.OSCILLATOR.harmonicity[1]),
+			modulationIndex: getRandomNumber(MIN_MAX.OSCILLATOR.modulationIndex[0], MIN_MAX.OSCILLATOR.modulationIndex[1]),
+			modulationShape: getRandomNumber(MIN_MAX.OSCILLATOR.modulationShape[0], MIN_MAX.OSCILLATOR.modulationShape[1]),
+		},
+		OSC_C: {
+			enabled: getRandomNumber(MIN_MAX.OSCILLATOR.enabled[0], MIN_MAX.OSCILLATOR.enabled[1]),
+			octave: getRandomNumber(MIN_MAX.OSCILLATOR.subOctave[0], MIN_MAX.OSCILLATOR.subOctave[1]),
+			detune: getRandomNumber(MIN_MAX.OSCILLATOR.detune[0], MIN_MAX.OSCILLATOR.detune[1]),
+			volume: getRandomNumber(MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1]),
+			shape: getRandomNumber(MIN_MAX.OSCILLATOR.shape[0], MIN_MAX.OSCILLATOR.shape[1]),
+			attack: getRandomNumber(MIN_MAX.OSCILLATOR.attack[0], MIN_MAX.OSCILLATOR.attack[1], 3),
+			decay: getRandomNumber(MIN_MAX.OSCILLATOR.decay[0], MIN_MAX.OSCILLATOR.decay[1], 3),
+			sustain: getRandomNumber(MIN_MAX.OSCILLATOR.sustain[0], MIN_MAX.OSCILLATOR.sustain[1], 3),
+			release: getRandomNumber(MIN_MAX.OSCILLATOR.release[0], MIN_MAX.OSCILLATOR.release[1], 3),
+			count: getRandomNumber(MIN_MAX.OSCILLATOR.count[0], MIN_MAX.OSCILLATOR.count[1]),
+			spread: getRandomNumber(MIN_MAX.OSCILLATOR.spread[0], MIN_MAX.OSCILLATOR.spread[1]),
+			harmonicity: getRandomNumber(MIN_MAX.OSCILLATOR.harmonicity[0], MIN_MAX.OSCILLATOR.harmonicity[1]),
+			modulationIndex: getRandomNumber(MIN_MAX.OSCILLATOR.modulationIndex[0], MIN_MAX.OSCILLATOR.modulationIndex[1]),
+			modulationShape: getRandomNumber(MIN_MAX.OSCILLATOR.modulationShape[0], MIN_MAX.OSCILLATOR.modulationShape[1]),
+		},
+		FILTER: {
+			enabled: getRandomNumber(MIN_MAX.FILTER.enabled[0], MIN_MAX.FILTER.enabled[1]),
+			frequency: getRandomNumber(MIN_MAX.FILTER.frequency[0], MIN_MAX.FILTER.frequency[1]),
+			Q: getRandomNumber(MIN_MAX.FILTER.Q[0], MIN_MAX.FILTER.Q[1], 1),
+			gain: getRandomNumber(MIN_MAX.FILTER.gain[0], MIN_MAX.FILTER.gain[1], 1),
+			rolloff: getRandomNumber(MIN_MAX.FILTER.rolloff[0], MIN_MAX.FILTER.rolloff[1]),
+			type: getRandomNumber(MIN_MAX.FILTER.type[0], MIN_MAX.FILTER.type[1]),
+			osc_a: getRandomNumber(MIN_MAX.FILTER.osc_a[0], MIN_MAX.FILTER.osc_a[1]),
+			osc_b: getRandomNumber(MIN_MAX.FILTER.osc_b[0], MIN_MAX.FILTER.osc_b[1]),
+			osc_c: getRandomNumber(MIN_MAX.FILTER.osc_c[0], MIN_MAX.FILTER.osc_c[1]),
+		},
+		LFO: {
+			enabled: getRandomNumber(MIN_MAX.LFO.enabled[0], MIN_MAX.LFO.enabled[1]),
+			target: lfoTargetValues[getRandomNumber(MIN_MAX.LFO.target[0], MIN_MAX.LFO.target[1])],
+			type: getRandomNumber(MIN_MAX.LFO.type[0], MIN_MAX.LFO.type[1]),
+			grid: getRandomNumber(MIN_MAX.LFO.grid[0], MIN_MAX.LFO.grid[1]),
+			min: undefined,
+			max: undefined,
+			osc_a: getRandomNumber(MIN_MAX.LFO.osc_a[0], MIN_MAX.LFO.osc_a[1]),
+			osc_b: getRandomNumber(MIN_MAX.LFO.osc_b[0], MIN_MAX.LFO.osc_b[1]),
+			osc_c: getRandomNumber(MIN_MAX.LFO.osc_c[0], MIN_MAX.LFO.osc_c[1]),
+		},
+		FX: {
+			enabled: getRandomNumber(MIN_MAX.FX.enabled[0], MIN_MAX.FX.enabled[1]),
+			type: fxTypeValues[getRandomNumber(MIN_MAX.FX.type[0], MIN_MAX.FX.type[1])],
+			param1: 0,
+			param2: 0,
+			param3: 0,
+			param4: 0,
+			mix: getRandomNumber(MIN_MAX.FX.mix[0], MIN_MAX.FX.mix[1]),
+			osc_a: getRandomNumber(MIN_MAX.FX.osc_a[0], MIN_MAX.FX.osc_a[1]),
+			osc_b: getRandomNumber(MIN_MAX.FX.osc_b[0], MIN_MAX.FX.osc_b[1]),
+			osc_c: getRandomNumber(MIN_MAX.FX.osc_c[0], MIN_MAX.FX.osc_c[1]),
+		},
+		ARP: {
+			A_enabled: getRandomNumber(MIN_MAX.ARP.A_enabled[0], MIN_MAX.ARP.A_enabled[1]),
+			B_enabled: getRandomNumber(MIN_MAX.ARP.B_enabled[0], MIN_MAX.ARP.B_enabled[1]),
+			C_enabled: getRandomNumber(MIN_MAX.ARP.C_enabled[0], MIN_MAX.ARP.C_enabled[1]),
+			pattern: arpPatternValues[getRandomNumber(MIN_MAX.ARP.pattern[0], MIN_MAX.ARP.pattern[1])],
+			playbackRate: getRandomNumber(MIN_MAX.ARP.playbackRate[0], MIN_MAX.ARP.playbackRate[1]),
+		}
+	}
+	switch(newPreset.FX.type) {
+		case "Distortion":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_DISTORTION.intensity[0], MIN_MAX.FX_DISTORTION.intensity[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_DISTORTION.oversample[0], MIN_MAX.FX_DISTORTION.oversample[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_DISTORTION.mix[0], MIN_MAX.FX_DISTORTION.mix[1])
+			break
+		case "Chebyshev":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_CHEBYSHEV.order[0], MIN_MAX.FX_CHEBYSHEV.order[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_CHEBYSHEV.mix[0], MIN_MAX.FX_CHEBYSHEV.mix[1])
+			break
+		case "Phaser":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_PHASER.frequency[0], MIN_MAX.FX_PHASER.frequency[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_PHASER.octaves[0], MIN_MAX.FX_PHASER.octaves[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_PHASER.Q[0], MIN_MAX.FX_PHASER.Q[1])
+			newPreset.FX.param4 = getRandomNumber(MIN_MAX.FX_PHASER.mix[0], MIN_MAX.FX_PHASER.mix[1])
+			break
+		case "Tremolo":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_TREMOLO.frequency[0], MIN_MAX.FX_TREMOLO.frequency[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_TREMOLO.depth[0], MIN_MAX.FX_TREMOLO.depth[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_TREMOLO.spread[0], MIN_MAX.FX_TREMOLO.spread[1])
+			newPreset.FX.param4 = getRandomNumber(MIN_MAX.FX_TREMOLO.mix[0], MIN_MAX.FX_TREMOLO.mix[1])
+			break
+		case "Vibrato":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_TREMOLO.frequency[0], MIN_MAX.FX_TREMOLO.frequency[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_TREMOLO.depth[0], MIN_MAX.FX_TREMOLO.depth[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_TREMOLO.spread[0], MIN_MAX.FX_TREMOLO.spread[1])
+			newPreset.FX.param4 = getRandomNumber(MIN_MAX.FX_TREMOLO.mix[0], MIN_MAX.FX_TREMOLO.mix[1])
+			break
+		case "Delay":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_DELAY.time[0], MIN_MAX.FX_DELAY.time[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_DELAY.feedback[0], MIN_MAX.FX_DELAY.feedback[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_DELAY.mix[0], MIN_MAX.FX_DELAY.mix[1])
+			break
+		case "Reverb":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_REVERB.decay[0], MIN_MAX.FX_REVERB.decay[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_REVERB.preDelay[0], MIN_MAX.FX_REVERB.preDelay[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_REVERB.mix[0], MIN_MAX.FX_REVERB.mix[1])
+			break
+		case "PitchShift":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_PITCHSHIFT.pitch[0], MIN_MAX.FX_PITCHSHIFT.pitch[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_PITCHSHIFT.size[0], MIN_MAX.FX_PITCHSHIFT.size[1])
+			newPreset.FX.param3 = getRandomNumber(MIN_MAX.FX_PITCHSHIFT.feedback[0], MIN_MAX.FX_PITCHSHIFT.feedback[1])
+			newPreset.FX.param4 = getRandomNumber(MIN_MAX.FX_PITCHSHIFT.mix[0], MIN_MAX.FX_PITCHSHIFT.mix[1])
+			break
+		case "FreqShift":
+			newPreset.FX.param1 = getRandomNumber(MIN_MAX.FX_FREQSHIFT.frequency[0], MIN_MAX.FX_FREQSHIFT.frequency[1])
+			newPreset.FX.param2 = getRandomNumber(MIN_MAX.FX_FREQSHIFT.mix[0], MIN_MAX.FX_FREQSHIFT.mix[1])
+	}
+	switch(newPreset.LFO.target) {
+		case "FilterFrequency":
+			console.log("FILTER FREQ")
+			newPreset.LFO.min = getRandomNumber(MIN_MAX.LFO.filterFrequency[0], MIN_MAX.LFO.filterFrequency[1])
+			newPreset.LFO.max = getRandomNumber(MIN_MAX.LFO.filterFrequency[0], MIN_MAX.LFO.filterFrequency[1])
+			break
+		case "OscAVol":
+		case "OscBVol":
+		case "OscCVol":
+			console.log("OSC VOLUME")
+			newPreset.LFO.min = getRandomNumber(MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1])
+			newPreset.LFO.max = getRandomNumber(MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1])
+			break
+	}
+	console.log("Random preset generated:", newPreset)
+	loadPreset(newPreset)
 })
 
 // Function which loops through all elements on the page, goes through each classList, and changes the colours
@@ -1412,18 +1648,66 @@ function loadPreset(preset) {
 	if (PRESET.LFO.enabled) {
 		switch (PRESET.LFO.target) {
 			case "FilterFrequency":
+				if(PRESET.LFO.min > 10000){
+					PRESET.LFO.min = 10000
+				} else if (PRESET.LFO.min < 0){
+					PRESET.LFO.min = 0
+				}
+				if(PRESET.LFO.max > 10000){
+					PRESET.LFO.max = 10000
+				} else if (PRESET.LFO.max < 0){
+					PRESET.LFO.max = 0
+				}
+				updateLFOKnob("lfo_min", MIN_MAX.LFO.filterFrequency[0], MIN_MAX.LFO.filterFrequency[1], 1, PRESET.LFO.min)
+				updateLFOKnob("lfo_max", MIN_MAX.LFO.filterFrequency[0], MIN_MAX.LFO.filterFrequency[1], 1, PRESET.LFO.max)
 				LFO_TARGET = FILTER.frequency
 				LFO.connect(FILTER.frequency)
 				break
 			case "OscAVol":
+				if(PRESET.LFO.min > 10){
+					PRESET.LFO.min = 10
+				} else if (PRESET.LFO.min < -10){
+					PRESET.LFO.min = -10
+				}
+				if(PRESET.LFO.max > 10){
+					PRESET.LFO.max = 10
+				} else if (PRESET.LFO.max < -10){
+					PRESET.LFO.max = -10
+				}
+				updateLFOKnob("lfo_min", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.min)
+				updateLFOKnob("lfo_max", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.max)
 				LFO_TARGET = SYNTH_A.volume
 				LFO.connect(SYNTH_A.volume)
 				break
 			case "OscBVol":
+				if(PRESET.LFO.min > 10){
+					PRESET.LFO.min = 10
+				} else if (PRESET.LFO.min < -10){
+					PRESET.LFO.min = -10
+				}
+				if(PRESET.LFO.max > 10){
+					PRESET.LFO.max = 10
+				} else if (PRESET.LFO.max < -10){
+					PRESET.LFO.max = -10
+				}
+				updateLFOKnob("lfo_min", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.min)
+				updateLFOKnob("lfo_max", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.max)
 				LFO_TARGET = SYNTH_B.volume
 				LFO.connect(SYNTH_B.volume)
 				break
 			case "OscCVol":
+				if(PRESET.LFO.min > 10){
+					PRESET.LFO.min = 10
+				} else if (PRESET.LFO.min < -10){
+					PRESET.LFO.min = -10
+				}
+				if(PRESET.LFO.max > 10){
+					PRESET.LFO.max = 10
+				} else if (PRESET.LFO.max < -10){
+					PRESET.LFO.max = -10
+				}
+				updateLFOKnob("lfo_min", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.min)
+				updateLFOKnob("lfo_max", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.max)
 				LFO_TARGET = SYNTH_C.volume
 				LFO.connect(SYNTH_C.volume)
 				break
@@ -1613,6 +1897,7 @@ function populatePresetsTable(){
 		}
 
 	}
+
 	presetsTableBody.innerHTML = presetsTableBodyHTML
 	let presetLoadButtons = document.getElementsByClassName("preset_load_button")
 	let presetDeleteButtons = document.getElementsByClassName("preset_delete_button")
@@ -3015,18 +3300,66 @@ for (let i = 0; i < controls.length; i++) {
 					// TODO: Update knob min/max/default values when switching targets!!
 					// TODO: figure out how to disconnect LFO from previous target!
 					case "FilterFrequency":
+						if(PRESET.LFO.min > 10000){
+							PRESET.LFO.min = 10000
+						} else if (PRESET.LFO.min < 0){
+							PRESET.LFO.min = 0
+						}
+						if(PRESET.LFO.max > 10000){
+							PRESET.LFO.max = 10000
+						} else if (PRESET.LFO.max < 0){
+							PRESET.LFO.max = 0
+						}
+						updateLFOKnob("lfo_min", MIN_MAX.LFO.filterFrequency[0], MIN_MAX.LFO.filterFrequency[1], 1, PRESET.LFO.min)
+						updateLFOKnob("lfo_max", MIN_MAX.LFO.filterFrequency[0], MIN_MAX.LFO.filterFrequency[1], 1, PRESET.LFO.max)
 						PRESET.LFO.target = "FilterFrequency"
 						LFO_TARGET = FILTER.frequency
 						break;
 					case "OscAVol":
+						if(PRESET.LFO.min > 10){
+							PRESET.LFO.min = 10
+						} else if (PRESET.LFO.min < -10){
+							PRESET.LFO.min = -10
+						}
+						if(PRESET.LFO.max > 10){
+							PRESET.LFO.max = 10
+						} else if (PRESET.LFO.max < -10){
+							PRESET.LFO.max = -10
+						}
+						updateLFOKnob("lfo_min", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.min)
+						updateLFOKnob("lfo_max", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.max)
 						PRESET.LFO.target = "OscAVol"
 						LFO_TARGET = SYNTH_A.volume
 						break;
 					case "OscBVol":
+						if(PRESET.LFO.min > 10){
+							PRESET.LFO.min = 10
+						} else if (PRESET.LFO.min < -10){
+							PRESET.LFO.min = -10
+						}
+						if(PRESET.LFO.max > 10){
+							PRESET.LFO.max = 10
+						} else if (PRESET.LFO.max < -10){
+							PRESET.LFO.max = -10
+						}
+						updateLFOKnob("lfo_min", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.min)
+						updateLFOKnob("lfo_max", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.max)
 						PRESET.LFO.target = "OscBVol"
 						LFO_TARGET = SYNTH_B.volume
 						break;
 					case "OscCVol":
+						if(PRESET.LFO.min > 10){
+							PRESET.LFO.min = 10
+						} else if (PRESET.LFO.min < -10){
+							PRESET.LFO.min = -10
+						}
+						if(PRESET.LFO.max > 10){
+							PRESET.LFO.max = 10
+						} else if (PRESET.LFO.max < -10){
+							PRESET.LFO.max = -10
+						}
+						updateLFOKnob("lfo_min", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.min)
+						updateLFOKnob("lfo_max", MIN_MAX.OSCILLATOR.volume[0], MIN_MAX.OSCILLATOR.volume[1], 1, PRESET.LFO.max)
 						PRESET.LFO.target = "OscCVol"
 						LFO_TARGET = SYNTH_C.volume
 						break;

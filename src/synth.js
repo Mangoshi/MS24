@@ -847,10 +847,14 @@ function filterGroupUpdate(target) {
 	if (target === 5 || target === 6) {
 		// ...change the filter Q knob to gain knob
 		updateFilterKnob("filter_resonance", 1, 0, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
-		// Else if filter type is not lowshelf or highshelf...
+		tooltips["webaudio-knob"].filter_resonance.top = "Change the filter gain"
+		tooltips["webaudio-knob"].filter_resonance.bottom = "This changes the gain of the shelf filter"
+	// Else if filter type is not lowshelf or highshelf...
 	} else {
 		// ...change the filter gain knob to Q knob
 		updateFilterKnob("filter_resonance", 1, 1, 10, 0.1, PRESET.FILTER.Q, "Q")
+		tooltips["webaudio-knob"].filter_resonance.top = "Change the filter Q"
+		tooltips["webaudio-knob"].filter_resonance.bottom = "This changes the resonance of the filter, be careful!"
 	}
 }
 
@@ -952,6 +956,10 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 2, 1, 0, "Oversample")
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Distortion"]["Intensity"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Distortion"]["Oversample"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Distortion"]["Mix"]
 			break;
 		case "Chebyshev":
 			PRESET.FX.type = "Chebyshev"
@@ -961,6 +969,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(3, 0)
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Chebyshev"]["Order"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Chebyshev"]["Mix"]
 			break;
 		case "Phaser":
 			PRESET.FX.type = "Phaser"
@@ -970,6 +981,11 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 12, 0.1, 2, "Octaves")
 			updateFxKnob(3, 1, 0, 100, 0.1, 1, "Q")
 			updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Phaser"]["Frequency"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Phaser"]["Octaves"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Phaser"]["Q"]
+			tooltips["webaudio-knob"].fx_param4 = fxTooltips["Phaser"]["Mix"]
 			break;
 		case "Tremolo":
 			PRESET.FX.type = "Tremolo"
@@ -979,6 +995,11 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
 			updateFxKnob(3, 1, 0, 100, 0.01, 0, "Spread")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Tremolo"]["Frequency"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Tremolo"]["Depth"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Tremolo"]["Spread"]
+			tooltips["webaudio-knob"].fx_param4 = fxTooltips["Tremolo"]["Mix"]
 			break;
 		case "Vibrato":
 			PRESET.FX.type = "Vibrato"
@@ -988,6 +1009,11 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
 			updateFxKnob(3, 1, 0, 3, 1, 0, "Type", "['sine','triangle','sawtooth','square'][x]")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Vibrato"]["Frequency"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Vibrato"]["Depth"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Vibrato"]["Type"]
+			tooltips["webaudio-knob"].fx_param4 = fxTooltips["Vibrato"]["Mix"]
 			break;
 		case "Delay":
 			PRESET.FX.type = "Delay"
@@ -997,15 +1023,23 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.01, 0.5, "Feedback")
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Delay"]["Time"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Delay"]["Feedback"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Delay"]["Mix"]
 			break;
 		case "Reverb":
 			PRESET.FX.type = "Reverb"
 			SELECTED_FX = FX_REVERB
 
 			updateFxKnob(1, 1, 0, 100, 1, 10, "Decay")
-			updateFxKnob(2, 1, 0, 5, 0.1, 0, "Pre-delay")
+			updateFxKnob(2, 1, 0, 5, 0.1, 0, "PreDelay")
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Reverb"]["Decay"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Reverb"]["Pre-delay"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Reverb"]["Mix"]
 			break;
 		case "PitchShift":
 			PRESET.FX.type = "PitchShift"
@@ -1015,6 +1049,11 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0.01, 12, 0.01, 0.03, "Size")
 			updateFxKnob(3, 1, 0, 1, 0.01, 0.5, "Feedback")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["PitchShift"]["Pitch"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["PitchShift"]["Size"]
+			tooltips["webaudio-knob"].fx_param3 = fxTooltips["PitchShift"]["Feedback"]
+			tooltips["webaudio-knob"].fx_param4 = fxTooltips["PitchShift"]["Mix"]
 			break;
 		case "FreqShift":
 			PRESET.FX.type = "FreqShift"
@@ -1024,6 +1063,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(3, 0)
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = fxTooltips["FreqShift"]["Frequency"]
+			tooltips["webaudio-knob"].fx_param2 = fxTooltips["FreqShift"]["Mix"]
 			break;
 		default:
 			console.log("Switch default: Nothing set for this case!")
@@ -3581,10 +3623,9 @@ let tooltips = {
 			top: "Change the filter cutoff frequency",
 			bottom: "This changes the cutoff frequency of the filter"
 		},
-		// TODO: Change this if using shelf filters
 		filter_resonance: {
-			top: "Change the filter Q (Resonance)",
-			bottom: "This changes the resonance of the filter"
+			top: "Change the filter Q",
+			bottom: "This changes the resonance of the filter, be careful!"
 		},
 		// LFO (Rate, Min, Max, Shape)
 		lfo_rate: {
@@ -3600,20 +3641,19 @@ let tooltips = {
 			bottom: "This changes the maximum value of the LFO"
 		},
 		// FX (Param 1, Param 2, Param 3, Param 4)
-		// TODO: Swap these out depending on the selected FX
-		fx_param_1: {
-			top: "",
-			bottom: ""
+		fx_param1: {
+			top: "Change the distortion intensity",
+			bottom: "This changes the intensity of the distortion"
 		},
-		fx_param_2: {
-			top: "",
-			bottom: ""
+		fx_param2: {
+			top: "Change the distortion oversample",
+			bottom: "This changes the oversampling of the distortion algorithm"
 		},
-		fx_param_3: {
-			top: "",
-			bottom: ""
+		fx_param3: {
+			top: "Change the distortion mix",
+			bottom: "This changes the wet level of the distortion effect"
 		},
-		fx_param_4: {
+		fx_param4: {
 			top: "",
 			bottom: ""
 		}
@@ -3690,7 +3730,7 @@ let tooltips = {
 
 let fxTooltips = {
 	// FX Distortion (Intensity, Oversample, Mix)
-	FX_DISTORTION: {
+	Distortion: {
 		Intensity: {
 			top: "Change the distortion intensity",
 			bottom: "This changes the intensity of the distortion"
@@ -3705,7 +3745,7 @@ let fxTooltips = {
 		}
 	},
 	// FX Chebyshev (Order, Mix)
-	FX_CHEBYSHEV: {
+	Chebyshev: {
 		Order: {
 			top: "Change the Chebyshev distortion order",
 			bottom: "This changes the order of the Chebyshev distortion algorithm"
@@ -3716,7 +3756,7 @@ let fxTooltips = {
 		}
 	},
 	// FX Phaser (Frequency, Octaves, Q, Mix)
-	FX_PHASER: {
+	Phaser: {
 		Frequency: {
 			top: "Change the phaser frequency",
 			bottom: "This changes the frequency of the phaser"
@@ -3735,7 +3775,7 @@ let fxTooltips = {
 		}
 	},
 	// FX Tremolo (Frequency, Depth, Spread, Mix)
-	FX_TREMOLO: {
+	Tremolo: {
 		Frequency: {
 			top: "Change the tremolo frequency",
 			bottom: "This changes the frequency of the tremolo"
@@ -3754,7 +3794,7 @@ let fxTooltips = {
 		}
 	},
 	// FX Vibrato (Frequency, Depth, Type, Mix)
-	FX_VIBRATO: {
+	Vibrato: {
 		Frequency: {
 			top: "Change the vibrato frequency",
 			bottom: "This changes the frequency of the vibrato"
@@ -3773,7 +3813,7 @@ let fxTooltips = {
 		}
 	},
 	// FX Delay (Time, Feedback, Mix)
-	FX_DELAY: {
+	Delay: {
 		Time: {
 			top: "Change the delay time",
 			bottom: "This changes the time of the delay"
@@ -3788,7 +3828,7 @@ let fxTooltips = {
 		}
 	},
 	// FX Reverb (Decay, Pre-Delay, Mix)
-	FX_REVERB: {
+	Reverb: {
 		Decay: {
 			top: "Change the reverb decay",
 			bottom: "This changes the decay of the reverb"
@@ -3803,12 +3843,12 @@ let fxTooltips = {
 		}
 	},
 	// FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
-	FX_PITCH_SHIFT: {
+	PitchShift: {
 		Pitch: {
 			top: "Change the pitch shift pitch",
 			bottom: "This changes the pitch of the pitch shift"
 		},
-		WindowSize: {
+		Size: {
 			top: "Change the pitch shift window size",
 			bottom: "This changes the window size of the pitch shift"
 		},
@@ -3821,8 +3861,8 @@ let fxTooltips = {
 			bottom: "This changes the wet level of the pitch shift effect"
 		}
 	},
-	// FX Freq Shift (Frequency, Mix)
-	FX_FREQ_SHIFT: {
+	// FX Frequency Shift (Frequency, Mix)
+	FreqShift: {
 		Frequency: {
 			top: "Change the frequency shift frequency",
 			bottom: "This changes the frequency of the frequency shift"

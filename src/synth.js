@@ -16,10 +16,9 @@ await register(await connect())
 // TODO:
 //  1. TOOLTIPS / HELP TEXT
 //  2. RANDOMIZE PRESET
-//  4. MISSING VISUALIZATIONS (FILTER, LFO, FX)
-//  5. PHRASE RECORDER? (Arpeggiator Latch)
-//  6. FIX LFO SWITCHING
-//  7. DISPLAY REVERB LOAD (If possible)
+//  3. PHRASE RECORDER? (Arpeggiator Latch)
+//  4. FIX LFO SWITCHING
+//  5. DISPLAY REVERB LOAD (If possible)
 
 // TODO: BONUS SYNTH FEATURES
 //  - Glide (Figure out why it's not working)
@@ -37,6 +36,8 @@ Tone.Transport.start()
 let SYNTH = {
 	STATE: {
 		enabled: false,
+		settingsDropdownOpen: false,
+		presetsPageOpen: false,
 		physicalKeyboardActive: true,
 		isPlaying: false,
 		keysHeld: 0,
@@ -47,7 +48,7 @@ let SYNTH = {
 		arp_C_frequencies: []
 	},
 	THEME: {
-		name: "dark",
+		current: "dark",
 		pageBackgroundColour: "#000",
 		synthBackgroundColour: "#242424",
 		synthTextColour: "#FFFFFF",
@@ -413,7 +414,8 @@ SYNTH_A.set({
 	modulationIndex: PRESET.OSC_A.modulationIndex,
 	modulation: {
 		type: oscillatorShapeValues[PRESET.OSC_A.modulationShape]
-	}
+	},
+	volume: PRESET.OSC_A.volume
 })
 const SYNTH_B = new Tone.PolySynth(Tone.FMSynth)
 SYNTH_B.set({
@@ -426,7 +428,8 @@ SYNTH_B.set({
 	modulationIndex: PRESET.OSC_B.modulationIndex,
 	modulation: {
 		type: oscillatorShapeValues[PRESET.OSC_B.modulationShape]
-	}
+	},
+	volume: PRESET.OSC_B.volume
 })
 const SYNTH_C = new Tone.PolySynth(Tone.AMSynth)
 SYNTH_C.set({
@@ -438,7 +441,8 @@ SYNTH_C.set({
 	harmonicity: PRESET.OSC_C.harmonicity,
 	modulation: {
 		type: oscillatorShapeValues[PRESET.OSC_C.modulationShape]
-	}
+	},
+	volume: PRESET.OSC_C.volume + 6,
 })
 
 // SYNTH_A.debug = true
@@ -447,6 +451,7 @@ SYNTH_C.set({
 
 // -- FILTER -- //
 
+// TODO: Fix shelf filters & strange behavior
 const FILTER = new Tone.Filter(
 	PRESET.FILTER.frequency,
 	filterTypeValues[PRESET.FILTER.type],
@@ -722,9 +727,21 @@ const ARP_C = new Tone.Pattern(function(time, note){
 
 // -- WAVEFORMS -- //
 
-let oscA_waveform = new Tone.Waveform()
-let oscB_waveform = new Tone.Waveform()
-let oscC_waveform = new Tone.Waveform()
+let oscA_waveform = new Tone.Waveform().set({size: 2048})
+let oscA_waveform_gain = new Tone.Gain(1)
+
+let oscB_waveform = new Tone.Waveform().set({size: 2048})
+let oscB_waveform_gain = new Tone.Gain(1)
+
+let oscC_waveform = new Tone.Waveform().set({size: 2048})
+let oscC_waveform_gain = new Tone.Gain(1)
+
+let lfo_waveform = new Tone.Waveform().set({size: 16384})
+let lfo_scale = new Tone.Scale(-0.000001, 0.000001)
+let lfo_waveform_gain = new Tone.Gain(100)
+
+let master_waveform = new Tone.Waveform().set({size: 2048})
+let master_waveform_gain = new Tone.Gain(0.5)
 
 // -- INITIAL CONNECTIONS -- //
 
@@ -742,7 +759,7 @@ function connectSynths(){
 			// If not, connect Osc A to waveform->FX->output
 			SYNTH_A.chain(SELECTED_FX, OUTPUT)
 		}
-		SYNTH_A.connect(oscA_waveform)
+		SYNTH_A.chain(oscA_waveform_gain, oscA_waveform)
 	}
 	if(PRESET.OSC_B.enabled){
 		if(PRESET.FILTER.enabled && PRESET.FILTER.osc_b){
@@ -750,7 +767,7 @@ function connectSynths(){
 		} else {
 			SYNTH_B.chain(SELECTED_FX, OUTPUT)
 		}
-		SYNTH_B.connect(oscB_waveform)
+		SYNTH_B.chain(oscB_waveform_gain, oscB_waveform)
 	}
 	if(PRESET.OSC_C.enabled){
 		if(PRESET.FILTER.enabled && PRESET.FILTER.osc_c){
@@ -758,7 +775,7 @@ function connectSynths(){
 		} else {
 			SYNTH_C.chain(SELECTED_FX, OUTPUT)
 		}
-		SYNTH_C.connect(oscC_waveform)
+		SYNTH_C.chain(oscC_waveform_gain, oscC_waveform)
 	}
 }
 
@@ -790,7 +807,12 @@ function connectTone() {
 	// Reconnect LFO if enabled
 	if(PRESET.LFO.enabled){
 		LFO.connect(LFO_TARGET).start()
+		// LFO -> Scale Values -> Amplify Values -> To Waveform
+		LFO.chain(lfo_scale, lfo_waveform_gain, lfo_waveform)
 	}
+
+	// Connect master waveform
+	OUTPUT.chain(master_waveform_gain, master_waveform)
 
 	// Reconnect Master Record
 	OUTPUT.connect(REC_DEST)
@@ -1012,6 +1034,7 @@ function fxGroupUpdate(switchTarget){
 
 // Top-row elements //
 let synthBody = document.getElementById("synth_body")
+let topRowContainer = document.getElementById("top_row_container")
 let presetsContainer = document.getElementById("presets_container")
 let presetsButton = document.getElementById("presets_button")
 let presetDiskLoadButton = document.getElementById("preset_disk_load_button")
@@ -1025,11 +1048,8 @@ let fileInput = document.getElementById("preset_file_input")
 let settingsButton = document.getElementById("settings_button")
 let settingsDropdown = document.getElementById("settings_dropdown")
 let settingsThemeButton = document.getElementById("settings_theme_button")
+let settingsHomeButton = document.getElementById("settings_home_button");
 let randomButton = document.getElementById("random_preset_button")
-
-// Dropdown states
-let settingsDropdownOpen = 0
-let presetsPageOpen = 0
 
 // Functions for top-row buttons
 function toggleDropdown(target) {
@@ -1039,7 +1059,7 @@ function toggleDropdown(target) {
 		target.classList.add("hidden")
 	}
 	if (target === settingsDropdown) {
-		settingsDropdownOpen = !settingsDropdownOpen
+		SYNTH.STATE.settingsDropdownOpen = !SYNTH.STATE.settingsDropdownOpen
 	}
 }
 function togglePresetsPage() {
@@ -1047,32 +1067,89 @@ function togglePresetsPage() {
 	SYNTH_A.releaseAll()
 	SYNTH_B.releaseAll()
 	SYNTH_C.releaseAll()
-	if (!presetsPageOpen) {
+	if (!SYNTH.STATE.presetsPageOpen) {
 		// hide synthBody and p5_canvas
 		synthBody.classList.add("hidden")
 		p5_canvas.classList.add("hidden");
 		// show presetsContainer
 		presetsContainer.classList.remove("hidden")
+		// change topRowContainer border styling
+		topRowContainer.classList.add("rounded-br-none", "rounded-bl-none")
 	} else {
 		// show synthBody and p5_canvas
 		synthBody.classList.remove("hidden")
 		p5_canvas.classList.remove("hidden");
 		// hide presetsContainer
 		presetsContainer.classList.add("hidden")
+		// undo topRowContainer border styling
+		topRowContainer.classList.remove("rounded-br-none", "rounded-bl-none")
 	}
-	presetsPageOpen = !presetsPageOpen
+	SYNTH.STATE.presetsPageOpen = !SYNTH.STATE.presetsPageOpen
 }
 
 // Event listeners for top-row buttons
 settingsButton.addEventListener("click", function () {
 	toggleDropdown(settingsDropdown)
 })
+presetsButton.addEventListener("click", function () {
+	togglePresetsPage()
+	if(SYNTH.STATE.settingsDropdownOpen){
+		toggleDropdown(settingsDropdown)
+	}
+})
+randomButton.addEventListener("click", function () {
+	console.log("This button will return a randomized preset!")
+})
+
+// Function which loops through all elements on the page, goes through each classList, and changes the colours
+function updateHtmlClasses(targetClass, newClass) {
+	let targetElements = document.getElementsByClassName(targetClass)
+	console.log(targetElements.length + " elements found with class '" + targetClass + "'" + "\nChanging to '" + newClass + "'")
+	while(targetElements.length > 0) {
+		targetElements.item(0).classList.add(newClass)
+		targetElements[0].classList.remove(targetClass)
+	}
+}
+
+// Event listeners for settings dropdown
 settingsThemeButton.addEventListener("click", function () {
-	console.log("Changing theme!")
-	if(SYNTH.THEME.name==="light"){
-		SYNTH.THEME.name = "dark"
+
+	// toggleDropdown(settingsDropdown)
+	if (SYNTH.THEME.current === "dark") {
+		console.log("Changing theme from " + SYNTH.THEME.current + " to light")
+		// Set theme to light
+		SYNTH.THEME.current = "light"
+		// Update page colours
+		updatePageColours("#555", "#999", "#000", "light")
+		updateControlColours("masterControl", "#000", "#FFFFFF", "#FFFFFF")
+		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
+		updateControlColours("subControl", "#000", "#FFFFFF", "#FFFFFF")
+		updateControlColours("mainControl1", "#000", "#FF6188", "#FFFFFF")
+		updateControlColours("mainControl2", "#000", "#A9DC76", "#FFFFFF")
+		updateControlColours("mainControl3", "#000", "#FFD866", "#FFFFFF")
+		updateControlColours("mainControl4", "#000", "#78DCE8", "#FFFFFF")
+		updateControlColours("adsrControl", "#000", "#AB9DF2", "#FFFFFF")
+		updateControlColours("arpControl", "#000", "#AB9DF2", "#FFFFFF")
+		updateParamColours("#000", "#ccc")
+		// Replace classes
+		// updateHtmlClasses("bg-gray-700", "bg-pink-500")
+		// updateHtmlClasses("hover:bg-gray-600", "hover:bg-pink-800")
+		updateHtmlClasses("border-gray-500", "border-gray-100")
+		updateHtmlClasses("border-gray-600", "border-gray-200")
+		updateHtmlClasses("border-gray-700", "border-gray-300")
+		updateHtmlClasses("bg-stone-900", "bg-custom-white")
+		updateHtmlClasses("hover:bg-stone-600", "hover:bg-custom-white")
+		updateHtmlClasses("text-gray-300", "text-black")
+		updateHtmlClasses("bg-custom-black", "bg-custom-gray")
+		updateHtmlClasses("border-blue-400", "bg-blue-400")
+		updateHtmlClasses("border-red-400", "bg-red-400")
+		updateHtmlClasses("border-green-400", "bg-green-400")
+	} else {
+		console.log("Changing theme from " + SYNTH.THEME.current + " to dark")
+		// Set theme to dark
+		SYNTH.THEME.current = "dark"
+		// Update page colours
 		updatePageColours("#111", "#242424", "#fff", "dark")
-		// #FFFFFF;#2C292D;#D9D9D9
 		updateControlColours("masterControl", "#FFFFFF", "#2C292D", "#D9D9D9")
 		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
 		updateControlColours("subControl", "#FFFFFF", "#2C292D", "#D9D9D9")
@@ -1081,34 +1158,34 @@ settingsThemeButton.addEventListener("click", function () {
 		updateControlColours("mainControl3", "#FFD866", "#2C292D", "#D9D9D9")
 		updateControlColours("mainControl4", "#78DCE8", "#2C292D", "#D9D9D9")
 		updateControlColours("adsrControl", "#AB9DF2", "#2C292D", "#D9D9D9")
-	} else {
-		SYNTH.THEME.name = "light"
-		updatePageColours("#555", "#999", "#000", "light")
-		updateControlColours("masterControl", "#FFFFFF", "#000", "#FFFFFF")
-		updateControlColours("toggleControl", "#A9DC76", "#2C292D", "#D9D9D9")
-		updateControlColours("subControl", "#000", "#FFFFFF", "#FFFFFF")
-		updateControlColours("mainControl1", "#000", "#FF6188", "#FFFFFF")
-		updateControlColours("mainControl2", "#000", "#A9DC76", "#FFFFFF")
-		updateControlColours("mainControl3", "#000", "#FFD866", "#FFFFFF")
-		updateControlColours("mainControl4", "#000", "#78DCE8", "#FFFFFF")
-		updateControlColours("adsrControl", "#000", "#AB9DF2", "#FFFFFF")
+		updateControlColours("arpControl", "#AB9DF2", "#2C292D", "#D9D9D9")
+		updateParamColours("#FFF", "#000")
+		// Replace classes
+		// updateHtmlClasses("bg-gray-50", "bg-gray-700")
+		updateHtmlClasses("border-gray-100", "border-gray-500")
+		updateHtmlClasses("border-gray-200", "border-gray-600")
+		updateHtmlClasses("border-gray-300", "border-gray-700")
+		updateHtmlClasses("bg-custom-white", "bg-stone-900")
+		updateHtmlClasses("hover:bg-custom-white", "hover:bg-stone-600")
+		updateHtmlClasses("text-black", "text-gray-300")
+		updateHtmlClasses("bg-custom-gray", "bg-custom-black")
+		updateHtmlClasses("bg-blue-400", "border-blue-400")
+		updateHtmlClasses("bg-red-400", "border-red-400")
+		updateHtmlClasses("bg-green-400", "border-green-400")
 	}
 })
-presetsButton.addEventListener("click", function () {
-	togglePresetsPage()
-	if(settingsDropdownOpen){
+settingsHomeButton.addEventListener("click", function () {
+	SYNTH.STATE.enabled = false;
+	consentContainer.style.display = "flex";
+	synthContainer.style.display = "none";
+	bodyContainer.style.paddingTop = "0rem";
+	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
+	p5_canvas.classList.add("hidden");
+	if(SYNTH.STATE.settingsDropdownOpen){
 		toggleDropdown(settingsDropdown)
 	}
 })
-randomButton.addEventListener("click", function () {
-	console.log("This button will return a randomized preset!")
-})
 
-// Event listeners for settings dropdown
-settingsThemeButton.addEventListener("click", function () {
-	console.log("This button will change the theme!")
-	toggleDropdown(settingsDropdown)
-})
 // Event listeners for presets page
 presetSaveButton.addEventListener("click", function() {
 	savePreset(PRESET)
@@ -1172,168 +1249,168 @@ function downloadPreset(PRESET){
 function loadPreset(preset) {
 	// Set PRESET object
 	PRESET = preset
-	console.log("Preset loaded:", preset.METADATA.name)
+	console.log("Preset loaded:", PRESET.METADATA.name)
 	// Close presets page if open
-	if(presetsPageOpen) {
+	if(SYNTH.STATE.presetsPageOpen) {
 		togglePresetsPage()
 	}
 	// Set input fields
-	presetNameInput.value = preset.METADATA.name
-	presetTypeInput.value = preset.METADATA.type
-	presetAuthorInput.value = preset.METADATA.author
-	presetRatingInput.value = preset.METADATA.rating
+	presetNameInput.value = PRESET.METADATA.name
+	presetTypeInput.value = PRESET.METADATA.type
+	presetAuthorInput.value = PRESET.METADATA.author
+	presetRatingInput.value = PRESET.METADATA.rating
 	// Update GUI //
 	// MASTER
-	updateGUI("master_gain", preset.MASTER.gain, preset.MASTER.gain)
-	updateGUI("master_bpm", preset.MASTER.bpm, preset.MASTER.bpm)
+	updateGUI("master_gain", PRESET.MASTER.gain, PRESET.MASTER.gain)
+	updateGUI("master_bpm", PRESET.MASTER.bpm, PRESET.MASTER.bpm)
 	// OSC A
-	updateGUI("osc_a_switch", preset.OSC_A.enabled)
-	updateGUI("osc_a_octave", preset.OSC_A.octave, preset.OSC_A.octave)
-	updateGUI("osc_a_semi", preset.OSC_A.detune, preset.OSC_A.detune)
-	updateGUI("osc_a_volume", preset.OSC_A.volume, preset.OSC_A.volume)
-	updateGUI("osc_a_shape", preset.OSC_A.shape, shapeReadoutValues[preset.OSC_A.shape])
-	updateGUI("osc_a_attack", preset.OSC_A.attack, preset.OSC_A.attack)
-	updateGUI("osc_a_decay", preset.OSC_A.decay, preset.OSC_A.decay)
-	updateGUI("osc_a_sustain", preset.OSC_A.sustain, preset.OSC_A.sustain)
-	updateGUI("osc_a_release", preset.OSC_A.release, preset.OSC_A.release)
-	updateGUI("osc_a_voices", preset.OSC_A.count, preset.OSC_A.count)
-	updateGUI("osc_a_spread", preset.OSC_A.spread, preset.OSC_A.spread)
-	updateGUI("osc_a_fm", preset.OSC_A.harmonicity, preset.OSC_A.harmonicity)
-	updateGUI("osc_a_fm_depth", preset.OSC_A.modulationIndex, preset.OSC_A.modulationIndex)
-	updateGUI("osc_a_fm_shape", preset.OSC_A.modulationShape, smallShapeReadoutValues[preset.OSC_A.modulationShape])
+	updateGUI("osc_a_switch", PRESET.OSC_A.enabled)
+	updateGUI("osc_a_octave", PRESET.OSC_A.octave, PRESET.OSC_A.octave)
+	updateGUI("osc_a_semi", PRESET.OSC_A.detune, PRESET.OSC_A.detune)
+	updateGUI("osc_a_volume", PRESET.OSC_A.volume, PRESET.OSC_A.volume)
+	updateGUI("osc_a_shape", PRESET.OSC_A.shape, shapeReadoutValues[PRESET.OSC_A.shape])
+	updateGUI("osc_a_attack", PRESET.OSC_A.attack, PRESET.OSC_A.attack)
+	updateGUI("osc_a_decay", PRESET.OSC_A.decay, PRESET.OSC_A.decay)
+	updateGUI("osc_a_sustain", PRESET.OSC_A.sustain, PRESET.OSC_A.sustain)
+	updateGUI("osc_a_release", PRESET.OSC_A.release, PRESET.OSC_A.release)
+	updateGUI("osc_a_voices", PRESET.OSC_A.count, PRESET.OSC_A.count)
+	updateGUI("osc_a_spread", PRESET.OSC_A.spread, PRESET.OSC_A.spread)
+	updateGUI("osc_a_fm", PRESET.OSC_A.harmonicity, PRESET.OSC_A.harmonicity)
+	updateGUI("osc_a_fm_depth", PRESET.OSC_A.modulationIndex, PRESET.OSC_A.modulationIndex)
+	updateGUI("osc_a_fm_shape", PRESET.OSC_A.modulationShape, smallShapeReadoutValues[PRESET.OSC_A.modulationShape])
 	// OSC B
-	updateGUI("osc_b_switch", preset.OSC_B.enabled)
-	updateGUI("osc_b_octave", preset.OSC_B.octave, preset.OSC_B.octave)
-	updateGUI("osc_b_semi", preset.OSC_B.detune, preset.OSC_B.detune)
-	updateGUI("osc_b_volume", preset.OSC_B.volume, preset.OSC_B.volume)
-	updateGUI("osc_b_shape", preset.OSC_B.shape, shapeReadoutValues[preset.OSC_B.shape])
-	updateGUI("osc_b_attack", preset.OSC_B.attack, preset.OSC_B.attack)
-	updateGUI("osc_b_decay", preset.OSC_B.decay, preset.OSC_B.decay)
-	updateGUI("osc_b_sustain", preset.OSC_B.sustain, preset.OSC_B.sustain)
-	updateGUI("osc_b_release", preset.OSC_B.release, preset.OSC_B.release)
-	updateGUI("osc_b_voices", preset.OSC_B.count, preset.OSC_B.count)
-	updateGUI("osc_b_spread", preset.OSC_B.spread, preset.OSC_B.spread)
-	updateGUI("osc_b_fm", preset.OSC_B.harmonicity, preset.OSC_B.harmonicity)
-	updateGUI("osc_b_fm_depth", preset.OSC_B.modulationIndex, preset.OSC_B.modulationIndex)
-	updateGUI("osc_b_fm_shape", preset.OSC_B.modulationShape, smallShapeReadoutValues[preset.OSC_B.modulationShape])
+	updateGUI("osc_b_switch", PRESET.OSC_B.enabled)
+	updateGUI("osc_b_octave", PRESET.OSC_B.octave, PRESET.OSC_B.octave)
+	updateGUI("osc_b_semi", PRESET.OSC_B.detune, PRESET.OSC_B.detune)
+	updateGUI("osc_b_volume", PRESET.OSC_B.volume, PRESET.OSC_B.volume)
+	updateGUI("osc_b_shape", PRESET.OSC_B.shape, shapeReadoutValues[PRESET.OSC_B.shape])
+	updateGUI("osc_b_attack", PRESET.OSC_B.attack, PRESET.OSC_B.attack)
+	updateGUI("osc_b_decay", PRESET.OSC_B.decay, PRESET.OSC_B.decay)
+	updateGUI("osc_b_sustain", PRESET.OSC_B.sustain, PRESET.OSC_B.sustain)
+	updateGUI("osc_b_release", PRESET.OSC_B.release, PRESET.OSC_B.release)
+	updateGUI("osc_b_voices", PRESET.OSC_B.count, PRESET.OSC_B.count)
+	updateGUI("osc_b_spread", PRESET.OSC_B.spread, PRESET.OSC_B.spread)
+	updateGUI("osc_b_fm", PRESET.OSC_B.harmonicity, PRESET.OSC_B.harmonicity)
+	updateGUI("osc_b_fm_depth", PRESET.OSC_B.modulationIndex, PRESET.OSC_B.modulationIndex)
+	updateGUI("osc_b_fm_shape", PRESET.OSC_B.modulationShape, smallShapeReadoutValues[PRESET.OSC_B.modulationShape])
 	// OSC C
-	updateGUI("osc_c_switch", preset.OSC_C.enabled)
-	updateGUI("osc_c_octave", preset.OSC_C.octave, preset.OSC_C.octave)
-	updateGUI("osc_c_semi", preset.OSC_C.detune, preset.OSC_C.detune)
-	updateGUI("osc_c_volume", preset.OSC_C.volume, preset.OSC_C.volume)
-	updateGUI("osc_c_shape", preset.OSC_C.shape, shapeReadoutValues[preset.OSC_C.shape])
-	updateGUI("osc_c_attack", preset.OSC_C.attack, preset.OSC_C.attack)
-	updateGUI("osc_c_decay", preset.OSC_C.decay, preset.OSC_C.decay)
-	updateGUI("osc_c_sustain", preset.OSC_C.sustain, preset.OSC_C.sustain)
-	updateGUI("osc_c_release", preset.OSC_C.release, preset.OSC_C.release)
-	updateGUI("osc_c_voices", preset.OSC_C.count, preset.OSC_C.count)
-	updateGUI("osc_c_spread", preset.OSC_C.spread, preset.OSC_C.spread)
-	updateGUI("osc_c_am", preset.OSC_C.harmonicity, preset.OSC_C.harmonicity)
-	updateGUI("osc_c_am_shape", preset.OSC_C.modulationShape, smallShapeReadoutValues[preset.OSC_C.modulationShape])
+	updateGUI("osc_c_switch", PRESET.OSC_C.enabled)
+	updateGUI("osc_c_octave", PRESET.OSC_C.octave, PRESET.OSC_C.octave)
+	updateGUI("osc_c_semi", PRESET.OSC_C.detune, PRESET.OSC_C.detune)
+	updateGUI("osc_c_volume", PRESET.OSC_C.volume, PRESET.OSC_C.volume)
+	updateGUI("osc_c_shape", PRESET.OSC_C.shape, shapeReadoutValues[PRESET.OSC_C.shape])
+	updateGUI("osc_c_attack", PRESET.OSC_C.attack, PRESET.OSC_C.attack)
+	updateGUI("osc_c_decay", PRESET.OSC_C.decay, PRESET.OSC_C.decay)
+	updateGUI("osc_c_sustain", PRESET.OSC_C.sustain, PRESET.OSC_C.sustain)
+	updateGUI("osc_c_release", PRESET.OSC_C.release, PRESET.OSC_C.release)
+	updateGUI("osc_c_voices", PRESET.OSC_C.count, PRESET.OSC_C.count)
+	updateGUI("osc_c_spread", PRESET.OSC_C.spread, PRESET.OSC_C.spread)
+	updateGUI("osc_c_am", PRESET.OSC_C.harmonicity, PRESET.OSC_C.harmonicity)
+	updateGUI("osc_c_am_shape", PRESET.OSC_C.modulationShape, smallShapeReadoutValues[PRESET.OSC_C.modulationShape])
 	// FILTER
-	filterGroupUpdate(preset.FILTER.type)
-	updateGUI("filter_switch", preset.FILTER.enabled)
-	updateGUI("filter_cutoff", preset.FILTER.frequency, preset.FILTER.frequency)
-	updateGUI("filter_resonance", preset.FILTER.Q, preset.FILTER.Q)
-	updateGUI("filter_rolloff", preset.FILTER.rolloff, filterRolloffValues[preset.FILTER.rolloff])
-	updateGUI("filter_type", preset.FILTER.type, filterTypeReadoutValues[preset.FILTER.type])
-	updateGUI("osc_a_filter_switch", preset.FILTER.osc_a)
-	updateGUI("osc_b_filter_switch", preset.FILTER.osc_b)
-	updateGUI("osc_c_filter_switch", preset.FILTER.osc_c)
+	filterGroupUpdate(PRESET.FILTER.type)
+	updateGUI("filter_switch", PRESET.FILTER.enabled)
+	updateGUI("filter_cutoff", PRESET.FILTER.frequency, PRESET.FILTER.frequency)
+	updateGUI("filter_resonance", PRESET.FILTER.Q, PRESET.FILTER.Q)
+	updateGUI("filter_rolloff", PRESET.FILTER.rolloff, filterRolloffValues[PRESET.FILTER.rolloff])
+	updateGUI("filter_type", PRESET.FILTER.type, filterTypeReadoutValues[PRESET.FILTER.type])
+	updateGUI("osc_a_filter_switch", PRESET.FILTER.osc_a)
+	updateGUI("osc_b_filter_switch", PRESET.FILTER.osc_b)
+	updateGUI("osc_c_filter_switch", PRESET.FILTER.osc_c)
 	// LFO
-	updateSelectBox("lfo_selector", preset.LFO.target)
-	updateGUI("lfo_switch", preset.LFO.enabled)
-	updateGUI("lfo_grid", preset.LFO.grid, lfoGridReadoutValues[preset.LFO.grid])
-	updateGUI("lfo_min", preset.LFO.min, preset.LFO.min)
-	updateGUI("lfo_max", preset.LFO.max, preset.LFO.max)
-	updateGUI("lfo_shape", preset.LFO.type, shapeValues[preset.LFO.type])
+	updateSelectBox("lfo_selector", PRESET.LFO.target)
+	updateGUI("lfo_switch", PRESET.LFO.enabled)
+	updateGUI("lfo_grid", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
+	updateGUI("lfo_min", PRESET.LFO.min, PRESET.LFO.min)
+	updateGUI("lfo_max", PRESET.LFO.max, PRESET.LFO.max)
+	updateGUI("lfo_shape", PRESET.LFO.type, shapeValues[PRESET.LFO.type])
 	// FX
-	updateSelectBox("fx_selector", preset.FX.type)
-	fxGroupUpdate(preset.FX.type)
-	updateGUI("fx_switch", preset.FX.enabled)
-	updateGUI("fx_param1", preset.FX.param1, preset.FX.param1)
-	updateGUI("fx_param2", preset.FX.param2, preset.FX.param2)
-	updateGUI("fx_param3", preset.FX.param3, preset.FX.param3)
-	updateGUI("fx_param4", preset.FX.param4, preset.FX.param4)
+	updateSelectBox("fx_selector", PRESET.FX.type)
+	fxGroupUpdate(PRESET.FX.type)
+	updateGUI("fx_switch", PRESET.FX.enabled)
+	updateGUI("fx_param1", PRESET.FX.param1, PRESET.FX.param1)
+	updateGUI("fx_param2", PRESET.FX.param2, PRESET.FX.param2)
+	updateGUI("fx_param3", PRESET.FX.param3, PRESET.FX.param3)
+	updateGUI("fx_param4", PRESET.FX.param4, PRESET.FX.param4)
 	// ARP & NOTES
-	updateGUI("arp_a_switch", preset.ARP.A_enabled)
-	updateGUI("arp_b_switch", preset.ARP.B_enabled)
-	updateGUI("arp_c_switch", preset.ARP.C_enabled)
-	updateGUI("arp_pattern", preset.ARP.pattern, arpPatternValues[preset.ARP.pattern])
-	updateGUI("arp_speed", preset.ARP.playbackRate, arpSpeedReadoutValues[preset.ARP.playbackRate])
-	updateGUI("master_octave", preset.MASTER.octaveOffset+2, masterOctaveReadoutValues[preset.MASTER.octaveOffset+2])
+	updateGUI("arp_a_switch", PRESET.ARP.A_enabled)
+	updateGUI("arp_b_switch", PRESET.ARP.B_enabled)
+	updateGUI("arp_c_switch", PRESET.ARP.C_enabled)
+	updateGUI("arp_pattern", PRESET.ARP.pattern, arpPatternValues[PRESET.ARP.pattern])
+	updateGUI("arp_speed", PRESET.ARP.playbackRate, arpSpeedReadoutValues[PRESET.ARP.playbackRate])
+	updateGUI("master_octave", PRESET.MASTER.octaveOffset+2, masterOctaveReadoutValues[PRESET.MASTER.octaveOffset+2])
 
 	// Update Tone.js //
 	// OSC A
 	SYNTH_A.set({
 		"oscillator": {
-			"type": oscillatorShapeValues[preset.OSC_A.shape],
-			"count": preset.OSC_A.count,
-			"spread": preset.OSC_A.spread,
+			"type": oscillatorShapeValues[PRESET.OSC_A.shape],
+			"count": PRESET.OSC_A.count,
+			"spread": PRESET.OSC_A.spread,
 		},
-		"harmonicity": preset.OSC_A.harmonicity,
-		"modulationIndex": preset.OSC_A.modulationIndex,
+		"harmonicity": PRESET.OSC_A.harmonicity,
+		"modulationIndex": PRESET.OSC_A.modulationIndex,
 		"modulation": {
-			"type": oscillatorShapeValues[preset.OSC_A.modulationShape]
+			"type": oscillatorShapeValues[PRESET.OSC_A.modulationShape]
 		},
 		"envelope": {
-			"attack": preset.OSC_A.attack,
-			"decay": preset.OSC_A.decay,
-			"sustain": preset.OSC_A.sustain,
-			"release": preset.OSC_A.release
+			"attack": PRESET.OSC_A.attack,
+			"decay": PRESET.OSC_A.decay,
+			"sustain": PRESET.OSC_A.sustain,
+			"release": PRESET.OSC_A.release
 		},
-		"volume": preset.OSC_A.volume
+		"volume": PRESET.OSC_A.volume
 	})
 	// OSC B
 	SYNTH_B.set({
 		"oscillator": {
-			"type": oscillatorShapeValues[preset.OSC_B.shape],
-			"count": preset.OSC_B.count,
-			"spread": preset.OSC_B.spread,
+			"type": oscillatorShapeValues[PRESET.OSC_B.shape],
+			"count": PRESET.OSC_B.count,
+			"spread": PRESET.OSC_B.spread,
 		},
-		"harmonicity": preset.OSC_B.harmonicity,
-		"modulationIndex": preset.OSC_B.modulationIndex,
+		"harmonicity": PRESET.OSC_B.harmonicity,
+		"modulationIndex": PRESET.OSC_B.modulationIndex,
 		"modulation": {
-			"type": oscillatorShapeValues[preset.OSC_B.modulationShape]
+			"type": oscillatorShapeValues[PRESET.OSC_B.modulationShape]
 		},
 		"envelope": {
-			"attack": preset.OSC_B.attack,
-			"decay": preset.OSC_B.decay,
-			"sustain": preset.OSC_B.sustain,
-			"release": preset.OSC_B.release
+			"attack": PRESET.OSC_B.attack,
+			"decay": PRESET.OSC_B.decay,
+			"sustain": PRESET.OSC_B.sustain,
+			"release": PRESET.OSC_B.release
 		},
-		"volume": preset.OSC_B.volume
+		"volume": PRESET.OSC_B.volume
 	})
 	// OSC C
 	SYNTH_C.set({
 		"oscillator": {
-			"type": oscillatorShapeValues[preset.OSC_C.shape],
-			"count": preset.OSC_C.count,
-			"spread": preset.OSC_C.spread,
+			"type": oscillatorShapeValues[PRESET.OSC_C.shape],
+			"count": PRESET.OSC_C.count,
+			"spread": PRESET.OSC_C.spread,
 		},
-		"harmonicity": preset.OSC_C.harmonicity,
+		"harmonicity": PRESET.OSC_C.harmonicity,
 		"modulation": {
-			"type": oscillatorShapeValues[preset.OSC_C.modulationShape]
+			"type": oscillatorShapeValues[PRESET.OSC_C.modulationShape]
 		},
 		"envelope": {
-			"attack": preset.OSC_C.attack,
-			"decay": preset.OSC_C.decay,
-			"sustain": preset.OSC_C.sustain,
-			"release": preset.OSC_C.release
+			"attack": PRESET.OSC_C.attack,
+			"decay": PRESET.OSC_C.decay,
+			"sustain": PRESET.OSC_C.sustain,
+			"release": PRESET.OSC_C.release
 		},
-		"volume": preset.OSC_C.volume
+		"volume": PRESET.OSC_C.volume+6
 	})
 	// FILTER
 	FILTER.set({
-		"type": filterTypeValues[preset.FILTER.type],
-		"frequency": preset.FILTER.frequency,
-		"Q": preset.FILTER.Q,
-		"gain": preset.FILTER.gain,
-		"rolloff": filterRolloffValues[preset.FILTER.rolloff]
+		"type": filterTypeValues[PRESET.FILTER.type],
+		"frequency": PRESET.FILTER.frequency,
+		"Q": PRESET.FILTER.Q,
+		"gain": PRESET.FILTER.gain,
+		"rolloff": filterRolloffValues[PRESET.FILTER.rolloff]
 	})
 	// LFO
-	if (preset.LFO.enabled) {
-		switch (preset.LFO.target) {
+	if (PRESET.LFO.enabled) {
+		switch (PRESET.LFO.target) {
 			case "FilterFrequency":
 				LFO_TARGET = FILTER.frequency
 				LFO.connect(FILTER.frequency)
@@ -1353,45 +1430,45 @@ function loadPreset(preset) {
 		}
 	}
 	LFO.set({
-		"frequency": lfoGridValues[preset.LFO.grid],
-		"min": preset.LFO.min,
-		"max": preset.LFO.max,
-		"type": shapeValues[preset.LFO.type]
+		"frequency": lfoGridValues[PRESET.LFO.grid],
+		"min": PRESET.LFO.min,
+		"max": PRESET.LFO.max,
+		"type": shapeValues[PRESET.LFO.type]
 	})
 	// FX
-	SELECTED_FX = fxSelectValues[preset.FX.type]
-	if (preset.FX.enabled) {
+	SELECTED_FX = fxSelectValues[PRESET.FX.type]
+	if (PRESET.FX.enabled) {
 		SELECTED_FX.set({
-			"wet": preset.FX.mix
+			"wet": PRESET.FX.mix
 		})
 	} else {
 		SELECTED_FX.set({
 			"wet": 0
 		})
 	}
-	setFXParam1(preset.FX.param1)
-	setFXParam2(preset.FX.param2)
-	setFXParam3(preset.FX.param3)
-	setFXParam4(preset.FX.param4)
+	setFXParam1(PRESET.FX.param1)
+	setFXParam2(PRESET.FX.param2)
+	setFXParam3(PRESET.FX.param3)
+	setFXParam4(PRESET.FX.param4)
 	// ARP
 	ARP_A.set({
-		"pattern": arpPatternValues[preset.ARP.pattern],
-		"playbackRate": arpSpeedValues[preset.ARP.playbackRate]
+		"pattern": arpPatternValues[PRESET.ARP.pattern],
+		"playbackRate": arpSpeedValues[PRESET.ARP.playbackRate]
 	})
 	ARP_B.set({
-		"pattern": arpPatternValues[preset.ARP.pattern],
-		"playbackRate": arpSpeedValues[preset.ARP.playbackRate]
+		"pattern": arpPatternValues[PRESET.ARP.pattern],
+		"playbackRate": arpSpeedValues[PRESET.ARP.playbackRate]
 	})
 	ARP_C.set({
-		"pattern": arpPatternValues[preset.ARP.pattern],
-		"playbackRate": arpSpeedValues[preset.ARP.playbackRate]
+		"pattern": arpPatternValues[PRESET.ARP.pattern],
+		"playbackRate": arpSpeedValues[PRESET.ARP.playbackRate]
 	})
 	// MASTER
 	MASTER_GAIN.set({
-		"gain": preset.MASTER.gain
+		"gain": PRESET.MASTER.gain
 	})
 	Tone.Transport.set({
-		"bpm": preset.MASTER.bpm
+		"bpm": PRESET.MASTER.bpm
 	})
 	// CONNECTIONS
 	connectTone()
@@ -1447,6 +1524,7 @@ checkForPresets()
 function populatePresetsTable(){
 	let presetsTableBody = document.getElementById("presets_table_body")
 	let presetsTableBodyHTML = ""
+	let bgState = 0
 	for(let i = 0; i < localStorage.length; i++) {
 		if (localStorage.key(i).includes("preset-")) {
 			let preset = JSON.parse(localStorage.getItem(localStorage.key(i)))
@@ -1459,24 +1537,79 @@ function populatePresetsTable(){
 			if(preset.METADATA.rating === ""){
 				preset.METADATA.rating = "?"
 			}
-			presetsTableBodyHTML += `
-	        <tr class="text-left">
-	            <td>${preset.METADATA.name}</td>
-	            <td>${preset.METADATA.type}</td>
-	            <td>${preset.METADATA.author}</td>
-	            <td>${preset.METADATA.rating}</td>
-	            <td class="text-right">
-	                <button class="preset_load_button bg-gray-700 text-gray-300 rounded-lg p-1" id="${localStorage.key(i)}-load-button">
-	                Load
+			if(bgState === 0 && SYNTH.THEME.current === "dark") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left bg-stone-900 h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border border-blue-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
 	                </button>
-	            </td>
-	            <td class="text-right">
-	                <button class="preset_delete_button bg-gray-700 text-gray-300 rounded-lg p-1" id="${localStorage.key(i)}-delete-button">
-	                Delete
+	                <button class="preset_delete_button border border-red-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
 	                </button>
 	            </td>
 	        </tr>
         	`
+				bgState++
+			} else if (bgState === 0 && SYNTH.THEME.current === "light") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left bg-custom-white h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border bg-blue-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
+	                </button>
+	                <button class="preset_delete_button border bg-red-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
+	                </button>
+	            </td>
+	        </tr>
+        	`
+				bgState++
+			} else if (bgState === 1 && SYNTH.THEME.current === "dark") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border border-blue-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
+	                </button>
+	                <button class="preset_delete_button border border-red-400 hover:border-white transition-all text-gray-300 rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
+	                </button>
+	            </td>
+	        </tr>
+        	`
+				bgState--
+			} else if (bgState === 1 && SYNTH.THEME.current === "light") {
+				presetsTableBodyHTML += `
+	        <tr class="text-left h-[45px]">
+	            <td><span class="ml-1">${preset.METADATA.name}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.type}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.author}</span></td>
+	            <td><span class="ml-1">${preset.METADATA.rating}</span></td>
+	            <td class="flex justify-end mt-1">
+	                <button class="preset_load_button border bg-blue-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center mr-1" id="${localStorage.key(i)}-load-button">
+	                Load Preset
+	                </button>
+	                <button class="preset_delete_button border bg-red-400 hover:border-white transition-all text-black rounded-lg p-1 w-[135px] text-center" id="${localStorage.key(i)}-delete-button">
+	                Delete Preset
+	                </button>
+	            </td>
+	        </tr>
+			`
+				bgState--
+			}
 		}
 
 	}
@@ -1506,9 +1639,12 @@ function populatePresetsTable(){
 populatePresetsTable()
 
 function updateGUI(target, value, readout){
+	// jQuery selector for the target element
 	let jQtarget = "#"+target
+	// Set the value of the target element
 	$(jQtarget)[0].value = value;
-	if(readout){
+	// If readout is defined, update the readout element
+	if(readout !== undefined){
 		let jQtargetReadout = document.getElementById(target+"_readout")
 		jQtargetReadout.value = readout
 	}
@@ -1545,6 +1681,25 @@ function updateControlColours(targetClass, indicator, background, highlight){
 	$(jQtargetGroup).each(function(){
 		$(this)[0].colors = `${indicator};${background};${highlight}`
 	})
+}
+function updateParamColours(textColor, backgroundColor){
+	/*
+	for(let i = 0; i < targets.length; i++){
+		console.log(targets[i])
+		let target = "#"+targets[i].id
+		console.log("Updating colour of", target, "to", textColor+";"+backgroundColor)
+		$(target)[0].colors = `${textColor};${backgroundColor}`
+		console.log(targets[i])
+	}
+	*/
+	for(let i = 0; i < webaudioControlsReadouts.length; i++){
+		console.log("Updating colour of", webaudioControlsReadouts[i])
+		let width = webaudioControlsReadouts[i].width
+		let fontSize = webaudioControlsReadouts[i].fontsize
+		webaudioControlsReadouts[i]
+			.shadowRoot.querySelector("input")
+			.setAttribute("style", `color: ${textColor}; background-color: ${backgroundColor}; width: ${width}px; height: 20px; font-size: ${fontSize}px;`)
+	}
 }
 let infoBlocks = document.getElementsByClassName("info_block")
 let lfoSelector = document.getElementById("lfo_selector")
@@ -1899,7 +2054,6 @@ function handleNote(state, note, velocity, origin) {
 			// The actual issue is bypassed in the keydown event handler below
 			if (SYNTH.STATE.playingFrequencies.length === 0) {
 				SYNTH.STATE.isPlaying = false
-				console.log("isPlaying", SYNTH.STATE.isPlaying)
 				SYNTH_A.releaseAll()
 				SYNTH_B.releaseAll()
 				SYNTH_C.releaseAll()
@@ -1907,6 +2061,8 @@ function handleNote(state, note, velocity, origin) {
 			// Stop the arpeggiators
 			stopArp(freqA, freqB, freqC)
 		}
+		// Log ifPlaying
+		console.log("isPlaying", SYNTH.STATE.isPlaying)
 		// Log the currently playing frequencies
 		console.log("SYNTH.STATE.playingFrequencies", SYNTH.STATE.playingFrequencies)
 		// Log the arpeggiator frequency array, if enabled
@@ -2464,6 +2620,27 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_A.set({
 					"volume": e.target.value
 				})
+				let wave_a_gain
+				if(e.target.value < 0) {
+					// If value is negative, increase waveform gain to compensate
+					wave_a_gain = 1 + (Math.abs(e.target.value) / 6)
+					oscA_waveform_gain.set({
+						"gain": wave_a_gain
+					})
+				} else if (e.target.value === 0) {
+					// If value is 0, set waveform gain to 1
+					wave_a_gain = 1
+					oscA_waveform_gain.set({
+						"gain": wave_a_gain
+					})
+				} else {
+					// If value is positive, decrease waveform gain to compensate
+					wave_a_gain = 1 - (e.target.value / 12)
+					oscA_waveform_gain.set({
+						"gain": wave_a_gain
+					})
+				}
+				console.log(wave_a_gain)
 				if (LFO_TARGET === SYNTH_A.volume) {
 					PRESET.LFO.max = e.target.value
 					LFO.set({"max": e.target.value})
@@ -2565,6 +2742,27 @@ for (let i = 0; i < controls.length; i++) {
 				SYNTH_B.set({
 					"volume": e.target.value
 				})
+				let wave_b_gain
+				if(e.target.value < 0) {
+					// If value is negative, increase waveform gain to compensate
+					wave_b_gain = 1 + (Math.abs(e.target.value) / 6)
+					oscB_waveform_gain.set({
+						"gain": wave_b_gain
+					})
+				} else if (e.target.value === 0) {
+					// If value is 0, set waveform gain to 1
+					wave_b_gain = 1
+					oscB_waveform_gain.set({
+						"gain": wave_b_gain
+					})
+				} else {
+					// If value is positive, decrease waveform gain to compensate
+					wave_b_gain = 1 - (e.target.value / 12)
+					oscB_waveform_gain.set({
+						"gain": wave_b_gain
+					})
+				}
+				console.log(wave_b_gain)
 				if (LFO_TARGET === SYNTH_B.volume) {
 					PRESET.LFO.max = e.target.value
 					LFO.set({"max": e.target.value})
@@ -2664,8 +2862,29 @@ for (let i = 0; i < controls.length; i++) {
 			case "osc_c_volume":
 				PRESET.OSC_C.volume = e.target.value
 				SYNTH_C.set({
-					"volume": e.target.value
+					"volume": e.target.value + 6
 				})
+				let wave_c_gain
+				if(e.target.value < 0) {
+					// If value is negative, increase waveform gain to compensate
+					wave_c_gain = 1 + (Math.abs(e.target.value) / 6)
+					oscC_waveform_gain.set({
+						"gain": wave_c_gain
+					})
+				} else if (e.target.value === 0) {
+					// If value is 0, set waveform gain to 1
+					wave_c_gain = 1
+					oscC_waveform_gain.set({
+						"gain": wave_c_gain
+					})
+				} else {
+					// If value is positive, decrease waveform gain to compensate
+					wave_c_gain = 1 - (e.target.value / 12)
+					oscC_waveform_gain.set({
+						"gain": wave_c_gain
+					})
+				}
+				console.log(wave_c_gain)
 				if (LFO_TARGET === SYNTH_C.volume) {
 					PRESET.LFO.max = e.target.value
 					LFO.set({"max": e.target.value})
@@ -2986,25 +3205,29 @@ window.addEventListener("keypress", function (e) {
 // let height = synthContainer.offsetHeight;
 
 // TODO: Figure out zoom-out issue with P5 canvas
-// TODO: Figure out why P5 canvas has become offset from the oscilloscope divs
 
 function p5_sketch(p) {
 	p.setup = function () {
 		oscilloscope_a_pos = getPositionXY(osc_a_oscilloscope);
 		oscilloscope_b_pos = getPositionXY(osc_b_oscilloscope);
 		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
+		console.log("osc_a pos:",oscilloscope_a_pos)
+		console.log("osc_b pos:",oscilloscope_b_pos)
+		console.log("osc_c pos:",oscilloscope_c_pos)
 		canvasWidth = getSize(synthContainer).width;
-		canvasHeight = getSize(synthContainer).height;
+		canvasHeight = getSize(synthContainer).height-2;
 		p.createCanvas(canvasWidth-16, canvasHeight-16);
 	}
 	p.windowResized = function () {
 		oscilloscope_a_pos = getPositionXY(osc_a_oscilloscope);
 		oscilloscope_b_pos = getPositionXY(osc_b_oscilloscope);
 		oscilloscope_c_pos = getPositionXY(osc_c_oscilloscope);
+		console.log("osc_a pos:",oscilloscope_a_pos)
+		console.log("osc_b pos:",oscilloscope_b_pos)
+		console.log("osc_c pos:",oscilloscope_c_pos)
 		canvasWidth = getSize(synthContainer).width;
-		canvasHeight = getSize(synthContainer).height;
+		canvasHeight = getSize(synthContainer).height-2;
 		p.resizeCanvas(canvasWidth-16, canvasHeight-16);
-		p.rectMode("CORNERS")
 	}
 	p.draw = function () {
 		// Redraw background
@@ -3013,27 +3236,31 @@ function p5_sketch(p) {
 		p.strokeWeight(1)
 		// Draw oscilloscopes
 		if(PRESET.OSC_A.enabled){
-			p.drawWaveform(oscA_waveform, 220, 320, 393, 145)
+			p.drawWaveform(oscA_waveform, 220, 320, 388, 112)
 		}
 		if(PRESET.OSC_B.enabled){
-			p.drawWaveform(oscB_waveform, 220, 320, 1078, 145)
+			p.drawWaveform(oscB_waveform, 220, 320, 1072, 112)
 		}
 		if(PRESET.OSC_C.enabled){
-			p.drawWaveform(oscC_waveform, 220, 320, 393, 405)
+			p.drawWaveform(oscC_waveform, 220, 320, 388, 340)
 		}
+		if(PRESET.LFO.enabled){
+			p.drawWaveform(lfo_waveform, 220, 50, 388, 690)
+		}
+		p.drawWaveform(master_waveform, 220, 320, 1072, 570)
 		// Set stroke and fill for rectangles
 		p.strokeWeight(0)
 		// p.fill(0)
 		p.fill(SYNTH.THEME.synthBackgroundColour)
 		// Horizontal rectangles to enclose the oscilloscopes
-		p.rect(0, 0, canvasWidth, 242)
-		p.rect(0, 374, canvasWidth, 122)
-		p.rect(0, 627, canvasWidth, 122)
-		p.rect(0, 881, canvasWidth, 168)
+		p.rect(0, 0, canvasWidth, 212)
+		p.rect(0, 324, canvasWidth, 111)
+		p.rect(0, 547, canvasWidth, 113)
+		p.rect(0, 772, canvasWidth, 125)
 		// Vertical rectangles to enclose the oscilloscopes
-		p.rect(0, 0, 387, canvasHeight)
-		p.rect(609, 0, 455, canvasHeight)
-		p.rect(canvasWidth-27, 0, 15, canvasHeight)
+		p.rect(0, 0, 382, canvasHeight)
+		p.rect(604, 0, 455, canvasHeight)
+		p.rect(canvasWidth-22, 0, 10, canvasHeight)
 
 	}
 	p.drawWaveform = function(wave, w, h, x, y) {
@@ -3043,24 +3270,44 @@ function p5_sketch(p) {
 
 		// Waveform buffer
 		let buffer = wave.getValue(0);
+		// console.log(buffer)
 
 		// Initialise start variable
 		let start;
 
 		// Find the first zero crossing
 		for (let i = 1; i < buffer.length; i++){
-			// if the previous point is negative, and the current point is positive/zero
-			// then we've found the zero crossing
-			if (buffer[i-1] < 0 && buffer[i] >= 0) {
-				// Set the start to the zero crossing
-				start = i;
-				break
+			if(wave !== lfo_waveform) {
+				// if the previous point is negative, and the current point is positive/zero
+				// then we've found the zero crossing
+				if (buffer[i - 1] < 0 && buffer[i] >= 0) {
+					// Set the start to the zero crossing
+					start = i;
+					break
+				}
+			} else {
+				// since LFO values may be all positive or all negative,
+				// to find the zero crossing we need to find the first point
+				// where the value is not equal to the previous value
+				if (buffer[i - 1] !== buffer[i]) {
+					// Set the start to the zero crossing
+					start = i;
+					break
+				}
 			}
 		}
 
-		// Drawing a portion of the waveform, to avoid the initial transient
-		// Otherwise we would see the waveform "jump" horizontally to the start of the buffer
-		let end = start + buffer.length/2;
+		// If visualising anything other than the LFO,
+		let end
+		if(wave !== lfo_waveform) {
+			// We draw a portion of the waveform, to avoid the initial transient
+			// Otherwise we would see the waveform "jump" horizontally to the start of the buffer
+			end = start + buffer.length / 2;
+		} else {
+			// If visualising the LFO, we draw the whole waveform
+			end = buffer.length;
+		}
+
 
 		// Set stroke colour to white
 		p.stroke(SYNTH.THEME.synthTextColour);
@@ -3086,7 +3333,7 @@ let firstEntry = true
 consentButton.addEventListener("click", function () {
 	consentContainer.style.display = "none";
 	synthContainer.style.display = "flex";
-	bodyContainer.style.paddingTop = "2rem";
+	bodyContainer.style.paddingTop = "1rem";
 	document.body.style.backgroundColor = SYNTH.THEME.pageBackgroundColour;
 	if (Tone.context.state !== "running") {
 		Tone.context.resume();
@@ -3099,18 +3346,4 @@ consentButton.addEventListener("click", function () {
 		SYNTH.STATE.enabled = true;
 	}
 	p5_canvas.classList.remove("hidden");
-})
-
-let homeButton = document.getElementById("home_button");
-
-homeButton.addEventListener("click", function () {
-	SYNTH.STATE.enabled = false;
-	consentContainer.style.display = "flex";
-	synthContainer.style.display = "none";
-	bodyContainer.style.paddingTop = "0rem";
-	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
-	p5_canvas.classList.add("hidden");
-	if(settingsDropdownOpen){
-		toggleDropdown(settingsDropdown)
-	}
 })

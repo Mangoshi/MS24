@@ -162,7 +162,7 @@ let PRESET = {
 // TODO: Add each FX type to the PRESET object
 
 // -- MIN/MAX DATA (to be used for randomization) -- //
-
+// TODO: Reference Tone.js documentation to ensure correct min/max values
 let MIN_MAX = {
 	MASTER: {
 		gain: [0, 2]
@@ -843,18 +843,16 @@ function updateFilterKnob(target, enable, min, max, step, value, label) {
 	}
 }
 function filterGroupUpdate(target) {
+	// TODO: Fix bugs!!!
 	// If filter type is lowshelf or highshelf...
 	if (target === 5 || target === 6) {
-		// ...change the filter Q knob to gain knob
+		// ...change the filter resonance knob to gain knob
 		updateFilterKnob("filter_resonance", 1, 0, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
-		tooltips["webaudio-knob"].filter_resonance.top = "Change the filter gain"
-		tooltips["webaudio-knob"].filter_resonance.bottom = "This changes the gain of the shelf filter"
-	// Else if filter type is not lowshelf or highshelf...
+		tooltips["webaudio-knob"].filter_resonance = dynamicTooltips.FilterGain
 	} else {
-		// ...change the filter gain knob to Q knob
+		// ...change the filter gain knob to resonace knob
 		updateFilterKnob("filter_resonance", 1, 1, 10, 0.1, PRESET.FILTER.Q, "Q")
-		tooltips["webaudio-knob"].filter_resonance.top = "Change the filter Q"
-		tooltips["webaudio-knob"].filter_resonance.bottom = "This changes the resonance of the filter, be careful!"
+		tooltips["webaudio-knob"].filter_resonance = dynamicTooltips.FilterResonance
 	}
 }
 
@@ -941,6 +939,7 @@ function updateFxKnob(target, enable, min, max, step, value, label, conv) {
 }
 
 function fxGroupUpdate(switchTarget){
+	// TODO: Start using MIN_MAX values instead of hardcoding them
 	switch (switchTarget) {
 		case "Distortion":
 			PRESET.FX.type = "Distortion"
@@ -957,9 +956,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Distortion"]["Intensity"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Distortion"]["Oversample"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Distortion"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Distortion"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Distortion"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Distortion"]["fx_param3"]
 			break;
 		case "Chebyshev":
 			PRESET.FX.type = "Chebyshev"
@@ -970,8 +969,8 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 0)
 			updateFxKnob(4, 0)
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Chebyshev"]["Order"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Chebyshev"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Chebyshev"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Chebyshev"]["fx_param2"]
 			break;
 		case "Phaser":
 			PRESET.FX.type = "Phaser"
@@ -982,24 +981,24 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 1, 0, 100, 0.1, 1, "Q")
 			updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Phaser"]["Frequency"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Phaser"]["Octaves"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Phaser"]["Q"]
-			tooltips["webaudio-knob"].fx_param4 = fxTooltips["Phaser"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Phaser"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Phaser"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Phaser"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["Phaser"]["fx_param4"]
 			break;
 		case "Tremolo":
 			PRESET.FX.type = "Tremolo"
 			SELECTED_FX = FX_TREMOLO
 
-			updateFxKnob(1, 1, 0, 20000, 0.1, 0, "Frequency")
+			updateFxKnob(1, 1, 0, 64, 0.1, 0, "Frequency")
 			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
-			updateFxKnob(3, 1, 0, 100, 0.01, 0, "Spread")
+			updateFxKnob(3, 1, 0, 180, 1, 0, "Spread")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Tremolo"]["Frequency"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Tremolo"]["Depth"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Tremolo"]["Spread"]
-			tooltips["webaudio-knob"].fx_param4 = fxTooltips["Tremolo"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Tremolo"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Tremolo"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Tremolo"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["Tremolo"]["fx_param4"]
 			break;
 		case "Vibrato":
 			PRESET.FX.type = "Vibrato"
@@ -1010,10 +1009,10 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 1, 0, 3, 1, 0, "Type", "['sine','triangle','sawtooth','square'][x]")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Vibrato"]["Frequency"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Vibrato"]["Depth"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Vibrato"]["Type"]
-			tooltips["webaudio-knob"].fx_param4 = fxTooltips["Vibrato"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Vibrato"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Vibrato"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Vibrato"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["Vibrato"]["fx_param4"]
 			break;
 		case "Delay":
 			PRESET.FX.type = "Delay"
@@ -1024,9 +1023,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Delay"]["Time"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Delay"]["Feedback"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Delay"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Delay"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Delay"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Delay"]["fx_param3"]
 			break;
 		case "Reverb":
 			PRESET.FX.type = "Reverb"
@@ -1037,9 +1036,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["Reverb"]["Decay"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["Reverb"]["Pre-delay"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["Reverb"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Reverb"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Reverb"]["Pre-delay"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Reverb"]["fx_param3"]
 			break;
 		case "PitchShift":
 			PRESET.FX.type = "PitchShift"
@@ -1050,10 +1049,10 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 1, 0, 1, 0.01, 0.5, "Feedback")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["PitchShift"]["Pitch"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["PitchShift"]["Size"]
-			tooltips["webaudio-knob"].fx_param3 = fxTooltips["PitchShift"]["Feedback"]
-			tooltips["webaudio-knob"].fx_param4 = fxTooltips["PitchShift"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["PitchShift"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["PitchShift"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["PitchShift"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["PitchShift"]["fx_param4"]
 			break;
 		case "FreqShift":
 			PRESET.FX.type = "FreqShift"
@@ -1064,8 +1063,8 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(3, 0)
 			updateFxKnob(4, 0)
 
-			tooltips["webaudio-knob"].fx_param1 = fxTooltips["FreqShift"]["Frequency"]
-			tooltips["webaudio-knob"].fx_param2 = fxTooltips["FreqShift"]["Mix"]
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["FreqShift"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["FreqShift"]["fx_param2"]
 			break;
 		default:
 			console.log("Switch default: Nothing set for this case!")
@@ -3431,63 +3430,246 @@ for (let i = 0; i < tooltip_elements.length; i++) {
 	})
 }
 
+let dynamicTooltips = {
+	// Filter (Resonance/Gain)
+	FilterResonance: {
+		top: "Filter resonance",
+		bottom: "This emphasises frequencies near the cutoff, be careful!"
+	},
+	FilterGain: {
+		top: "Filter gain",
+		bottom: "This sets the amplitude of the cutoff frequencies!"
+	},
+	// FX Distortion (Intensity, Oversample, Mix)
+	Distortion: {
+		fx_param1: {
+			top: "Distortion intensity",
+			bottom: "The amount of distortion applied to the signal!"
+		},
+		fx_param2: {
+			top: "Distortion oversample",
+			bottom: "Higher quality distortion, at the cost of performance!"
+		},
+		fx_param3: {
+			top: "Distortion mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Chebyshev (Order, Mix)
+	Chebyshev: {
+		fx_param1: {
+			top: "Chebyshev order",
+			bottom: "The order of the Chebyshev polynomial used for distortion!"
+		},
+		fx_param2: {
+			top: "Chebyshev mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param3: {
+			top: "",
+			bottom: ""
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Phaser (Frequency, Octaves, Q, Mix)
+	Phaser: {
+		fx_param1: {
+			top: "Phaser frequency",
+			bottom: "The speed of the phasing effect!"
+		},
+		fx_param2: {
+			top: "Phaser octaves",
+			bottom: "The octaves of the effect!"
+		},
+		fx_param3: {
+			top: "Phaser Q",
+			bottom: "The quality factor of the filters!"
+		},
+		fx_param4: {
+			top: "Phaser mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Tremolo (Frequency, Depth, Spread, Mix)
+	Tremolo: {
+		fx_param1: {
+			top: "Tremolo frequency",
+			bottom: "The speed of the tremolo effect!"
+		},
+		fx_param2: {
+			top: "Tremolo depth",
+			bottom: "The depth of the tremolo effect!"
+		},
+		fx_param3: {
+			top: "Tremolo spread",
+			bottom: "The amount of stereo spread!"
+		},
+		fx_param4: {
+			top: "Tremolo mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Vibrato (Frequency, Depth, Type, Mix)
+	Vibrato: {
+		fx_param1: {
+			top: "Vibrato frequency",
+			bottom: "The speed of the vibrato effect!"
+		},
+		fx_param2: {
+			top: "Vibrato depth",
+			bottom: "The depth of the vibrato effect!"
+		},
+		fx_param3: {
+			top: "Vibrato type",
+			bottom: "The type of oscillator used for the vibrato effect!"
+		},
+		fx_param4: {
+			top: "Vibrato mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Delay (Time, Feedback, Mix)
+	Delay: {
+		fx_param1: {
+			top: "Delay time",
+			bottom: "The amount of time the incoming signal is delayed by!"
+		},
+		fx_param2: {
+			top: "Delay feedback",
+			bottom: "The amount of signal fed back into the delay!"
+		},
+		fx_param3: {
+			top: "Delay mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Reverb (Decay, Pre-Delay, Mix)
+	Reverb: {
+		fx_param1: {
+			top: "Reverb decay",
+			bottom: "The duration of the reverb effect!"
+		},
+		fx_param2: {
+			top: "Reverb pre-delay",
+			bottom: "The amount of time before the reverb is fully applied!"
+		},
+		fx_param3: {
+			top: "Reverb mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
+	PitchShift: {
+		fx_param1: {
+			top: "Pitch shift pitch",
+			bottom: "The pitch offset in semitones!"
+		},
+		fx_param2: {
+			top: "Pitch shift window size",
+			bottom: "The sample length, high values result in strange artifacts!"
+		},
+		fx_param3: {
+			top: "Pitch shift feedback",
+			bottom: "The amount of signal fed back into the pitch shift!"
+		},
+		fx_param4: {
+			top: "Pitch shift mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Frequency Shift (Frequency, Mix)
+	FreqShift: {
+		fx_param1: {
+			top: "Frequency shift frequency",
+			bottom: "The ring modulator carrier frequency!"
+		},
+		fx_param2: {
+			top: "Frequency shift mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param3: {
+			top: "",
+			bottom: ""
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	}
+}
+
 let tooltips = {
 	defaults: {
-		top: "Tooltips go here :)",
-		bottom: "Hover over something to see what it does!"
+		top: "Tooltips go here!",
+		bottom: "Hover over something to see what it does &#128516;"
 	},
 	// Buttons (Settings, Presets, Random)
 	button: {
 		settings_button: {
-			top: "Change synth settings",
+			top: "Open settings menu",
 			bottom: "Return home, or change the theme!"
 		},
 		presets_button: {
-			top: "Open the preset menu",
+			top: "Open preset menu",
 			bottom: "Load a preset, or save your own!"
 		},
 		random_preset_button: {
-			top: "Randomise the synth settings",
-			bottom: "Careful! This will overwrite your current settings!"
+			top: "Randomise synth settings",
+			bottom: "Careful! This can result in VERY loud sounds!"
 		}
 	},
 	p: {
 		osc_a_label: {
-			top: "Oscillator A",
+			top: "Oscillator A (FM)",
 			bottom: "Oscillators are the main sound generators in a synthesizer!"
 		},
 		arp_a_label: {
 			top: "Arpeggiator A",
-			bottom: "Arpeggiators play notes in a sequence! Try holding multiple keys!"
+			bottom: "Arpeggiators play held notes in a sequence!"
 		},
 		osc_b_label: {
-			top: "Oscillator B",
+			top: "Oscillator B (FM)",
 			bottom: "Oscillators are the main sound generators in a synthesizer!"
 		},
 		arp_b_label: {
 			top: "Arpeggiator B",
-			bottom: "Arpeggiators play notes in a sequence! Try holding multiple keys!"
+			bottom: "Arpeggiators play held notes in a sequence!"
 		},
 		osc_c_label: {
-			top: "Oscillator C",
+			top: "Oscillator C (AM)",
 			bottom: "Oscillators are the main sound generators in a synthesizer!"
 		},
 		arp_c_label: {
 			top: "Arpeggiator C",
-			bottom: "Arpeggiators play notes in a sequence! Try holding multiple keys!"
+			bottom: "Arpeggiators play held notes in a sequence!"
 		},
 		filter_label: {
 			top: "Filter",
-			bottom: "Filters shape the sound by cutting out certain frequencies!"
+			bottom: "Filters shape sound by cutting out certain frequencies!"
 		}
 	},
 	label: {
 		lfo_label: {
-			top: "LFO",
-			bottom: "LFOs (Low Frequency Oscillators) are used to automatically modulate parameters over time!"
+			top: "Low Frequency Oscillator",
+			bottom: "LFOs are used to automatically modulate parameters over time!"
 		},
 		fx_label: {
-			top: "FX",
+			top: "FX (Effects)",
 			bottom: "Choose from several effects to manipulate your sound with!"
 		},
 	},
@@ -3495,381 +3677,220 @@ let tooltips = {
 	"webaudio-switch": {
 		osc_a_switch: {
 			top: "Toggle Oscillator A",
-			bottom: "This will turn the oscillator on or off"
+			bottom: "Turn the oscillator on or off!"
 		},
 		arp_a_switch: {
 			top: "Toggle Arpeggiator A",
-			bottom: "This will turn the arpeggiator on or off"
+			bottom: "Turn the arpeggiator on or off!"
 		},
 		osc_b_switch: {
 			top: "Toggle Oscillator B",
-			bottom: "This will turn the oscillator on or off"
+			bottom: "Turn the oscillator on or off!"
 		},
 		arp_b_switch: {
 			top: "Toggle Arpeggiator B",
-			bottom: "This will turn the arpeggiator on or off"
+			bottom: "Turn the arpeggiator on or off!"
 		},
 		osc_c_switch: {
 			top: "Toggle Oscillator C",
-			bottom: "This will turn the oscillator on or off"
+			bottom: "Turn the oscillator on or off!"
 		},
 		arp_c_switch: {
 			top: "Toggle Arpeggiator C",
-			bottom: "This will turn the arpeggiator on or off"
+			bottom: "Turn the arpeggiator on or off!"
 		},
 		filter_switch: {
 			top: "Toggle Filter",
-			bottom: "This will turn the filter on or off"
+			bottom: "Turn the filter on or off!"
 		},
 		osc_a_filter_switch: {
-			top: "Toggle filter for oscillator A",
-			bottom: "This will turn the filter on or off only for oscillator A"
+			top: "Toggle Oscillator A Send",
+			bottom: "Turn the filter on or off for oscillator A!"
 		},
 		osc_b_filter_switch: {
-			top: "Toggle filter for oscillator B",
-			bottom: "This will turn the filter on or off only for oscillator B"
+			top: "Toggle Oscillator B Send",
+			bottom: "Turn the filter on or off for oscillator B!"
 		},
 		osc_c_filter_switch: {
-			top: "Toggle filter for oscillator C",
-			bottom: "This will turn the filter on or off only for oscillator C"
+			top: "Toggle Oscillator C Send",
+			bottom: "Turn the filter on or off for oscillator C!"
 		},
 		lfo_switch: {
 			top: "Toggle LFO",
-			bottom: "This will turn the LFO on or off"
+			bottom: "Turn the LFO on or off!"
 		},
 		fx_switch: {
 			top: "Toggle FX",
-			bottom: "This will turn the FX on or off"
+			bottom: "Turn the FX on or off!"
 		},
 		rec_switch: {
 			top: "Toggle recording",
-			bottom: "This will start or stop recording the synth output"
+			bottom: "Start or stop recording the synth output!"
 		}
 	},
 	// Controls
 	"webaudio-knob": {
 		// Master (BPM, Gain, Octave)
 		master_bpm: {
-			top: "Change the global BPM",
-			bottom: "This will change the tempo of the arpeggiators"
+			top: "Global BPM",
+			bottom: "The tempo of the arpeggiators!"
 		},
 		master_gain: {
-			top: "Change the master gain",
-			bottom: "This will change the overall volume of the synth"
+			top: "Master Gain",
+			bottom: "The overall volume of the synth!"
 		},
 		// -- Osc A -- //
 		// FM (Voices, Spread, FM, Depth, Shape)
 		voices: {
-			top: "Change the number of voices",
-			bottom: "This will change the number of voices generated"
+			top: "Voice Count",
+			bottom: "The number of voices generated!"
 		},
 		spread: {
-			top: "Change the spread of the voices",
-			bottom: "This will offset the pitch of each voice (in cents)"
+			top: "Voice Spread",
+			bottom: "The pitch offset of each voice (in cents)!"
 		},
 		fm: {
-			top: "Change the FM modulator frequency",
-			bottom: "This will change the frequency of the FM modulator"
+			top: "FM harmonicity",
+			bottom: "The ratio the between the carrier and modulator frequencies!"
 		},
 		fm_depth: {
-			top: "Change the FM modulator depth",
-			bottom: "This will change the amplitude of Frequency Modulation"
+			top: "FM depth",
+			bottom: "The amplitude of the modulator!"
 		},
 		fm_shape: {
-			top: "Change the FM modulator shape",
-			bottom: "This will change the shape of the FM modulator"
+			top: "FM shape",
+			bottom: "The shape of the modulator!"
 		},
 		// AM (AM, Shape)
 		am: {
-			top: "Change the AM modulator frequency",
-			bottom: "This will change the frequency of the AM modulator"
+			top: "AM harmonicity",
+			bottom: "The ratio the between the carrier and modulator frequencies!"
 		},
 		am_shape: {
-			top: "Change the AM modulator shape",
-			bottom: "This will change the shape of the AM modulator"
+			top: "AM shape",
+			bottom: "The shape of the modulator!"
 		},
 		// ADSR (Attack, Decay, Sustain, Release)
 		attack: {
-			top: "Change the attack time",
-			bottom: "This will change the time it takes for the envelope to reach its peak"
+			top: "Attack time",
+			bottom: "The time it takes for the envelope to reach its peak!"
 		},
 		decay: {
-			top: "Change the decay time",
-			bottom: "This will change the time it takes for the envelope to reach its sustain level"
+			top: "Decay time",
+			bottom: "The time it takes for the envelope to reach its sustain level!"
 		},
 		sustain: {
-			top: "Change the sustain level",
-			bottom: "This will change the level the envelope will sustain at"
+			top: "Sustain level",
+			bottom: "The level the envelope will sustain at!"
 		},
 		release: {
-			top: "Change the release time",
-			bottom: "This will change the time it takes for the envelope to return to silence"
+			top: "Release time",
+			bottom: "The time it takes for the envelope to return to silence!"
 		},
 		// Main (Octave, Detune, Volume, Shape)
 		octave: {
-			top: "Change the octave offset",
-			bottom: "This offsets the pitch of the oscillator, in octaves"
+			top: "Octave offset",
+			bottom: "The pitch offset of the oscillator, in octaves!"
 		},
 		semi: {
-			top: "Change the semitone offset",
-			bottom: "This offsets the pitch of the oscillator, in semitones"
+			top: "Semitone offset",
+			bottom: "The pitch offset of the oscillator, in semitones!"
 		},
 		volume: {
-			top: "Change the volume",
-			bottom: "This changes the volume of the oscillator"
+			top: "Volume",
+			bottom: "The amplitude of the oscillator!"
 		},
 		// Filter (Cutoff, Q/Gain, Rolloff, Type)
 		filter_cutoff: {
-			top: "Change the filter cutoff frequency",
-			bottom: "This changes the cutoff frequency of the filter"
+			top: "Filter cutoff frequency",
+			bottom: "The frequency at which the filter will begin to attenuate!"
 		},
-		filter_resonance: {
-			top: "Change the filter Q",
-			bottom: "This changes the resonance of the filter, be careful!"
-		},
+		filter_resonance: dynamicTooltips.FilterResonance,
 		// LFO (Rate, Min, Max, Shape)
 		lfo_rate: {
-			top: "Change the LFO rate",
-			bottom: "This changes the rate of the LFO"
+			top: "LFO rate",
+			bottom: "The speed of the LFO (in bars)!"
 		},
 		lfo_min: {
-			top: "Change the LFO minimum value",
-			bottom: "This changes the minimum value of the LFO"
+			top: "LFO minimum value",
+			bottom: "The lowest value the LFO will reach!"
 		},
 		lfo_max: {
-			top: "Change the LFO maximum value",
-			bottom: "This changes the maximum value of the LFO"
+			top: "LFO maximum value",
+			bottom: "The highest value the LFO will reach!"
 		},
 		// FX (Param 1, Param 2, Param 3, Param 4)
-		fx_param1: {
-			top: "Change the distortion intensity",
-			bottom: "This changes the intensity of the distortion"
-		},
-		fx_param2: {
-			top: "Change the distortion oversample",
-			bottom: "This changes the oversampling of the distortion algorithm"
-		},
-		fx_param3: {
-			top: "Change the distortion mix",
-			bottom: "This changes the wet level of the distortion effect"
-		},
-		fx_param4: {
-			top: "",
-			bottom: ""
-		}
+		fx_param1: dynamicTooltips[PRESET.FX.type].fx_param1,
+		fx_param2: dynamicTooltips[PRESET.FX.type].fx_param2,
+		fx_param3: dynamicTooltips[PRESET.FX.type].fx_param3,
+		fx_param4: dynamicTooltips[PRESET.FX.type].fx_param4,
 	},
 	"webaudio-slider": {
 		shape: {
-			top: "Change the shape",
-			bottom: "This changes the shape of the oscillator"
+			top: "Shape",
+			bottom: "The oscillator's waveform shape!"
 		},
 		filter_rolloff: {
-			top: "Change the filter rolloff",
-			bottom: "This changes the decibel rolloff of the filter curve"
+			top: "Filter rolloff",
+			bottom: "The decibel rolloff (slope) of the filter curve!"
 		},
 		filter_type: {
-			top: "Change the filter type",
-			bottom: "Choose between lowpass, highpass, bandpass, allpass, notch, lowshelf, and highshelf"
+			top: "Filter type",
+			bottom: "Choose between lowpass, highpass, bandpass, allpass, notch, lowshelf, and highshelf!"
 		},
 		lfo_shape: {
-			top: "Change the LFO shape",
-			bottom: "This changes the shape of the LFO"
+			top: "LFO shape",
+			bottom: "The LFO's waveform shape!"
 		},
 		arp_pattern: {
-			top: "Change the arp pattern",
-			bottom: "This changes the pattern of the arp"
+			top: "Arpeggiator pattern",
+			bottom: "The playback order of the notes!"
 		},
 		arp_speed: {
-			top: "Change the arp speed",
-			bottom: "This changes the speed of the arp"
+			top: "Arp speed",
+			bottom: "The playback speed of the notes (in bars)!"
 		},
 		master_octave: {
-			top: "Change the global octave modifier",
-			bottom: "This will change the octave of all oscillators"
+			top: "Global octave modifier",
+			bottom: "The octave offset for all oscillators!"
 		},
 	},
 	select: {
 		lfo_selector: {
-			top: "Select the LFO modulation target",
+			top: "LFO target selector",
 			bottom: "Choose between filter frequency and oscillator volume"
 		},
 		fx_selector: {
-			top: "Select an effect",
+			top: "Effect selector",
 			bottom: "Choose from a range of different effects!"
 		}
 	},
 	canvas: {
 		oscilloscope_a: {
 			top: "Oscilloscope A",
-			bottom: "This visualises the waveform of oscillator A!"
+			bottom: "This visualises the output of oscillator A!"
 		},
 		oscilloscope_b: {
 			top: "Oscilloscope B",
-			bottom: "This visualises the waveform of oscillator B!"
+			bottom: "This visualises the output of oscillator B!"
 		},
 		oscilloscope_c: {
 			top: "Oscilloscope C",
-			bottom: "This visualises the waveform of oscillator C!"
+			bottom: "This visualises the output of oscillator C!"
 		},
 		oscilloscope_lfo: {
 			top: "LFO Oscilloscope",
-			bottom: "This visualises the waveform of the LFO!"
+			bottom: "This visualises the output of the LFO!"
 		},
 		oscilloscope_master: {
 			top: "Master Oscilloscope",
-			bottom: "This visualises the waveform of the master output!"
+			bottom: "This visualises the master output (what you hear)!"
 		}
 	},
 	"webaudio-keyboard": {
 		keyboard: {
 			top: "GUI Keyboard",
-			bottom: "Click on the keys to play them, or use your keyboard!"
-		}
-	}
-}
-
-let fxTooltips = {
-	// FX Distortion (Intensity, Oversample, Mix)
-	Distortion: {
-		Intensity: {
-			top: "Change the distortion intensity",
-			bottom: "This changes the intensity of the distortion"
-		},
-		Oversample: {
-			top: "Change the distortion oversample",
-			bottom: "This changes the oversampling of the distortion algorithm"
-		},
-		Mix: {
-			top: "Change the distortion mix",
-			bottom: "This changes the wet level of the distortion effect"
-		}
-	},
-	// FX Chebyshev (Order, Mix)
-	Chebyshev: {
-		Order: {
-			top: "Change the Chebyshev distortion order",
-			bottom: "This changes the order of the Chebyshev distortion algorithm"
-		},
-		Mix: {
-			top: "Change the Chebyshev distortion mix",
-			bottom: "This changes the wet level of the Chebyshev distortion effect"
-		}
-	},
-	// FX Phaser (Frequency, Octaves, Q, Mix)
-	Phaser: {
-		Frequency: {
-			top: "Change the phaser frequency",
-			bottom: "This changes the frequency of the phaser"
-		},
-		Octaves: {
-			top: "Change the phaser octaves",
-			bottom: "This changes the number of octaves of the phaser"
-		},
-		Q: {
-			top: "Change the phaser Q",
-			bottom: "This changes the Q of the phaser"
-		},
-		Mix: {
-			top: "Change the phaser mix",
-			bottom: "This changes the wet level of the phaser effect"
-		}
-	},
-	// FX Tremolo (Frequency, Depth, Spread, Mix)
-	Tremolo: {
-		Frequency: {
-			top: "Change the tremolo frequency",
-			bottom: "This changes the frequency of the tremolo"
-		},
-		Depth: {
-			top: "Change the tremolo depth",
-			bottom: "This changes the depth of the tremolo"
-		},
-		Spread: {
-			top: "Change the tremolo spread",
-			bottom: "This changes the spread of the tremolo"
-		},
-		Mix: {
-			top: "Change the tremolo mix",
-			bottom: "This changes the wet level of the tremolo effect"
-		}
-	},
-	// FX Vibrato (Frequency, Depth, Type, Mix)
-	Vibrato: {
-		Frequency: {
-			top: "Change the vibrato frequency",
-			bottom: "This changes the frequency of the vibrato"
-		},
-		Depth: {
-			top: "Change the vibrato depth",
-			bottom: "This changes the depth of the vibrato"
-		},
-		Type: {
-			top: "Change the vibrato type",
-			bottom: "Choose between different oscillator shapes"
-		},
-		Mix: {
-			top: "Change the vibrato mix",
-			bottom: "This changes the wet level of the vibrato effect"
-		}
-	},
-	// FX Delay (Time, Feedback, Mix)
-	Delay: {
-		Time: {
-			top: "Change the delay time",
-			bottom: "This changes the time of the delay"
-		},
-		Feedback: {
-			top: "Change the delay feedback",
-			bottom: "This changes the feedback of the delay"
-		},
-		Mix: {
-			top: "Change the delay mix",
-			bottom: "This changes the wet level of the delay effect"
-		}
-	},
-	// FX Reverb (Decay, Pre-Delay, Mix)
-	Reverb: {
-		Decay: {
-			top: "Change the reverb decay",
-			bottom: "This changes the decay of the reverb"
-		},
-		PreDelay: {
-			top: "Change the reverb pre-delay",
-			bottom: "This changes the pre-delay of the reverb"
-		},
-		Mix: {
-			top: "Change the reverb mix",
-			bottom: "This changes the wet level of the reverb effect"
-		}
-	},
-	// FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
-	PitchShift: {
-		Pitch: {
-			top: "Change the pitch shift pitch",
-			bottom: "This changes the pitch of the pitch shift"
-		},
-		Size: {
-			top: "Change the pitch shift window size",
-			bottom: "This changes the window size of the pitch shift"
-		},
-		Feedback: {
-			top: "Change the pitch shift feedback",
-			bottom: "This changes the feedback of the pitch shift"
-		},
-		Mix: {
-			top: "Change the pitch shift mix",
-			bottom: "This changes the wet level of the pitch shift effect"
-		}
-	},
-	// FX Frequency Shift (Frequency, Mix)
-	FreqShift: {
-		Frequency: {
-			top: "Change the frequency shift frequency",
-			bottom: "This changes the frequency of the frequency shift"
-		},
-		Mix: {
-			top: "Change the frequency shift mix",
-			bottom: "This changes the wet level of the frequency shift effect"
+			bottom: "Click on the keys to play them, or use your physical keyboard!"
 		}
 	}
 }

@@ -3352,38 +3352,342 @@ consentButton.addEventListener("click", function () {
 
 // Buttons (Settings, Presets, Random)
 
-// Switches (Groups, Arpeggiators, Sends, Record)
-
-// Controls - Master (BPM, Gain, Octave)
-
-// Controls - FM (Voices, Spread, FM, Depth, Shape)
-
-// Controls - ADSR (Attack, Decay, Sustain, Release)
-
-// Controls - Oscillator (Octave, Detune, Volume, Shape)
-
-// Controls - Filter (Cutoff, Q/Gain, Rolloff, Type)
-
-// Controls - LFO (Rate, Min, Max, Shape)
-
-// Selects - LFO (Filter Frequency, Oscillator Volume)
-
-// Controls - FX Distortion (Intensity, Oversample, Mix)
-
-// Controls - FX Chebyshev (Order, Mix)
-
-// Controls - FX Phaser (Frequency, Octaves, Q, Mix)
-
-// Controls - FX Tremolo (Frequency, Depth, Spread, Mix)
-
-// Controls - FX Vibrato (Frequency, Depth, Type, Mix)
-
-// Controls - FX Delay (Time, Feedback, Mix)
-
-// Controls - FX Reverb (Decay, Pre-Delay, Mix)
-
-// Controls - FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
-
-// Controls - FX Freq Shift (Frequency, Mix)
-
-// Controls - ARP (Pattern, Speed)
+let tooltips = {
+	Defaults: {
+		top: "Tooltips go here!",
+		bottom: "Hover over something to see what it does!"
+	},
+	// Buttons (Settings, Presets, Random)
+	Buttons: {
+		Settings: {
+			top: "Change synth settings",
+			bottom: "Return home, or change the theme!"
+		},
+		Presets: {
+			top: "Open the preset menu",
+			bottom: "Load a preset, or save your own!"
+		},
+		Random: {
+			top: "Randomise the synth settings",
+			bottom: "Careful! This will overwrite your current settings!"
+		}
+	},
+	// Switches (Groups, Arpeggiators, Sends, Record)
+	Switches: {
+		A: {
+			top: "Toggle oscillator A",
+			bottom: "This will turn the oscillator on or off"
+		},
+		B: {
+			top: "Toggle oscillator B",
+			bottom: "This will turn the oscillator on or off"
+		},
+		C: {
+			top: "Toggle oscillator C",
+			bottom: "This will turn the oscillator on or off"
+		},
+		Filter: {
+			top: "Toggle filter",
+			bottom: "This will turn the filter on or off"
+		},
+		FilterSend_A: {
+			top: "Toggle filter for oscillator A",
+			bottom: "This will turn the filter on or off only for oscillator A"
+		},
+		FilterSend_B: {
+			top: "Toggle filter for oscillator B",
+			bottom: "This will turn the filter on or off only for oscillator B"
+		},
+		FilterSend_C: {
+			top: "Toggle filter for oscillator C",
+			bottom: "This will turn the filter on or off only for oscillator C"
+		},
+		LFO: {
+			top: "Toggle LFO",
+			bottom: "This will turn the LFO on or off"
+		},
+		FX: {
+			top: "Toggle FX",
+			bottom: "This will turn the FX on or off"
+		},
+		Arpeggiator: {
+			top: "Toggle arpeggiator (for this oscillator)",
+			bottom: "This will turn the arpeggiator on or off"
+		}
+	},
+	// Controls
+	Controls: {
+		// Master (BPM, Gain, Octave)
+		Master: {
+			BPM: {
+				top: "Change the global BPM",
+				bottom: "This will change the tempo of the arpeggiators"
+			},
+			Gain: {
+				top: "Change the master gain",
+				bottom: "This will change the overall volume of the synth"
+			},
+			Octave: {
+				top: "Change the global octave modifier",
+				bottom: "This will change the octave of all oscillators"
+			}
+		},
+		// FM (Voices, Spread, FM, Depth, Shape)
+		FM: {
+			Voices: {
+				top: "Change the number of voices",
+				bottom: "This will change the number of voices generated"
+			},
+			Spread: {
+				top: "Change the spread of the voices",
+				bottom: "This will offset the pitch of each voice (in cents)"
+			},
+			FM: {
+				top: "Change the FM modulator frequency",
+				bottom: "This will change the frequency of the FM modulator"
+			},
+			Depth: {
+				top: "Change the FM modulator depth",
+				bottom: "This will change the amplitude of Frequency Modulation"
+			},
+			Shape: {
+				top: "Change the FM modulator shape",
+				bottom: "This will change the shape of the FM modulator"
+			}
+		},
+		// ADSR (Attack, Decay, Sustain, Release)
+		ADSR: {
+			Attack: {
+				top: "Change the attack time",
+				bottom: "This will change the time it takes for the envelope to reach its peak"
+			},
+			Decay: {
+				top: "Change the decay time",
+				bottom: "This will change the time it takes for the envelope to reach its sustain level"
+			},
+			Sustain: {
+				top: "Change the sustain level",
+				bottom: "This will change the level the envelope will sustain at"
+			},
+			Release: {
+				top: "Change the release time",
+				bottom: "This will change the time it takes for the envelope to return to silence"
+			}
+		},
+		// Oscillator (Octave, Detune, Volume, Shape)
+		Oscillator: {
+			Octave: {
+				top: "Change the octave offset",
+				bottom: "This offsets the pitch of the oscillator, in octaves"
+			},
+			Detune: {
+				top: "Change the semitone offset",
+				bottom: "This offsets the pitch of the oscillator, in semitones"
+			},
+			Volume: {
+				top: "Change the volume",
+				bottom: "This changes the volume of the oscillator"
+			},
+			Shape: {
+				top: "Change the shape",
+				bottom: "This changes the shape of the oscillator"
+			}
+		},
+		// Filter (Cutoff, Q/Gain, Rolloff, Type)
+		Filter: {
+			Cutoff: {
+				top: "Change the filter cutoff frequency",
+				bottom: "This changes the cutoff frequency of the filter"
+			},
+			Q: {
+				top: "Change the filter Q (Resonance)",
+				bottom: "This changes the resonance of the filter"
+			},
+			Rolloff: {
+				top: "Change the filter rolloff",
+				bottom: "This changes the decibel rolloff of the filter curve"
+			},
+			Type: {
+				top: "Change the filter type",
+				bottom: "Choose between lowpass, highpass, bandpass, allpass, notch, lowshelf, and highshelf"
+			}
+		},
+		// LFO (Rate, Min, Max, Shape)
+		LFO: {
+			Select: {
+				top: "Select the LFO modulation target",
+				bottom: "Choose between filter frequency and oscillator volume"
+			},
+			Rate: {
+				top: "Change the LFO rate",
+				bottom: "This changes the rate of the LFO"
+			},
+			Min: {
+				top: "Change the LFO minimum value",
+				bottom: "This changes the minimum value of the LFO"
+			},
+			Max: {
+				top: "Change the LFO maximum value",
+				bottom: "This changes the maximum value of the LFO"
+			},
+			Shape: {
+				top: "Change the LFO shape",
+				bottom: "This changes the shape of the LFO"
+			}
+		},
+		// FX Distortion (Intensity, Oversample, Mix)
+		FX_DISTORTION: {
+			Intensity: {
+				top: "Change the distortion intensity",
+				bottom: "This changes the intensity of the distortion"
+			},
+			Oversample: {
+				top: "Change the distortion oversample",
+				bottom: "This changes the oversampling of the distortion algorithm"
+			},
+			Mix: {
+				top: "Change the distortion mix",
+				bottom: "This changes the wet level of the distortion effect"
+			}
+		},
+		// FX Chebyshev (Order, Mix)
+		FX_CHEBYSHEV: {
+			Order: {
+				top: "Change the Chebyshev distortion order",
+				bottom: "This changes the order of the Chebyshev distortion algorithm"
+			},
+			Mix: {
+				top: "Change the Chebyshev distortion mix",
+				bottom: "This changes the wet level of the Chebyshev distortion effect"
+			}
+		},
+		// FX Phaser (Frequency, Octaves, Q, Mix)
+		FX_PHASER: {
+			Frequency: {
+				top: "Change the phaser frequency",
+				bottom: "This changes the frequency of the phaser"
+			},
+			Octaves: {
+				top: "Change the phaser octaves",
+				bottom: "This changes the number of octaves of the phaser"
+			},
+			Q: {
+				top: "Change the phaser Q",
+				bottom: "This changes the Q of the phaser"
+			},
+			Mix: {
+				top: "Change the phaser mix",
+				bottom: "This changes the wet level of the phaser effect"
+			}
+		},
+		// FX Tremolo (Frequency, Depth, Spread, Mix)
+		FX_TREMOLO: {
+			Frequency: {
+				top: "Change the tremolo frequency",
+				bottom: "This changes the frequency of the tremolo"
+			},
+			Depth: {
+				top: "Change the tremolo depth",
+				bottom: "This changes the depth of the tremolo"
+			},
+			Spread: {
+				top: "Change the tremolo spread",
+				bottom: "This changes the spread of the tremolo"
+			},
+			Mix: {
+				top: "Change the tremolo mix",
+				bottom: "This changes the wet level of the tremolo effect"
+			}
+		},
+		// FX Vibrato (Frequency, Depth, Type, Mix)
+		FX_VIBRATO: {
+			Frequency: {
+				top: "Change the vibrato frequency",
+				bottom: "This changes the frequency of the vibrato"
+			},
+			Depth: {
+				top: "Change the vibrato depth",
+				bottom: "This changes the depth of the vibrato"
+			},
+			Type: {
+				top: "Change the vibrato type",
+				bottom: "Choose between different oscillator shapes"
+			},
+			Mix: {
+				top: "Change the vibrato mix",
+				bottom: "This changes the wet level of the vibrato effect"
+			}
+		},
+		// FX Delay (Time, Feedback, Mix)
+		FX_DELAY: {
+			Time: {
+				top: "Change the delay time",
+				bottom: "This changes the time of the delay"
+			},
+			Feedback: {
+				top: "Change the delay feedback",
+				bottom: "This changes the feedback of the delay"
+			},
+			Mix: {
+				top: "Change the delay mix",
+				bottom: "This changes the wet level of the delay effect"
+			}
+		},
+		// FX Reverb (Decay, Pre-Delay, Mix)
+		FX_REVERB: {
+			Decay: {
+				top: "Change the reverb decay",
+				bottom: "This changes the decay of the reverb"
+			},
+			PreDelay: {
+				top: "Change the reverb pre-delay",
+				bottom: "This changes the pre-delay of the reverb"
+			},
+			Mix: {
+				top: "Change the reverb mix",
+				bottom: "This changes the wet level of the reverb effect"
+			}
+		},
+		// FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
+		FX_PITCH_SHIFT: {
+			Pitch: {
+				top: "Change the pitch shift pitch",
+				bottom: "This changes the pitch of the pitch shift"
+			},
+			WindowSize: {
+				top: "Change the pitch shift window size",
+				bottom: "This changes the window size of the pitch shift"
+			},
+			Feedback: {
+				top: "Change the pitch shift feedback",
+				bottom: "This changes the feedback of the pitch shift"
+			},
+			Mix: {
+				top: "Change the pitch shift mix",
+				bottom: "This changes the wet level of the pitch shift effect"
+			}
+		},
+		// FX Freq Shift (Frequency, Mix)
+		FX_FREQ_SHIFT: {
+			Frequency: {
+				top: "Change the frequency shift frequency",
+				bottom: "This changes the frequency of the frequency shift"
+			},
+			Mix: {
+				top: "Change the frequency shift mix",
+				bottom: "This changes the wet level of the frequency shift effect"
+			}
+		},
+		// ARP (Pattern, Speed)
+		ARP: {
+			Pattern: {
+				top: "Change the arp pattern",
+				bottom: "This changes the pattern of the arp"
+			},
+			Speed: {
+				top: "Change the arp speed",
+				bottom: "This changes the speed of the arp"
+			}
+		}
+	}
+}

@@ -125,7 +125,7 @@
 					<button
 						id="settings_button"
 						class="
-							dropdownButton
+							dropdownButton tooltipElement
 							border border-gray-300 rounded-lg
 							px-2 pb-0 self-center hover:bg-stone-600
 							transition-all duration-300 ease-in-out">
@@ -153,7 +153,7 @@
 					<button
 						id="presets_button"
 						class="
-							w-[75px]
+							tooltipElement w-[75px]
 							border border-gray-300 rounded-lg
 							px-2 pb-0 self-center hover:bg-stone-600
 							transition-all duration-300 ease-in-out">
@@ -174,7 +174,8 @@
 				<div class="flex flex-col justify-center">
 					<button
 						id="random_preset_button"
-						class="w-[75px]
+						class="
+							tooltipElement w-[75px]
 							border border-gray-300 rounded-lg
 							px-2 pb-0 self-center hover:bg-stone-600
 							transition-all duration-300 ease-in-out">
@@ -230,7 +231,7 @@
 						<p id="master_bpm_label" class="text-center text-sm">BPM</p>
 						<webaudio-knob
 							id="master_bpm"
-							class="control masterControl self-center"
+							class="tooltipElement control masterControl self-center"
 							colors="#FFFFFF;#2C292D;#D9D9D9"
 							diameter="30"
 							min="1"
@@ -250,7 +251,7 @@
 						<p id="master_gain_label" class="text-center text-sm">Gain</p>
 						<webaudio-knob
 							id="master_gain"
-							class="control masterControl self-center"
+							class="tooltipElement control masterControl self-center"
 							colors="#FFFFFF;#2C292D;#D9D9D9"
 							diameter="30"
 							min="0"
@@ -286,22 +287,22 @@
 								<div class="flex p-1">
 									<webaudio-switch
 										id="osc_a_switch"
-										class="control toggleControl self-center pr-1"
+										class="tooltipElement control toggleControl self-center pr-1"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
 										value="1"
 									></webaudio-switch>
-									<p class="font-inika self-center">OSC A</p>
+									<p id="osc_a_label" class="tooltipElement font-inika self-center">OSC A</p>
 								</div>
 								<div class="flex p-1">
 									<webaudio-switch
 										id="arp_a_switch"
-										class="control"
+										class="tooltipElement control"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										value="0"
 									></webaudio-switch>
-									<p id="arp_a_label" class="font-inika ml-1">ARP</p>
+									<p id="arp_a_label" class="tooltipElement font-inika ml-1">ARP</p>
 								</div>
 							</div>
 							<div class="self-center border border-gray-600 flex rounded-lg p-1">
@@ -309,7 +310,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Voices</p>
 									<webaudio-knob
 										id="osc_a_voices"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="1"
@@ -330,7 +331,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Spread</p>
 									<webaudio-knob
 										id="osc_a_spread"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="1"
@@ -351,7 +352,7 @@
 									<p class="font-light text-sm self-center mb-0.5">FM</p>
 									<webaudio-knob
 										id="osc_a_fm"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -372,7 +373,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Depth</p>
 									<webaudio-knob
 										id="osc_a_fm_depth"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -393,7 +394,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Shape</p>
 									<webaudio-knob
 										id="osc_a_fm_shape"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -418,7 +419,7 @@
 								<p class="font-light self-center mb-0.5">Octave</p>
 								<webaudio-knob
 									id="osc_a_octave"
-									class="control mainControl1 self-center"
+									class="tooltipElement control mainControl1 self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-3"
@@ -439,7 +440,7 @@
 								<p class="font-light self-center mb-0.5">Detune</p>
 								<webaudio-knob
 									id="osc_a_semi"
-									class="control mainControl2 self-center"
+									class="tooltipElement control mainControl2 self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-12"
@@ -460,7 +461,7 @@
 								<p class="font-light self-center mb-0.5">Volume</p>
 								<webaudio-knob
 									id="osc_a_volume"
-									class="control mainControl3 self-center"
+									class="tooltipElement control mainControl3 self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-10"
@@ -481,7 +482,7 @@
 								<p class="font-light self-center mb-0.5">Shape</p>
 								<webaudio-slider
 									id="osc_a_shape"
-									class="control mainControl4 self-center"
+									class="tooltipElement control mainControl4 self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									height="50"
 									min="0"
@@ -507,7 +508,7 @@
 								<p class="font-light text-sm self-center mb-0.5">ATK</p>
 								<webaudio-knob
 									id="osc_a_attack"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -528,7 +529,7 @@
 								<p class="font-light text-sm self-center mb-0.5">DEC</p>
 								<webaudio-knob
 									id="osc_a_decay"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -549,7 +550,7 @@
 								<p class="font-light text-sm self-center mb-0.5">SUS</p>
 								<webaudio-knob
 									id="osc_a_sustain"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -570,7 +571,7 @@
 								<p class="font-light text-sm self-center mb-0.5">REL</p>
 								<webaudio-knob
 									id="osc_a_release"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -589,7 +590,7 @@
 							</div>
 						</div>
 						<div id="osc_a_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_a_canvas" width="212" height="102"></canvas>
+							<canvas class="tooltipElement self-center" id="oscilloscope_a" width="212" height="102"></canvas>
 						</div>
 					</div>
 				</div>
@@ -608,22 +609,22 @@
 								<div class="flex p-1">
 									<webaudio-switch
 										id="osc_b_switch"
-										class="control toggleControl self-center pr-1"
+										class="tooltipElement control toggleControl self-center pr-1"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
 										value="0"
 									></webaudio-switch>
-									<p class="font-inika self-center">OSC B</p>
+									<p id="osc_b_label" class="tooltipElement font-inika self-center">OSC B</p>
 								</div>
 								<div class="flex p-1">
 									<webaudio-switch
 										id="arp_b_switch"
-										class="control"
+										class="tooltipElement control"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										value="0"
 									></webaudio-switch>
-									<p id="arp_b_label" class="font-inika ml-1">ARP</p>
+									<p id="arp_b_label" class="tooltipElement font-inika ml-1">ARP</p>
 								</div>
 							</div>
 							<div class="self-center border border-gray-600 flex rounded-lg p-1">
@@ -631,7 +632,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Voices</p>
 									<webaudio-knob
 										id="osc_b_voices"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="1"
@@ -652,7 +653,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Spread</p>
 									<webaudio-knob
 										id="osc_b_spread"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="1"
@@ -673,7 +674,7 @@
 									<p class="font-light text-sm self-center mb-0.5">FM</p>
 									<webaudio-knob
 										id="osc_b_fm"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -694,7 +695,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Depth</p>
 									<webaudio-knob
 										id="osc_b_fm_depth"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -715,7 +716,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Shape</p>
 									<webaudio-knob
 										id="osc_b_fm_shape"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -740,7 +741,7 @@
 								<p class="font-light self-center mb-0.5">Octave</p>
 								<webaudio-knob
 									id="osc_b_octave"
-									class="control mainControl1 self-center"
+									class="tooltipElement control mainControl1 self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-3"
@@ -761,7 +762,7 @@
 								<p class="font-light self-center mb-0.5">Detune</p>
 								<webaudio-knob
 									id="osc_b_semi"
-									class="control mainControl2 self-center"
+									class="tooltipElement control mainControl2 self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-12"
@@ -782,7 +783,7 @@
 								<p class="font-light self-center mb-0.5">Volume</p>
 								<webaudio-knob
 									id="osc_b_volume"
-									class="control mainControl3 self-center"
+									class="tooltipElement control mainControl3 self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-10"
@@ -803,7 +804,7 @@
 								<p class="font-light self-center mb-0.5">Shape</p>
 								<webaudio-slider
 									id="osc_b_shape"
-									class="control mainControl4 self-center"
+									class="tooltipElement control mainControl4 self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									height="50"
 									min="0"
@@ -830,7 +831,7 @@
 								<p class="font-light text-sm self-center mb-0.5">ATK</p>
 								<webaudio-knob
 									id="osc_b_attack"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -851,7 +852,7 @@
 								<p class="font-light text-sm self-center mb-0.5">DEC</p>
 								<webaudio-knob
 									id="osc_b_decay"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -872,7 +873,7 @@
 								<p class="font-light text-sm self-center mb-0.5">SUS</p>
 								<webaudio-knob
 									id="osc_b_sustain"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -893,7 +894,7 @@
 								<p class="font-light text-sm self-center mb-0.5">REL</p>
 								<webaudio-knob
 									id="osc_b_release"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -912,7 +913,7 @@
 							</div>
 						</div>
 						<div id="osc_b_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_b_canvas" width="212" height="102"></canvas>
+							<canvas class="tooltipElement self-center" id="oscilloscope_b" width="212" height="102"></canvas>
 						</div>
 					</div>
 				</div>
@@ -932,22 +933,22 @@
 								<div class="flex p-1">
 									<webaudio-switch
 										id="osc_c_switch"
-										class="control toggleControl self-center pr-1"
+										class="tooltipElement control toggleControl self-center pr-1"
 										colors="#A9DC76;#2C292D;#D9D9D9"
 										diameter="30"
 										value="0"
 									></webaudio-switch>
-									<p class="font-inika self-center">SUB OSC</p>
+									<p id="osc_c_label" class="tooltipElement font-inika self-center">SUB OSC</p>
 								</div>
 								<div class="flex p-1">
 									<webaudio-switch
 										id="arp_c_switch"
-										class="control"
+										class="tooltipElement control"
 										colors="#AB9DF2;#2C292D;#D9D9D9"
 										diameter="30"
 										value="0"
 									></webaudio-switch>
-									<p id="arp_c_label" class="font-inika ml-1">ARP</p>
+									<p id="arp_c_label" class="tooltipElement font-inika ml-1">ARP</p>
 								</div>
 							</div>
 							<div class="self-center border border-gray-600 flex rounded-lg p-1">
@@ -955,7 +956,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Voices</p>
 									<webaudio-knob
 										id="osc_c_voices"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="1"
@@ -976,7 +977,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Spread</p>
 									<webaudio-knob
 										id="osc_c_spread"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="1"
@@ -997,7 +998,7 @@
 									<p class="font-light text-sm self-center mb-0.5">AM</p>
 									<webaudio-knob
 										id="osc_c_am"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -1018,7 +1019,7 @@
 									<p class="font-light text-sm self-center mb-0.5">Shape</p>
 									<webaudio-knob
 										id="osc_c_am_shape"
-										class="control subControl self-center"
+										class="tooltipElement control subControl self-center"
 										colors="#FFFFFF;#2C292D;#D9D9D9"
 										diameter="30"
 										min="0"
@@ -1043,7 +1044,7 @@
 								<p class="font-light self-center mb-0.5">Octave</p>
 								<webaudio-knob
 									id="osc_c_octave"
-									class="control mainControl1 self-center"
+									class="tooltipElement control mainControl1 self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1064,7 +1065,7 @@
 								<p class="font-light self-center mb-0.5">Detune</p>
 								<webaudio-knob
 									id="osc_c_semi"
-									class="control mainControl2 self-center"
+									class="tooltipElement control mainControl2 self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-12"
@@ -1085,7 +1086,7 @@
 								<p class="font-light self-center mb-0.5">Volume</p>
 								<webaudio-knob
 									id="osc_c_volume"
-									class="control mainControl3 self-center"
+									class="tooltipElement control mainControl3 self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
 									diameter="50"
 									min="-10"
@@ -1106,7 +1107,7 @@
 								<p class="font-light self-center mb-0.5">Shape</p>
 								<webaudio-slider
 									id="osc_c_shape"
-									class="control mainControl4 self-center"
+									class="tooltipElement control mainControl4 self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									height="50"
 									min="0"
@@ -1133,7 +1134,7 @@
 								<p class="font-light text-sm self-center mb-0.5">ATK</p>
 								<webaudio-knob
 									id="osc_c_attack"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -1154,7 +1155,7 @@
 								<p class="font-light text-sm self-center mb-0.5">DEC</p>
 								<webaudio-knob
 									id="osc_c_decay"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -1175,7 +1176,7 @@
 								<p class="font-light text-sm self-center mb-0.5">SUS</p>
 								<webaudio-knob
 									id="osc_c_sustain"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -1196,7 +1197,7 @@
 								<p class="font-light text-sm self-center mb-0.5">REL</p>
 								<webaudio-knob
 									id="osc_c_release"
-									class="control adsrControl self-center"
+									class="tooltipElement control adsrControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									diameter="30"
 									min="0"
@@ -1215,7 +1216,7 @@
 							</div>
 						</div>
 						<div id="osc_c_canvas_container" class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="osc_c_canvas" width="212" height="102"></canvas>
+							<canvas class="tooltipElement self-center" id="oscilloscope_c" width="212" height="102"></canvas>
 						</div>
 					</div>
 				</div>
@@ -1235,12 +1236,12 @@
 							<div class="flex p-1">
 								<webaudio-switch
 									id="filter_switch"
-									class="control toggleControl self-center pr-1"
+									class="tooltipElement control toggleControl self-center pr-1"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="1"
 								></webaudio-switch>
-								<p class="font-inika self-center">FILTER</p>
+								<p id="filter_label" class="tooltipElement font-inika self-center">FILTER</p>
 							</div>
 						</div>
 
@@ -1249,7 +1250,7 @@
 								<p class="font-light self-center mb-0.5">Cutoff</p>
 								<webaudio-knob
 									id="filter_cutoff"
-									class="control mainControl1 self-center"
+									class="tooltipElement control mainControl1 self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
 									diameter="50"
 									min="5"
@@ -1270,7 +1271,7 @@
 								<p id="filter_resonance_label" class="font-light self-center mb-0.5">Q</p>
 								<webaudio-knob
 									id="filter_resonance"
-									class="control mainControl2 self-center"
+									class="tooltipElement control mainControl2 self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="50"
 									min="1"
@@ -1291,7 +1292,7 @@
 								<p class="font-light self-center mb-0.5">Rolloff</p>
 								<webaudio-slider
 									id="filter_rolloff"
-									class="control mainControl3 self-center"
+									class="tooltipElement control mainControl3 self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
 									height="50"
 									min="0"
@@ -1313,7 +1314,7 @@
 								<p class="font-light self-center mb-0.5">Type</p>
 								<webaudio-slider
 									id="filter_type"
-									class="control mainControl4 self-center"
+									class="tooltipElement control mainControl4 self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									height="50"
 									min="0"
@@ -1341,7 +1342,7 @@
 								<p class="font-light text-sm self-center w-max">Send A</p>
 								<webaudio-switch
 									id="osc_a_filter_switch"
-									class="control toggleControl self-center"
+									class="tooltipElement control toggleControl self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="1"
@@ -1351,7 +1352,7 @@
 								<p class="font-light text-sm self-center w-max">Send B</p>
 								<webaudio-switch
 									id="osc_b_filter_switch"
-									class="control toggleControl self-center"
+									class="tooltipElement control toggleControl self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="1"
@@ -1361,7 +1362,7 @@
 								<p class="font-light text-sm self-center w-max">Send C</p>
 								<webaudio-switch
 									id="osc_c_filter_switch"
-									class="control toggleControl self-center"
+									class="tooltipElement control toggleControl self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="30"
 									value="1"
@@ -1370,8 +1371,7 @@
 						</div>
 						<div class="self-center justify-center border border-gray-600 flex rounded-lg p-1 w-[222px] h-[102px]">
 							<div id="tooltips_container" class=" self-center text-center text-sm">
-								<p id="tooltip_top">Tooltips go here!</p>
-								<br/>
+								<p id="tooltip_top" class="font-bold">Tooltips go here :)</p>
 								<p id="tooltip_bottom">Hover over something to see what it does!</p>
 							</div>
 						</div>
@@ -1391,32 +1391,32 @@
 						<div class="flex p-1">
 							<webaudio-switch
 								id="lfo_switch"
-								class="control toggleControl self-center pr-1"
+								class="tooltipElement control toggleControl self-center pr-1"
 								colors="#A9DC76;#2C292D;#D9D9D9"
 								diameter="30"
 								value="0"
 							></webaudio-switch>
-							<label class="font-inika self-center" for="lfo_selector">
+							<label id="lfo_label" class="tooltipElement font-inika self-center" for="lfo_selector">
 								LFO
 								&nbsp;
-								<select
-									id="lfo_selector"
-									class="control font-light bg-custom-black border border-gray-600 rounded-lg p-1 pl-3"
-									autocomplete="off"
-								>
-									<option value="FilterFrequency" selected="selected">Filter Frequency</option>
-									<option value="OscAVol">OSC A Volume</option>
-									<option value="OscBVol">OSC B Volume</option>
-									<option value="OscCVol">OSC C Volume</option>
-								</select>
 							</label>
+							<select
+								id="lfo_selector"
+								class="tooltipElement control font-light bg-custom-black border border-gray-600 rounded-lg p-1 pl-3"
+								autocomplete="off"
+							>
+								<option value="FilterFrequency" selected="selected">Filter Frequency</option>
+								<option value="OscAVol">OSC A Volume</option>
+								<option value="OscBVol">OSC B Volume</option>
+								<option value="OscCVol">OSC C Volume</option>
+							</select>
 						</div>
 						<div class="flex">
 							<div class="border border-gray-600 rounded-lg p-1 flex flex-col w-[90px] mr-1">
-								<p class="font-light self-center mb-0.5">Grid</p>
+								<p class="font-light self-center mb-0.5">Rate</p>
 								<webaudio-knob
-									id="lfo_grid"
-									class="control mainControl1 self-center"
+									id="lfo_rate"
+									class="tooltipElement control mainControl1 self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1426,8 +1426,8 @@
 									conv="['8/1','4/1','2/1','1/1','1/2','1/4','1/8','1/16','1/32','1/64'][x]"
 								></webaudio-knob>
 								<webaudio-param
-									id="lfo_grid_readout"
-									link="lfo_grid"
+									id="lfo_rate_readout"
+									link="lfo_rate"
 									fontSize="14"
 									width="60"
 									class="self-center border border-pink-800 mt-1"
@@ -1438,7 +1438,7 @@
 								<p class="font-light self-center mb-0.5">Min</p>
 								<webaudio-knob
 									id="lfo_min"
-									class="control mainControl2 self-center"
+									class="tooltipElement control mainControl2 self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1459,7 +1459,7 @@
 								<p class="font-light self-center mb-0.5">Max</p>
 								<webaudio-knob
 									id="lfo_max"
-									class="control mainControl3 self-center"
+									class="tooltipElement control mainControl3 self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1480,7 +1480,7 @@
 								<p class="font-light self-center mb-0.5">Shape</p>
 								<webaudio-slider
 									id="lfo_shape"
-									class="control mainControl4 self-center"
+									class="tooltipElement control mainControl4 self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									height="50"
 									min="0"
@@ -1505,7 +1505,7 @@
 					<div>
 						<div class="self-center flex rounded-lg p-1 h-[100px] mb-1"></div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="lfo_canvas" width="212" height="102"></canvas>
+							<canvas class="tooltipElement self-center" id="oscilloscope_lfo" width="212" height="102"></canvas>
 						</div>
 					</div>
 				</div>
@@ -1522,17 +1522,18 @@
 						<div class="flex p-1">
 							<webaudio-switch
 								id="fx_switch"
-								class="control toggleControl self-center pr-1"
+								class="tooltipElement control toggleControl self-center pr-1"
 								colors="#A9DC76;#2C292D;#D9D9D9"
 								diameter="30"
 								value="1"
 							></webaudio-switch>
-							<label class="font-inika self-center" for="fx_selector">
+							<label id="fx_label" class="tooltipElement font-inika self-center" for="fx_selector">
 								FX
 								&nbsp;
+							</label>
 								<select
 									id="fx_selector"
-									class="control font-light bg-custom-black border border-gray-600 rounded-lg p-1 pl-3"
+									class="tooltipElement control font-light bg-custom-black border border-gray-600 rounded-lg p-1 pl-3"
 									autocomplete="off"
 								>
 									<option value="Distortion" selected="selected">Distortion</option>
@@ -1545,14 +1546,13 @@
 									<option value="PitchShift">Pitch Shift</option>
 									<option value="FreqShift">Freq Shift</option>
 								</select>
-							</label>
 						</div>
 						<div class="flex w-[372px]">
 							<div id="fx_param1_group" class="border border-gray-600 rounded-lg p-1 flex flex-col w-[90px] mr-1">
 								<p id="fx_param1_label" class="font-light self-center mb-0.5">Intensity</p>
 								<webaudio-knob
 									id="fx_param1"
-									class="control mainControl1 self-center"
+									class="tooltipElement control mainControl1 self-center"
 									colors="#FF6188;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1573,7 +1573,7 @@
 								<p id="fx_param2_label" class="font-light self-center mb-0.5">Oversample</p>
 								<webaudio-knob
 									id="fx_param2"
-									class="control mainControl2 self-center"
+									class="tooltipElement control mainControl2 self-center"
 									colors="#A9DC76;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1594,7 +1594,7 @@
 								<p id="fx_param3_label" class="font-light self-center mb-0.5">Mix</p>
 								<webaudio-knob
 									id="fx_param3"
-									class="control mainControl3 self-center"
+									class="tooltipElement control mainControl3 self-center"
 									colors="#FFD866;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1615,7 +1615,7 @@
 								<p id="fx_param4_label" class="font-light self-center mb-0.5">Mix</p>
 								<webaudio-knob
 									id="fx_param4"
-									class="control mainControl4 self-center"
+									class="tooltipElement control mainControl4 self-center"
 									colors="#78DCE8;#2C292D;#D9D9D9"
 									diameter="50"
 									min="0"
@@ -1638,7 +1638,7 @@
 					<div class="flex flex-col justify-center">
 						<div class="self-center flex rounded-lg p-1 h-[100px] mb-1"></div>
 						<div class="self-center border border-gray-600 flex rounded-lg p-1">
-							<canvas class="self-center" id="fx_canvas" width="212" height="102"></canvas>
+							<canvas class="tooltipElement self-center" id="oscilloscope_master" width="212" height="102"></canvas>
 						</div>
 					</div>
 				</div>
@@ -1654,7 +1654,7 @@
 								<p class="font-light text-sm self-center mb-0.5">Pattern</p>
 								<webaudio-slider
 									id="arp_pattern"
-									class="control arpControl self-center"
+									class="tooltipElement control arpControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									min="0"
 									max="8"
@@ -1678,7 +1678,7 @@
 								<p class="font-light text-sm self-center mb-0.5">Speed</p>
 								<webaudio-slider
 									id="arp_speed"
-									class="control arpControl self-center"
+									class="tooltipElement control arpControl self-center"
 									colors="#AB9DF2;#2C292D;#D9D9D9"
 									min="0"
 									max="6"
@@ -1702,7 +1702,7 @@
 							<p class="font-light text-sm self-center mb-0.5">Octave</p>
 							<webaudio-slider
 								id="master_octave"
-								class="control masterControl self-center"
+								class="tooltipElement control masterControl self-center"
 								colors="#FFFFFF;#2C292D;#D9D9D9"
 								min="0"
 								max="4"
@@ -1728,7 +1728,7 @@
 						keys="61"
 						height="85"
 						width="510"
-						class="self-center"
+						class="tooltipElement self-center"
 					></webaudio-keyboard>
 				</div>
 				<div class="w-full flex flex-col z-10">
@@ -1736,7 +1736,7 @@
 						<p id="rec_label" class="mr-1">Record</p>
 						<webaudio-switch
 							id="rec_switch"
-							class="control"
+							class="tooltipElement control"
 							colors="#FF6188;#2C292D;#D9D9D9"
 							diameter="30"
 							value="0"

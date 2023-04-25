@@ -162,7 +162,7 @@ let PRESET = {
 // TODO: Add each FX type to the PRESET object
 
 // -- MIN/MAX DATA (to be used for randomization) -- //
-
+// TODO: Reference Tone.js documentation to ensure correct min/max values
 let MIN_MAX = {
 	MASTER: {
 		gain: [0, 2]
@@ -843,14 +843,16 @@ function updateFilterKnob(target, enable, min, max, step, value, label) {
 	}
 }
 function filterGroupUpdate(target) {
+	// TODO: Fix bugs!!!
 	// If filter type is lowshelf or highshelf...
 	if (target === 5 || target === 6) {
-		// ...change the filter Q knob to gain knob
+		// ...change the filter resonance knob to gain knob
 		updateFilterKnob("filter_resonance", 1, 0, 24, 0.1, PRESET.FILTER.gain.toFixed(1), "Gain")
-		// Else if filter type is not lowshelf or highshelf...
+		tooltips["webaudio-knob"].filter_resonance = dynamicTooltips.FilterGain
 	} else {
-		// ...change the filter gain knob to Q knob
+		// ...change the filter gain knob to resonace knob
 		updateFilterKnob("filter_resonance", 1, 1, 10, 0.1, PRESET.FILTER.Q, "Q")
+		tooltips["webaudio-knob"].filter_resonance = dynamicTooltips.FilterResonance
 	}
 }
 
@@ -937,6 +939,7 @@ function updateFxKnob(target, enable, min, max, step, value, label, conv) {
 }
 
 function fxGroupUpdate(switchTarget){
+	// TODO: Start using MIN_MAX values instead of hardcoding them
 	switch (switchTarget) {
 		case "Distortion":
 			PRESET.FX.type = "Distortion"
@@ -952,6 +955,10 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 2, 1, 0, "Oversample")
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Distortion"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Distortion"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Distortion"]["fx_param3"]
 			break;
 		case "Chebyshev":
 			PRESET.FX.type = "Chebyshev"
@@ -961,6 +968,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(3, 0)
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Chebyshev"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Chebyshev"]["fx_param2"]
 			break;
 		case "Phaser":
 			PRESET.FX.type = "Phaser"
@@ -970,15 +980,25 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 12, 0.1, 2, "Octaves")
 			updateFxKnob(3, 1, 0, 100, 0.1, 1, "Q")
 			updateFxKnob(4, 1, 0, 1, 0.1, 1, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Phaser"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Phaser"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Phaser"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["Phaser"]["fx_param4"]
 			break;
 		case "Tremolo":
 			PRESET.FX.type = "Tremolo"
 			SELECTED_FX = FX_TREMOLO
 
-			updateFxKnob(1, 1, 0, 20000, 0.1, 0, "Frequency")
+			updateFxKnob(1, 1, 0, 64, 0.1, 0, "Frequency")
 			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
-			updateFxKnob(3, 1, 0, 100, 0.01, 0, "Spread")
+			updateFxKnob(3, 1, 0, 180, 1, 0, "Spread")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Tremolo"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Tremolo"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Tremolo"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["Tremolo"]["fx_param4"]
 			break;
 		case "Vibrato":
 			PRESET.FX.type = "Vibrato"
@@ -988,6 +1008,11 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.01, 0, "Depth")
 			updateFxKnob(3, 1, 0, 3, 1, 0, "Type", "['sine','triangle','sawtooth','square'][x]")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Vibrato"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Vibrato"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Vibrato"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["Vibrato"]["fx_param4"]
 			break;
 		case "Delay":
 			PRESET.FX.type = "Delay"
@@ -997,15 +1022,23 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.01, 0.5, "Feedback")
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Delay"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Delay"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Delay"]["fx_param3"]
 			break;
 		case "Reverb":
 			PRESET.FX.type = "Reverb"
 			SELECTED_FX = FX_REVERB
 
 			updateFxKnob(1, 1, 0, 100, 1, 10, "Decay")
-			updateFxKnob(2, 1, 0, 5, 0.1, 0, "Pre-delay")
+			updateFxKnob(2, 1, 0, 5, 0.1, 0, "PreDelay")
 			updateFxKnob(3, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Reverb"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Reverb"]["Pre-delay"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Reverb"]["fx_param3"]
 			break;
 		case "PitchShift":
 			PRESET.FX.type = "PitchShift"
@@ -1015,6 +1048,11 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0.01, 12, 0.01, 0.03, "Size")
 			updateFxKnob(3, 1, 0, 1, 0.01, 0.5, "Feedback")
 			updateFxKnob(4, 1, 0, 1, 0.1, 0.5, "Mix")
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["PitchShift"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["PitchShift"]["fx_param2"]
+			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["PitchShift"]["fx_param3"]
+			tooltips["webaudio-knob"].fx_param4 = dynamicTooltips["PitchShift"]["fx_param4"]
 			break;
 		case "FreqShift":
 			PRESET.FX.type = "FreqShift"
@@ -1024,6 +1062,9 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(2, 1, 0, 1, 0.1, 0.5, "Mix")
 			updateFxKnob(3, 0)
 			updateFxKnob(4, 0)
+
+			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["FreqShift"]["fx_param1"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["FreqShift"]["fx_param2"]
 			break;
 		default:
 			console.log("Switch default: Nothing set for this case!")
@@ -1320,7 +1361,7 @@ function loadPreset(preset) {
 	// LFO
 	updateSelectBox("lfo_selector", PRESET.LFO.target)
 	updateGUI("lfo_switch", PRESET.LFO.enabled)
-	updateGUI("lfo_grid", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
+	updateGUI("lfo_rate", PRESET.LFO.grid, lfoGridReadoutValues[PRESET.LFO.grid])
 	updateGUI("lfo_min", PRESET.LFO.min, PRESET.LFO.min)
 	updateGUI("lfo_max", PRESET.LFO.max, PRESET.LFO.max)
 	updateGUI("lfo_shape", PRESET.LFO.type, shapeValues[PRESET.LFO.type])
@@ -2402,7 +2443,7 @@ function changeNote(targetSynth, targetValue, newValue){
 // -- GUI CONTROLS LOGIC -- //
 
 let controls = document.getElementsByClassName("control");
-// console.log(controls);
+console.log(controls);
 
 // For each control...
 for (let i = 0; i < controls.length; i++) {
@@ -3036,7 +3077,7 @@ for (let i = 0; i < controls.length; i++) {
 				connectTone()
 				// LFO.connect(LFO_TARGET)
 				break;
-			case "lfo_grid":
+			case "lfo_rate":
 				PRESET.LFO.grid = e.target.value
 				LFO.set({
 					frequency: lfoGridValues[e.target.value]
@@ -3347,3 +3388,509 @@ consentButton.addEventListener("click", function () {
 	}
 	p5_canvas.classList.remove("hidden");
 })
+
+// -- TOOLTIPS -- //
+
+let tooltip_top = document.getElementById("tooltip_top");
+let tooltip_bottom = document.getElementById("tooltip_bottom");
+let tooltip_elements = document.getElementsByClassName("tooltipElement");
+
+for (let i = 0; i < tooltip_elements.length; i++) {
+	// Get the element's id
+	let element_id = tooltip_elements[i].id;
+	// Get the element's tag name
+	let element_tag = tooltip_elements[i].localName;
+	// Add mouseover event listener to each button
+	tooltip_elements[i].addEventListener("mouseover", function () {
+		// Log the element's tag and id
+		console.log("mouseover", element_tag, element_id)
+		// Get the tooltip text from the tooltips object
+		let tooltip
+		// If the first part of the id is "osc", and the element is a knob or slider
+		if (element_id.split("_")[0] === "osc" && element_tag === "webaudio-knob" || element_id.split("_")[0] === "osc" && element_tag === "webaudio-slider") {
+			// Log the id without the first two parts (e.g. "osc_a_fm_depth" becomes "fm_depth")
+			console.log(element_id.split("_").splice(2).join("_"))
+			// Use the id without the first two parts to get the correct tooltip text
+			// This is to reduce the amount of duplicate tooltip values
+			tooltip = tooltips[element_tag][element_id.split("_").splice(2).join("_")]
+		} else {
+			// Otherwise, just use the id to get the correct tooltip text
+			tooltip = tooltips[element_tag][element_id];
+		}
+		// Set the tooltip text
+		tooltip_top.innerHTML = tooltip.top;
+		tooltip_bottom.innerHTML = tooltip.bottom;
+	})
+	// Add mouseout event listener to each button
+	tooltip_elements[i].addEventListener("mouseout", function () {
+		console.log("mouseout", element_tag, element_id)
+		// Return the tooltip text to the default
+		tooltip_top.innerHTML = tooltips.defaults.top;
+		tooltip_bottom.innerHTML = tooltips.defaults.bottom;
+	})
+}
+
+let dynamicTooltips = {
+	// Filter (Resonance/Gain)
+	FilterResonance: {
+		top: "Filter resonance",
+		bottom: "This emphasises frequencies near the cutoff, be careful!"
+	},
+	FilterGain: {
+		top: "Filter gain",
+		bottom: "This sets the amplitude of the cutoff frequencies!"
+	},
+	// FX Distortion (Intensity, Oversample, Mix)
+	Distortion: {
+		fx_param1: {
+			top: "Distortion intensity",
+			bottom: "The amount of distortion applied to the signal!"
+		},
+		fx_param2: {
+			top: "Distortion oversample",
+			bottom: "Higher quality distortion, at the cost of performance!"
+		},
+		fx_param3: {
+			top: "Distortion mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Chebyshev (Order, Mix)
+	Chebyshev: {
+		fx_param1: {
+			top: "Chebyshev order",
+			bottom: "The order of the Chebyshev polynomial used for distortion!"
+		},
+		fx_param2: {
+			top: "Chebyshev mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param3: {
+			top: "",
+			bottom: ""
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Phaser (Frequency, Octaves, Q, Mix)
+	Phaser: {
+		fx_param1: {
+			top: "Phaser frequency",
+			bottom: "The speed of the phasing effect!"
+		},
+		fx_param2: {
+			top: "Phaser octaves",
+			bottom: "The octaves of the effect!"
+		},
+		fx_param3: {
+			top: "Phaser Q",
+			bottom: "The quality factor of the filters!"
+		},
+		fx_param4: {
+			top: "Phaser mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Tremolo (Frequency, Depth, Spread, Mix)
+	Tremolo: {
+		fx_param1: {
+			top: "Tremolo frequency",
+			bottom: "The speed of the tremolo effect!"
+		},
+		fx_param2: {
+			top: "Tremolo depth",
+			bottom: "The depth of the tremolo effect!"
+		},
+		fx_param3: {
+			top: "Tremolo spread",
+			bottom: "The amount of stereo spread!"
+		},
+		fx_param4: {
+			top: "Tremolo mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Vibrato (Frequency, Depth, Type, Mix)
+	Vibrato: {
+		fx_param1: {
+			top: "Vibrato frequency",
+			bottom: "The speed of the vibrato effect!"
+		},
+		fx_param2: {
+			top: "Vibrato depth",
+			bottom: "The depth of the vibrato effect!"
+		},
+		fx_param3: {
+			top: "Vibrato type",
+			bottom: "The type of oscillator used for the vibrato effect!"
+		},
+		fx_param4: {
+			top: "Vibrato mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Delay (Time, Feedback, Mix)
+	Delay: {
+		fx_param1: {
+			top: "Delay time",
+			bottom: "The amount of time the incoming signal is delayed by!"
+		},
+		fx_param2: {
+			top: "Delay feedback",
+			bottom: "The amount of signal fed back into the delay!"
+		},
+		fx_param3: {
+			top: "Delay mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Reverb (Decay, Pre-Delay, Mix)
+	Reverb: {
+		fx_param1: {
+			top: "Reverb decay",
+			bottom: "The duration of the reverb effect!"
+		},
+		fx_param2: {
+			top: "Reverb pre-delay",
+			bottom: "The amount of time before the reverb is fully applied!"
+		},
+		fx_param3: {
+			top: "Reverb mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	},
+	// FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
+	PitchShift: {
+		fx_param1: {
+			top: "Pitch shift pitch",
+			bottom: "The pitch offset in semitones!"
+		},
+		fx_param2: {
+			top: "Pitch shift window size",
+			bottom: "The sample length, high values result in strange artifacts!"
+		},
+		fx_param3: {
+			top: "Pitch shift feedback",
+			bottom: "The amount of signal fed back into the pitch shift!"
+		},
+		fx_param4: {
+			top: "Pitch shift mix",
+			bottom: "The ratio between the dry and wet signals!"
+		}
+	},
+	// FX Frequency Shift (Frequency, Mix)
+	FreqShift: {
+		fx_param1: {
+			top: "Frequency shift frequency",
+			bottom: "The ring modulator carrier frequency!"
+		},
+		fx_param2: {
+			top: "Frequency shift mix",
+			bottom: "The ratio between the dry and wet signals!"
+		},
+		fx_param3: {
+			top: "",
+			bottom: ""
+		},
+		fx_param4: {
+			top: "",
+			bottom: ""
+		}
+	}
+}
+
+let tooltips = {
+	defaults: {
+		top: "Tooltips go here!",
+		bottom: "Hover over something to see what it does &#128516;"
+	},
+	// Buttons (Settings, Presets, Random)
+	button: {
+		settings_button: {
+			top: "Open settings menu",
+			bottom: "Return home, or change the theme!"
+		},
+		presets_button: {
+			top: "Open preset menu",
+			bottom: "Load a preset, or save your own!"
+		},
+		random_preset_button: {
+			top: "Randomise synth settings",
+			bottom: "Careful! This can result in VERY loud sounds!"
+		}
+	},
+	p: {
+		osc_a_label: {
+			top: "Oscillator A (FM)",
+			bottom: "Oscillators are the main sound generators in a synthesizer!"
+		},
+		arp_a_label: {
+			top: "Arpeggiator A",
+			bottom: "Arpeggiators play held notes in a sequence!"
+		},
+		osc_b_label: {
+			top: "Oscillator B (FM)",
+			bottom: "Oscillators are the main sound generators in a synthesizer!"
+		},
+		arp_b_label: {
+			top: "Arpeggiator B",
+			bottom: "Arpeggiators play held notes in a sequence!"
+		},
+		osc_c_label: {
+			top: "Oscillator C (AM)",
+			bottom: "Oscillators are the main sound generators in a synthesizer!"
+		},
+		arp_c_label: {
+			top: "Arpeggiator C",
+			bottom: "Arpeggiators play held notes in a sequence!"
+		},
+		filter_label: {
+			top: "Filter",
+			bottom: "Filters shape sound by cutting out certain frequencies!"
+		}
+	},
+	label: {
+		lfo_label: {
+			top: "Low Frequency Oscillator",
+			bottom: "LFOs are used to automatically modulate parameters over time!"
+		},
+		fx_label: {
+			top: "FX (Effects)",
+			bottom: "Choose from several effects to manipulate your sound with!"
+		},
+	},
+	// Switches (Groups, Arpeggiators, Sends, Record)
+	"webaudio-switch": {
+		osc_a_switch: {
+			top: "Toggle Oscillator A",
+			bottom: "Turn the oscillator on or off!"
+		},
+		arp_a_switch: {
+			top: "Toggle Arpeggiator A",
+			bottom: "Turn the arpeggiator on or off!"
+		},
+		osc_b_switch: {
+			top: "Toggle Oscillator B",
+			bottom: "Turn the oscillator on or off!"
+		},
+		arp_b_switch: {
+			top: "Toggle Arpeggiator B",
+			bottom: "Turn the arpeggiator on or off!"
+		},
+		osc_c_switch: {
+			top: "Toggle Oscillator C",
+			bottom: "Turn the oscillator on or off!"
+		},
+		arp_c_switch: {
+			top: "Toggle Arpeggiator C",
+			bottom: "Turn the arpeggiator on or off!"
+		},
+		filter_switch: {
+			top: "Toggle Filter",
+			bottom: "Turn the filter on or off!"
+		},
+		osc_a_filter_switch: {
+			top: "Toggle Oscillator A Send",
+			bottom: "Turn the filter on or off for oscillator A!"
+		},
+		osc_b_filter_switch: {
+			top: "Toggle Oscillator B Send",
+			bottom: "Turn the filter on or off for oscillator B!"
+		},
+		osc_c_filter_switch: {
+			top: "Toggle Oscillator C Send",
+			bottom: "Turn the filter on or off for oscillator C!"
+		},
+		lfo_switch: {
+			top: "Toggle LFO",
+			bottom: "Turn the LFO on or off!"
+		},
+		fx_switch: {
+			top: "Toggle FX",
+			bottom: "Turn the FX on or off!"
+		},
+		rec_switch: {
+			top: "Toggle recording",
+			bottom: "Start or stop recording the synth output!"
+		}
+	},
+	// Controls
+	"webaudio-knob": {
+		// Master (BPM, Gain, Octave)
+		master_bpm: {
+			top: "Global BPM",
+			bottom: "The tempo of the arpeggiators!"
+		},
+		master_gain: {
+			top: "Master Gain",
+			bottom: "The overall volume of the synth!"
+		},
+		// -- Osc A -- //
+		// FM (Voices, Spread, FM, Depth, Shape)
+		voices: {
+			top: "Voice Count",
+			bottom: "The number of voices generated!"
+		},
+		spread: {
+			top: "Voice Spread",
+			bottom: "The pitch offset of each voice (in cents)!"
+		},
+		fm: {
+			top: "FM harmonicity",
+			bottom: "The ratio the between the carrier and modulator frequencies!"
+		},
+		fm_depth: {
+			top: "FM depth",
+			bottom: "The amplitude of the modulator!"
+		},
+		fm_shape: {
+			top: "FM shape",
+			bottom: "The shape of the modulator!"
+		},
+		// AM (AM, Shape)
+		am: {
+			top: "AM harmonicity",
+			bottom: "The ratio the between the carrier and modulator frequencies!"
+		},
+		am_shape: {
+			top: "AM shape",
+			bottom: "The shape of the modulator!"
+		},
+		// ADSR (Attack, Decay, Sustain, Release)
+		attack: {
+			top: "Attack time",
+			bottom: "The time it takes for the envelope to reach its peak!"
+		},
+		decay: {
+			top: "Decay time",
+			bottom: "The time it takes for the envelope to reach its sustain level!"
+		},
+		sustain: {
+			top: "Sustain level",
+			bottom: "The level the envelope will sustain at!"
+		},
+		release: {
+			top: "Release time",
+			bottom: "The time it takes for the envelope to return to silence!"
+		},
+		// Main (Octave, Detune, Volume, Shape)
+		octave: {
+			top: "Octave offset",
+			bottom: "The pitch offset of the oscillator, in octaves!"
+		},
+		semi: {
+			top: "Semitone offset",
+			bottom: "The pitch offset of the oscillator, in semitones!"
+		},
+		volume: {
+			top: "Volume",
+			bottom: "The amplitude of the oscillator!"
+		},
+		// Filter (Cutoff, Q/Gain, Rolloff, Type)
+		filter_cutoff: {
+			top: "Filter cutoff frequency",
+			bottom: "The frequency at which the filter will begin to attenuate!"
+		},
+		filter_resonance: dynamicTooltips.FilterResonance,
+		// LFO (Rate, Min, Max, Shape)
+		lfo_rate: {
+			top: "LFO rate",
+			bottom: "The speed of the LFO (in bars)!"
+		},
+		lfo_min: {
+			top: "LFO minimum value",
+			bottom: "The lowest value the LFO will reach!"
+		},
+		lfo_max: {
+			top: "LFO maximum value",
+			bottom: "The highest value the LFO will reach!"
+		},
+		// FX (Param 1, Param 2, Param 3, Param 4)
+		fx_param1: dynamicTooltips[PRESET.FX.type].fx_param1,
+		fx_param2: dynamicTooltips[PRESET.FX.type].fx_param2,
+		fx_param3: dynamicTooltips[PRESET.FX.type].fx_param3,
+		fx_param4: dynamicTooltips[PRESET.FX.type].fx_param4,
+	},
+	"webaudio-slider": {
+		shape: {
+			top: "Shape",
+			bottom: "The oscillator's waveform shape!"
+		},
+		filter_rolloff: {
+			top: "Filter rolloff",
+			bottom: "The decibel rolloff (slope) of the filter curve!"
+		},
+		filter_type: {
+			top: "Filter type",
+			bottom: "Choose between lowpass, highpass, bandpass, allpass, notch, lowshelf, and highshelf!"
+		},
+		lfo_shape: {
+			top: "LFO shape",
+			bottom: "The LFO's waveform shape!"
+		},
+		arp_pattern: {
+			top: "Arpeggiator pattern",
+			bottom: "The playback order of the notes!"
+		},
+		arp_speed: {
+			top: "Arp speed",
+			bottom: "The playback speed of the notes (in bars)!"
+		},
+		master_octave: {
+			top: "Global octave modifier",
+			bottom: "The octave offset for all oscillators!"
+		},
+	},
+	select: {
+		lfo_selector: {
+			top: "LFO target selector",
+			bottom: "Choose between filter frequency and oscillator volume"
+		},
+		fx_selector: {
+			top: "Effect selector",
+			bottom: "Choose from a range of different effects!"
+		}
+	},
+	canvas: {
+		oscilloscope_a: {
+			top: "Oscilloscope A",
+			bottom: "This visualises the output of oscillator A!"
+		},
+		oscilloscope_b: {
+			top: "Oscilloscope B",
+			bottom: "This visualises the output of oscillator B!"
+		},
+		oscilloscope_c: {
+			top: "Oscilloscope C",
+			bottom: "This visualises the output of oscillator C!"
+		},
+		oscilloscope_lfo: {
+			top: "LFO Oscilloscope",
+			bottom: "This visualises the output of the LFO!"
+		},
+		oscilloscope_master: {
+			top: "Master Oscilloscope",
+			bottom: "This visualises the master output (what you hear)!"
+		}
+	},
+	"webaudio-keyboard": {
+		keyboard: {
+			top: "GUI Keyboard",
+			bottom: "Click on the keys to play them, or use your physical keyboard!"
+		}
+	}
+}

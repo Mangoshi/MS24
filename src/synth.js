@@ -3347,3 +3347,43 @@ consentButton.addEventListener("click", function () {
 	}
 	p5_canvas.classList.remove("hidden");
 })
+
+// -- TOOLTIPS -- //
+
+// Buttons (Settings, Presets, Random)
+
+// Switches (Groups, Arpeggiators, Sends, Record)
+
+// Controls - Master (BPM, Gain, Octave)
+
+// Controls - FM (Voices, Spread, FM, Depth, Shape)
+
+// Controls - ADSR (Attack, Decay, Sustain, Release)
+
+// Controls - Oscillator (Octave, Detune, Volume, Shape)
+
+// Controls - Filter (Cutoff, Q/Gain, Rolloff, Type)
+
+// Controls - LFO (Rate, Min, Max, Shape)
+
+// Selects - LFO (Filter Frequency, Oscillator Volume)
+
+// Controls - FX Distortion (Intensity, Oversample, Mix)
+
+// Controls - FX Chebyshev (Order, Mix)
+
+// Controls - FX Phaser (Frequency, Octaves, Q, Mix)
+
+// Controls - FX Tremolo (Frequency, Depth, Spread, Mix)
+
+// Controls - FX Vibrato (Frequency, Depth, Type, Mix)
+
+// Controls - FX Delay (Time, Feedback, Mix)
+
+// Controls - FX Reverb (Decay, Pre-Delay, Mix)
+
+// Controls - FX Pitch Shift (Pitch, Window Size, Feedback, Mix)
+
+// Controls - FX Freq Shift (Frequency, Mix)
+
+// Controls - ARP (Pattern, Speed)

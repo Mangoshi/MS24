@@ -737,8 +737,8 @@ let oscC_waveform = new Tone.Waveform().set({size: 2048})
 let oscC_waveform_gain = new Tone.Gain(1)
 
 let lfo_waveform = new Tone.Waveform().set({size: 16384})
-let lfo_scale = new Tone.Scale(-0.000001, 0.000001)
-let lfo_waveform_gain = new Tone.Gain(100)
+let lfo_scale = new Tone.Scale(-0.0001, 0.0001)
+let lfo_waveform_gain = new Tone.Gain(1)
 
 let master_waveform = new Tone.Waveform().set({size: 2048})
 let master_waveform_gain = new Tone.Gain(0.5)

@@ -36,6 +36,7 @@ Tone.Transport.start()
 let SYNTH = {
 	STATE: {
 		enabled: false,
+		visualisationsEnabled: true,
 		settingsDropdownOpen: false,
 		presetsPageOpen: false,
 		physicalKeyboardActive: true,
@@ -1088,8 +1089,9 @@ let presetRatingInput = document.getElementById("preset_rating_input")
 let fileInput = document.getElementById("preset_file_input")
 let settingsButton = document.getElementById("settings_button")
 let settingsDropdown = document.getElementById("settings_dropdown")
+let settingsHomeButton = document.getElementById("settings_home_button")
 let settingsThemeButton = document.getElementById("settings_theme_button")
-let settingsHomeButton = document.getElementById("settings_home_button");
+let settingsVisualisationsButton = document.getElementById("settings_visualisations_button")
 let randomButton = document.getElementById("random_preset_button")
 
 // Functions for top-row buttons
@@ -1153,6 +1155,17 @@ function updateHtmlClasses(targetClass, newClass) {
 }
 
 // Event listeners for settings dropdown
+settingsHomeButton.addEventListener("click", function () {
+	SYNTH.STATE.enabled = false;
+	consentContainer.style.display = "flex";
+	synthContainer.style.display = "none";
+	bodyContainer.style.paddingTop = "0rem";
+	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
+	p5_canvas.classList.add("hidden");
+	if(SYNTH.STATE.settingsDropdownOpen){
+		toggleDropdown(settingsDropdown)
+	}
+})
 settingsThemeButton.addEventListener("click", function () {
 
 	// toggleDropdown(settingsDropdown)
@@ -1215,17 +1228,18 @@ settingsThemeButton.addEventListener("click", function () {
 		updateHtmlClasses("bg-green-400", "border-green-400")
 	}
 })
-settingsHomeButton.addEventListener("click", function () {
-	SYNTH.STATE.enabled = false;
-	consentContainer.style.display = "flex";
-	synthContainer.style.display = "none";
-	bodyContainer.style.paddingTop = "0rem";
-	document.body.style.backgroundColor = SYNTH.THEME.synthBackgroundColour;
-	p5_canvas.classList.add("hidden");
-	if(SYNTH.STATE.settingsDropdownOpen){
+settingsVisualisationsButton.addEventListener("click", function () {
+if (SYNTH.STATE.visualisationsEnabled) {
+		SYNTH.STATE.visualisationsEnabled = false
+		settingsVisualisationsButton.innerHTML = "Enable Visualisations"
+		toggleDropdown(settingsDropdown)
+	} else {
+		SYNTH.STATE.visualisationsEnabled = true
+		settingsVisualisationsButton.innerHTML = "Disable Visualisations"
 		toggleDropdown(settingsDropdown)
 	}
 })
+
 
 // Event listeners for presets page
 presetSaveButton.addEventListener("click", function() {
@@ -3273,36 +3287,38 @@ function p5_sketch(p) {
 	p.draw = function () {
 		// Redraw background
 		p.background(SYNTH.THEME.synthBackgroundColour)
-		// Reset stroke
-		p.strokeWeight(1)
-		// Draw oscilloscopes
-		if(PRESET.OSC_A.enabled){
-			p.drawWaveform(oscA_waveform, 220, 320, 388, 112)
+		// If visualisations are enabled
+		if(SYNTH.STATE.visualisationsEnabled) {
+			// Reset stroke
+			p.strokeWeight(1)
+			// Draw oscilloscopes
+			if (PRESET.OSC_A.enabled) {
+				p.drawWaveform(oscA_waveform, 220, 320, 388, 112)
+			}
+			if (PRESET.OSC_B.enabled) {
+				p.drawWaveform(oscB_waveform, 220, 320, 1072, 112)
+			}
+			if (PRESET.OSC_C.enabled) {
+				p.drawWaveform(oscC_waveform, 220, 320, 388, 340)
+			}
+			if (PRESET.LFO.enabled) {
+				p.drawWaveform(lfo_waveform, 220, 50, 388, 690)
+			}
+			p.drawWaveform(master_waveform, 220, 320, 1072, 570)
+			// Set stroke and fill for rectangles
+			p.strokeWeight(0)
+			// p.fill(0)
+			p.fill(SYNTH.THEME.synthBackgroundColour)
+			// Horizontal rectangles to enclose the oscilloscopes
+			p.rect(0, 0, canvasWidth, 212)
+			p.rect(0, 324, canvasWidth, 111)
+			p.rect(0, 547, canvasWidth, 113)
+			p.rect(0, 772, canvasWidth, 125)
+			// Vertical rectangles to enclose the oscilloscopes
+			p.rect(0, 0, 382, canvasHeight)
+			p.rect(604, 0, 455, canvasHeight)
+			p.rect(canvasWidth - 22, 0, 10, canvasHeight)
 		}
-		if(PRESET.OSC_B.enabled){
-			p.drawWaveform(oscB_waveform, 220, 320, 1072, 112)
-		}
-		if(PRESET.OSC_C.enabled){
-			p.drawWaveform(oscC_waveform, 220, 320, 388, 340)
-		}
-		if(PRESET.LFO.enabled){
-			p.drawWaveform(lfo_waveform, 220, 50, 388, 690)
-		}
-		p.drawWaveform(master_waveform, 220, 320, 1072, 570)
-		// Set stroke and fill for rectangles
-		p.strokeWeight(0)
-		// p.fill(0)
-		p.fill(SYNTH.THEME.synthBackgroundColour)
-		// Horizontal rectangles to enclose the oscilloscopes
-		p.rect(0, 0, canvasWidth, 212)
-		p.rect(0, 324, canvasWidth, 111)
-		p.rect(0, 547, canvasWidth, 113)
-		p.rect(0, 772, canvasWidth, 125)
-		// Vertical rectangles to enclose the oscilloscopes
-		p.rect(0, 0, 382, canvasHeight)
-		p.rect(604, 0, 455, canvasHeight)
-		p.rect(canvasWidth-22, 0, 10, canvasHeight)
-
 	}
 	p.drawWaveform = function(wave, w, h, x, y) {
 		// Adjust x/y position based on current canvas size
@@ -3622,7 +3638,7 @@ let tooltips = {
 	button: {
 		settings_button: {
 			top: "Open settings menu",
-			bottom: "Return home, or change the theme!"
+			bottom: "Return home, change the theme, or disable visualisations!"
 		},
 		presets_button: {
 			top: "Open preset menu",

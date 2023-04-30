@@ -1038,7 +1038,7 @@ function fxGroupUpdate(switchTarget){
 			updateFxKnob(4, 0)
 
 			tooltips["webaudio-knob"].fx_param1 = dynamicTooltips["Reverb"]["fx_param1"]
-			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Reverb"]["Pre-delay"]
+			tooltips["webaudio-knob"].fx_param2 = dynamicTooltips["Reverb"]["fx_param2"]
 			tooltips["webaudio-knob"].fx_param3 = dynamicTooltips["Reverb"]["fx_param3"]
 			break;
 		case "PitchShift":

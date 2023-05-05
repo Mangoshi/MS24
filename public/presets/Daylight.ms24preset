@@ -1,0 +1,102 @@
+{
+  "METADATA": {
+    "name": "Daylight",
+    "type": "Lead",
+    "author": "MangoSynth",
+    "rating": "3"
+  },
+  "MASTER": {
+    "gain": 1,
+    "octaveOffset": 0,
+    "bpm": 120
+  },
+  "OSC_A": {
+    "enabled": 1,
+    "octave": 0,
+    "detune": 0,
+    "volume": -10,
+    "shape": 2,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1.75,
+    "count": 1,
+    "spread": 1,
+    "harmonicity": 1,
+    "modulationIndex": 7.5,
+    "modulationShape": 0
+  },
+  "OSC_B": {
+    "enabled": 1,
+    "octave": 1,
+    "detune": -5,
+    "volume": -7,
+    "shape": 2,
+    "attack": 0.20500000000000002,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 0.25,
+    "count": 2,
+    "spread": 2,
+    "harmonicity": 0,
+    "modulationIndex": 0,
+    "modulationShape": 0
+  },
+  "OSC_C": {
+    "enabled": 0,
+    "octave": 1,
+    "detune": 0,
+    "volume": 0,
+    "shape": 3,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.45,
+    "release": 3.25,
+    "count": 2,
+    "spread": 6,
+    "harmonicity": 1.5,
+    "modulationShape": 0
+  },
+  "FILTER": {
+    "enabled": 1,
+    "frequency": 5000,
+    "Q": 0,
+    "gain": 0,
+    "rolloff": 0,
+    "type": 0,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1,
+    "cutoff": 8500
+  },
+  "LFO": {
+    "enabled": 0,
+    "target": "FilterFrequency",
+    "type": 0,
+    "grid": 5,
+    "min": 0,
+    "max": 8500,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "FX": {
+    "enabled": 1,
+    "type": "Reverb",
+    "param1": 1,
+    "param2": 0.2,
+    "param3": 0,
+    "param4": 0,
+    "mix": 0.5,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "ARP": {
+    "A_enabled": 1,
+    "B_enabled": 0,
+    "C_enabled": 1,
+    "pattern": "up",
+    "playbackRate": 2
+  }
+}

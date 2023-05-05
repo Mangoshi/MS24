@@ -1,0 +1,101 @@
+{
+  "METADATA": {
+    "name": "Hyperspace",
+    "type": "FX",
+    "author": "MangoSynth",
+    "rating": "3"
+  },
+  "MASTER": {
+    "gain": 1.5,
+    "octaveOffset": 0,
+    "bpm": 240
+  },
+  "OSC_A": {
+    "enabled": 1,
+    "octave": 0,
+    "detune": 0,
+    "volume": 0,
+    "shape": 1,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1,
+    "count": 1,
+    "spread": 0,
+    "harmonicity": 0.05,
+    "modulationIndex": 10,
+    "modulationShape": 1
+  },
+  "OSC_B": {
+    "enabled": 1,
+    "octave": -1,
+    "detune": 0,
+    "volume": 0,
+    "shape": 0,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1,
+    "count": 1,
+    "spread": 0,
+    "harmonicity": 0.3,
+    "modulationIndex": 2.5,
+    "modulationShape": 0
+  },
+  "OSC_C": {
+    "enabled": 0,
+    "octave": 0,
+    "detune": 0,
+    "volume": 0,
+    "shape": 2,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1,
+    "count": 1,
+    "spread": 0,
+    "harmonicity": 0,
+    "modulationShape": 0
+  },
+  "FILTER": {
+    "enabled": 0,
+    "frequency": 5000,
+    "Q": 0,
+    "gain": 0,
+    "rolloff": 0,
+    "type": 0,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "LFO": {
+    "enabled": 0,
+    "target": "FilterFrequency",
+    "type": 0,
+    "grid": 5,
+    "min": 0,
+    "max": 1000,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "FX": {
+    "enabled": 1,
+    "type": "Chebyshev",
+    "param1": 11,
+    "param2": 0,
+    "param3": 0.5,
+    "param4": 0,
+    "mix": 0.5,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "ARP": {
+    "A_enabled": 0,
+    "B_enabled": 0,
+    "C_enabled": 0,
+    "pattern": 3,
+    "playbackRate": 4
+  }
+}

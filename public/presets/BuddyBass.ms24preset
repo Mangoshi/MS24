@@ -1,0 +1,102 @@
+{
+	"METADATA":{
+		"name":"BuddyBass",
+		"type":"Bass",
+		"author":"MangoSynth",
+		"rating":3
+	},
+	"MASTER":{
+		"gain": 1,
+		"octaveOffset": 0,
+		"bpm": 120
+	},
+	"OSC_A":{
+		"enabled":1,
+		"octave":-3,
+		"detune":7,
+		"volume":0,
+		"shape":2,
+		"attack":0.005,
+		"decay":0.1,
+		"sustain":0.3,
+		"release":1,
+		"count":9,
+		"spread":69,
+		"harmonicity":8,
+		"modulationIndex":10,
+		"modulationShape":0
+	},
+	"OSC_B":{
+		"enabled":0,
+		"octave":1,
+		"detune":12,
+		"volume":0,
+		"shape":2,
+		"attack":0.005,
+		"decay":0.1,
+		"sustain":0.3,
+		"release":1,
+		"count":1,
+		"spread":0,
+		"harmonicity":0,
+		"modulationIndex":0,
+		"modulationShape":0
+	},
+	"OSC_C":{
+		"enabled":0,
+		"octave":0,
+		"detune":0,
+		"volume":0,
+		"shape":1,
+		"attack":0.005,
+		"decay":0.1,
+		"sustain":0.3,
+		"release":1,
+		"count":1,
+		"spread":0,
+		"harmonicity":0,
+		"modulationShape":0
+	},
+	"FILTER":{
+		"enabled":1,
+		"frequency":1000,
+		"Q":10,
+		"gain":0,
+		"rolloff":0,
+		"type":0,
+		"osc_a":1,
+		"osc_b":1,
+		"osc_c":1,
+		"cutoff":150
+	},
+	"LFO":{
+		"enabled":0,
+		"target":"FilterFrequency",
+		"type":0,
+		"grid":5,
+		"min":0,
+		"max":150,
+		"osc_a":1,
+		"osc_b":1,
+		"osc_c":1
+	},
+	"FX":{
+		"enabled":1,
+		"type":"Distortion",
+		"param1":1,
+		"param2":1,
+		"param3":0.5,
+		"param4":0,
+		"mix":0.5,
+		"osc_a":1,
+		"osc_b":1,
+		"osc_c":1
+	},
+	"ARP":{
+		"A_enabled": 0,
+		"B_enabled": 0,
+		"C_enabled": 0,
+		"pattern": "up",
+		"playbackRate": 2
+	}
+}

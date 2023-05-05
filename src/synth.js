@@ -14,17 +14,16 @@ await register(await connect())
 	.catch((err) => {console.error(err)})
 
 // TODO:
-//  1. TOOLTIPS / HELP TEXT
-//  2. RANDOMIZE PRESET
-//  3. PHRASE RECORDER? (Arpeggiator Latch)
-//  4. FIX LFO SWITCHING
-//  5. DISPLAY REVERB LOAD (If possible)
+//  1. SMART PRESET RANDOMIZATION
+//  2. PHRASE RECORDER? (Arpeggiator Latch / Pattern Mode)
+//  3. EXTRA LFO MODULATION TARGETS
+//  4. DISPLAY REVERB LOAD (If possible)
 
 // TODO: BONUS SYNTH FEATURES
 //  - Glide (Figure out why it's not working)
 //  - Partials control (Will require strange dynamic controls for each partial)
 //  - FX Buses (Will require using Tone.Channel: send generators to bus and receive on FX)
-//  - Noise Generators (Will require using Tone.Noise)
+//  - Noise Generators (Will require using Tone.Noise instead of synths)
 
 // -- TONE.JS SETUP -- //
 
@@ -813,7 +812,8 @@ function connectTone() {
 	}
 
 	// Connect master waveform
-	OUTPUT.chain(master_waveform_gain, master_waveform)
+	OUTPUT.connect(master_waveform_gain)
+	master_waveform_gain.connect(master_waveform)
 
 	// Reconnect Master Record
 	OUTPUT.connect(REC_DEST)
@@ -1170,9 +1170,7 @@ settingsHomeButton.addEventListener("click", function () {
 		toggleDropdown(settingsDropdown)
 	}
 })
-settingsThemeButton.addEventListener("click", function () {
-
-	// toggleDropdown(settingsDropdown)
+function toggleTheme() {
 	if (SYNTH.THEME.current === "dark") {
 		console.log("Changing theme from " + SYNTH.THEME.current + " to light")
 		// Set theme to light
@@ -1202,6 +1200,8 @@ settingsThemeButton.addEventListener("click", function () {
 		updateHtmlClasses("border-blue-400", "bg-blue-400")
 		updateHtmlClasses("border-red-400", "bg-red-400")
 		updateHtmlClasses("border-green-400", "bg-green-400")
+		// Set localStorage
+		localStorage.setItem("ms24_opposite_theme", "dark")
 	} else {
 		console.log("Changing theme from " + SYNTH.THEME.current + " to dark")
 		// Set theme to dark
@@ -1230,7 +1230,12 @@ settingsThemeButton.addEventListener("click", function () {
 		updateHtmlClasses("bg-blue-400", "border-blue-400")
 		updateHtmlClasses("bg-red-400", "border-red-400")
 		updateHtmlClasses("bg-green-400", "border-green-400")
+		// Set localStorage
+		localStorage.setItem("ms24_opposite_theme", "light")
 	}
+}
+settingsThemeButton.addEventListener("click", function () {
+	toggleTheme()
 })
 settingsVisualisationsButton.addEventListener("click", function () {
 if (SYNTH.STATE.visualisationsEnabled) {
@@ -1523,9 +1528,7 @@ function loadPreset(preset) {
 		"playbackRate": arpSpeedValues[PRESET.ARP.playbackRate]
 	})
 	// MASTER
-	MASTER_GAIN.set({
-		"gain": PRESET.MASTER.gain
-	})
+	MASTER_GAIN.gain.value = PRESET.MASTER.gain
 	Tone.Transport.set({
 		"bpm": PRESET.MASTER.bpm
 	})
@@ -1537,16 +1540,22 @@ function loadPreset(preset) {
 // These have to be hardcoded in, because you can't read files from a folder client-side
 function loadDefaultPresets(){
 	let presetFiles = [
-		"init.ms24preset",
-		"fm1.ms24preset",
-		"fm2.ms24preset",
-		"fm3.ms24preset",
-		"fm4.ms24preset",
-		"fm5.ms24preset",
-		"darkfm.ms24preset",
-		"aliendrone.ms24preset",
-		"angrydrone.ms24preset",
-		"buddhabass.ms24preset",
+		"Alien Drone.ms24preset",
+		"BuddyBass.ms24preset",
+		"Cheery Arp.ms24preset",
+		"Dark FM.ms24preset",
+		"Daylight.ms24preset",
+		"Delirium.ms24preset",
+		"Digital Flute.ms24preset",
+		"Eff Emm.ms24preset",
+		"Elysian FM.ms24preset",
+		"Hyperspace.ms24preset",
+		"Init.ms24preset",
+		"Sharp Pluck.ms24preset",
+		"Space Engine.ms24preset",
+		"Temple Bass.ms24preset",
+		"Wubber.ms24preset",
+		"Yes FM.ms24preset",
 	]
 
 	for(let i = 0; i < presetFiles.length; i++){
@@ -2641,9 +2650,7 @@ for (let i = 0; i < controls.length; i++) {
 			// -------------- //
 			case "master_gain":
 				PRESET.MASTER.gain = e.target.value
-				MASTER_GAIN.set({
-					"gain": e.target.value
-				})
+				MASTER_GAIN.gain.value = e.target.value
 				break;
 			case "master_bpm":
 				// Set preset value
@@ -3405,6 +3412,14 @@ consentButton.addEventListener("click", function () {
 		new p5(p5_sketch, "p5_canvas");
 		SYNTH.STATE.enabled = true;
 		firstEntry = false;
+		// If theme does not exist in localStorage, set it to dark, otherwise use the value to set SYNTH.THEME.current
+		// Then run changeTheme() to update the page colours
+		if (localStorage.getItem("ms24_opposite_theme") === null) {
+			localStorage.setItem("ms24_opposite_theme", "light")
+		} else {
+			SYNTH.THEME.current = localStorage.getItem("ms24_opposite_theme")
+			toggleTheme()
+		}
 	} else if (!SYNTH.STATE.enabled && !firstEntry){
 		SYNTH.STATE.enabled = true;
 	}
@@ -3651,7 +3666,7 @@ let tooltips = {
 			bottom: "Load a preset, or save your own!"
 		},
 		random_preset_button: {
-			top: "Randomise synth settings",
+			top: "Randomise synth settings [DISABLED]",
 			bottom: "Careful! This can result in VERY loud sounds!"
 		}
 	},

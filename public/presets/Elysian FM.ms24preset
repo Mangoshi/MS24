@@ -1,0 +1,102 @@
+{
+  "METADATA": {
+    "name": "Elysian FM",
+    "type": "Bass",
+    "author": "MangoSynth",
+    "rating": 4
+  },
+  "MASTER": {
+    "gain": 1.4000000000000001,
+    "octaveOffset": -1,
+    "bpm": 120
+  },
+  "OSC_A": {
+    "enabled": 1,
+    "octave": 0,
+    "detune": 0,
+    "volume": 0,
+    "shape": 0,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1,
+    "count": 1,
+    "spread": 0,
+    "harmonicity": 9,
+    "modulationIndex": 12,
+    "modulationShape": 0
+  },
+  "OSC_B": {
+    "enabled": 1,
+    "octave": 1,
+    "detune": 7,
+    "volume": -5,
+    "shape": 2,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1,
+    "count": 7,
+    "spread": 6,
+    "harmonicity": 4,
+    "modulationIndex": 12,
+    "modulationShape": 1
+  },
+  "OSC_C": {
+    "enabled": 1,
+    "octave": 0,
+    "detune": 0,
+    "volume": 0,
+    "shape": 2,
+    "attack": 0.005,
+    "decay": 0.1,
+    "sustain": 0.3,
+    "release": 1,
+    "count": 5,
+    "spread": 16,
+    "harmonicity": 21,
+    "modulationShape": 2
+  },
+  "FILTER": {
+    "enabled": 1,
+    "frequency": 1000,
+    "Q": 1,
+    "gain": 0,
+    "rolloff": 0,
+    "type": 0,
+    "osc_a": 0,
+    "osc_b": 1,
+    "osc_c": 0,
+    "cutoff": 1504
+  },
+  "LFO": {
+    "enabled": 0,
+    "target": "FilterFrequency",
+    "type": 0,
+    "grid": 5,
+    "min": 0,
+    "max": 1504,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "FX": {
+    "enabled": 1,
+    "type": "Distortion",
+    "param1": 0.1,
+    "param2": 1,
+    "param3": 0.5,
+    "param4": 0,
+    "mix": 0.5,
+    "osc_a": 1,
+    "osc_b": 1,
+    "osc_c": 1
+  },
+  "ARP": {
+    "A_enabled": 0,
+    "B_enabled": 0,
+    "C_enabled": 0,
+    "pattern": "up",
+    "playbackRate": 2
+  }
+}

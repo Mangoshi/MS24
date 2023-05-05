@@ -1118,6 +1118,8 @@ function togglePresetsPage() {
 		presetsContainer.classList.remove("hidden")
 		// change topRowContainer border styling
 		topRowContainer.classList.add("rounded-br-none", "rounded-bl-none")
+		// disable keyboard
+		SYNTH.STATE.physicalKeyboardActive = false
 	} else {
 		// show synthBody and p5_canvas
 		synthBody.classList.remove("hidden")
@@ -1126,6 +1128,8 @@ function togglePresetsPage() {
 		presetsContainer.classList.add("hidden")
 		// undo topRowContainer border styling
 		topRowContainer.classList.remove("rounded-br-none", "rounded-bl-none")
+		// enable keyboard
+		SYNTH.STATE.physicalKeyboardActive = true
 	}
 	SYNTH.STATE.presetsPageOpen = !SYNTH.STATE.presetsPageOpen
 }
@@ -2036,7 +2040,9 @@ for(let input of inputs) {
 	})
 	input.addEventListener("focusout", e => {
 		console.log(e)
-		SYNTH.STATE.physicalKeyboardActive = true
+		if(!SYNTH.STATE.presetsPageOpen){
+			SYNTH.STATE.physicalKeyboardActive = true
+		}
 	})
 }
 

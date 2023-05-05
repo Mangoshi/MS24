@@ -70,62 +70,56 @@
 			<p class="text-2xl self-center">Attention!</p>
 			<hr class="w-full mt-1 mb-5"/>
 			<div>
-				<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2">
+				<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2 text-center">
 					<i>Recommended browsers: Chrome, Brave, Opera, Vivaldi, Edge</i>
 					<br/>
-					<i>Other browsers don't use the V8 engine, which can lead to lower performance.</i>
+					<i>Other browsers generally result in lower performance.</i>
 				</div>
 			</div>
 			<hr class="w-full mt-5 mb-1"/>
 			<p class="text-2xl self-center">Controls</p>
 			<hr class="w-full mt-1 mb-5"/>
-			<div>
-				<p class="text-lg underline">Knobs</p>
+			<div class="mb-5">
+				<p class="text-lg underline">Playing Notes</p>
 				<ul class="list-disc text-lg mb-2">
-					<li class="ml-5">Click and drag on the knobs to adjust the values.</li>
-					<li class="ml-5">You can also scroll the mousewheel while hovering over a knob.</li>
-					<li class="ml-5">Hold SHIFT on the keyboard while adjusting knobs to fine-tune.</li>
-					<li class="ml-5">Hold CTRL on the keyboard and click a knob to return it to default.
-					<li class="ml-5">Right-click a knob to bring up the MIDI-learn context menu.</li>
-				</ul>
-			</div>
-			<div>
-				<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2">
-					<i>Note: Changing octave/detune while holding a key will cause it to stick down! This is a bug.</i>
-					<br/>
-					<i>To fix, either switch back to the octave/detune value you were on and press the same key...</i>
-					<br/>
-					<i>Or reload the page. I apologize for this, it's a tricky bug to squash 🐛</i>
-				</div>
-			</div>
-			<div>
-				<p class="text-lg underline">Keyboard</p>
-				<ul class="list-disc text-lg mb-2">
-					<li class="ml-5">Click the keys on the keyboard to play a sound.</li>
-					<li class="ml-5">You can also use your computer keyboard if your cursor is hovering over it.</li>
+					<li class="ml-5"><b>Mouse:</b> Click the keys on the GUI keyboard.</li>
+					<li class="ml-5"><b>MIDI Keyboard:</b> Works as expected, just make sure it's connected before loading.</li>
+					<li class="ml-5"><b>Comptuer Keyboard:</b> The image below shows which keys can be used.</li>
+					<!--
 					<li class="ml-5">ZXC-row = white keys, first octave</li>
 					<li class="ml-5">ASD-row = black keys, first octave</li>
 					<li class="ml-5">QWE-row = white keys, second octave</li>
 					<li class="ml-5">Num-row = black keys, second octave</li>
+					-->
+				</ul>
+				<div class="flex justify-center my-5">
+					<img src="img/controls.png" alt="keyboard controls" width="800">
+				</div>
+			</div>
+			<div class="mb-5">
+				<p class="text-lg underline">Knobs & Sliders</p>
+				<ul class="list-disc text-lg mb-2">
+					<li class="ml-5">Click and drag to adjust the values.</li>
+					<li class="ml-5">You can also scroll the mousewheel while hovering over them.</li>
+					<li class="ml-5">Hold SHIFT while adjusting to fine-tune.</li>
+					<li class="ml-5">Hold CTRL and click to return to default value.
+					<li class="ml-5">Right-click to bring up the MIDI-learn context menu.</li>
 				</ul>
 			</div>
-			<div>
+			<div class="mb-5">
 				<p class="text-lg underline">Switches</p>
 				<ul class="list-disc text-lg mb-2">
 					<li class="ml-5">Click on the green buttons to turn parts of the synth on and off.</li>
+					<li class="ml-5">Click on the purple buttons to turn oscillator arpeggiators on and off.</li>
 				</ul>
 			</div>
 			<div>
 				<p class="text-lg underline">Selectors</p>
 				<ul class="list-disc text-lg mb-2">
-					<li class="ml-5">Click on the select boxes in LFO & FX to change modulation target & effect type</li>
+					<li class="ml-5">Click on the LFO & FX select boxes to change modulation target or effect type</li>
 				</ul>
 			</div>
-			<div>
-				<div class="info_block border border-gray-400 bg-black w-[800px] p-2 mb-2">
-					<i>Note: LFO select is currently broken, but FX select works!</i>
-				</div>
-			</div>
+			<hr class="w-full mb-5 mt-4"/>
 		</div>
 	</div>
 	<div class="flex-col hidden w-min select-none bg-custom-black border border-orange-300 rounded-lg p-2" id="synth_container">
